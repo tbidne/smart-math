@@ -22,15 +22,41 @@ source-repository head
 
 common common-exts
   default-extensions:
+    BangPatterns
+    DeriveGeneric
+    DataKinds
+    DeriveLift
+    DerivingStrategies
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
     ImportQualifiedPost
     NegativeLiterals
     NumericUnderscores
     OverloadedStrings
+    PatternSynonyms
+    ScopedTypeVariables
+    StandaloneKindSignatures
     TypeApplications
+    TypeFamilies
 
 library
   import:           common-exts
-  exposed-modules:  Lib
-  build-depends:    base >=4.14.0.0 && <4.17
+  exposed-modules:
+    Numeric.Data
+    Numeric.Data.Fraction
+    Numeric.Data.Interval
+    Numeric.Data.ModN
+    Numeric.Data.ModP
+    Numeric.Data.ModP.Internal
+    Numeric.Data.NonNegative
+    Numeric.Data.Positive
+
+  build-depends:
+    , algebra-simple    ^>=0.1.0.0
+    , base              >=4.14.0.0 && <4.17
+    , deepseq           ^>=1.4.4.0
+    , random            ^>=1.2.0
+    , template-haskell  >=2.16.0.0 && <2.19.0.0
+
   hs-source-dirs:   src
   default-language: Haskell2010

@@ -2,6 +2,3 @@ cradle:
   cabal:
     - path: "./src"
       component: "lib:smart-math"
-
-    - path: "./app/Main.hs"
-      component: "smart-math:exe:smart-math"
