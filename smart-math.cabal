@@ -107,6 +107,7 @@ test-suite props
     , algebra-simple
     , base
     , hedgehog        >=1.0.2   && <1.2
+    , smart-math
     , tagged          ^>=0.8.6
     , tasty           >=1.1.0.3 && <1.5
     , tasty-hedgehog  >=1.0.0.2 && <1.3
