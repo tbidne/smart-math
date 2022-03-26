@@ -37,6 +37,7 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Class.Division (Division (..))
+import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
 
 -- $setup
@@ -107,6 +108,12 @@ instance (Eq a, Num a, Ord a, Show a) => MMonoid (Positive a) where
 instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (Positive a) where
   type DivConstraint (Positive a) = Positive a
   MkPositive x .%. MkPositive d = reallyUnsafePositive $ x `divide` d
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1.0.0
+instance (Num a, Ord a, Show a) => NumLiteral (Positive a) where
+  fromLit = unsafePositive . fromInteger
 
 -- | Unwraps a 'Positive'.
 --

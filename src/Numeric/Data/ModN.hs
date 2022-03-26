@@ -31,6 +31,7 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
+import Numeric.Class.Literal (NumLiteral (..))
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -151,6 +152,10 @@ instance KnownNat n => Ring (ModN n Integer)
 
 -- | @since 0.1.0.0
 instance KnownNat n => Ring (ModN n Natural)
+
+-- | @since 0.1.0.0
+instance (KnownNat n, UpperBoundless a) => NumLiteral (ModN n a) where
+  fromLit = MkModN . fromInteger
 
 -- | Unwraps a 'ModN'.
 --

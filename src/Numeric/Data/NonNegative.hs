@@ -37,6 +37,7 @@ import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
+import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
 
 -- $setup
@@ -119,6 +120,12 @@ instance (Division a, Integral a, Show a) => MGroupIntegral (NonNegative a) wher
   type ModResult (NonNegative a) = NonNegative a
   MkNonNegative x `gdivMod` MkNonZero (MkNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1.0.0
+instance (Num a, Ord a, Show a) => NumLiteral (NonNegative a) where
+  fromLit = unsafeNonNegative . fromInteger
 
 -- | @since 0.1.0.0
 instance (Eq a, Num a, Ord a, Show a) => Semiring (NonNegative a)

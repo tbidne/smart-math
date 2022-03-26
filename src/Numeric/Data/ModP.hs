@@ -45,6 +45,7 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
+import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (NonZero (..))
@@ -195,6 +196,10 @@ instance KnownNat p => Field (ModP p Integer)
 
 -- | @since 0.1.0.0
 instance KnownNat p => Field (ModP p Natural)
+
+-- | @since 0.1.0.0
+instance (KnownNat p, UpperBoundless a) => NumLiteral (ModP p a) where
+  fromLit = MkModP . fromInteger
 
 -- | Unwraps a 'ModP'.
 --

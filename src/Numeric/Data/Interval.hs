@@ -63,6 +63,7 @@ import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
+import Numeric.Class.Literal (NumLiteral (..))
 
 -- | Represents a closed interval that is bounded on both sides i.e.
 -- @LRInterval \@l \@r x@ represents \( x \in [l, r] \).

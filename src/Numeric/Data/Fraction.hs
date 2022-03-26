@@ -50,6 +50,7 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
+import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
 import Text.ParserCombinators.ReadPrec qualified as ReadP
 import Text.Read.Lex qualified as L
@@ -284,6 +285,16 @@ instance Ring (Fraction Integer)
 
 -- | @since 0.1.0.0
 instance Field (Fraction Integer)
+
+-- | @since 0.1.0.0
+instance NumLiteral (Fraction Integer) where
+  fromLit = fromInteger
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1.0.0
+instance NumLiteral (Fraction Natural) where
+  fromLit = fromInteger
 
 -- | Smart constructor for 'Fraction'. Returns 'Nothing' if the second
 -- parameter is 0. Reduces the fraction via 'reduce' if possible.
