@@ -24,6 +24,6 @@ jobs:
 
       - name: Compile
         run: |
-          nix-shell nix/ghc_8-10-7.nix --command \
+          nix-shell nix/ghc_9-0-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always"
