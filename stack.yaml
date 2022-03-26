@@ -1,4 +1,4 @@
-resolver: lts-18.24
+resolver: nightly-2022-03-23
 packages:
 - .
 ghc-options:
@@ -9,3 +9,5 @@ ghc-options:
 extra-deps:
 - git: https://github.com/tbidne/algebra-simple.git
   commit: afebd245bc3b50eaea50c2c22625a42908b1bcb8
+nix:
+  shell-file: nix/stack.nix
