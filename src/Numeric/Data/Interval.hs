@@ -109,6 +109,12 @@ pattern MkLRInterval x <-
 
 {-# COMPLETE MkLRInterval #-}
 
+-- | __WARNING: Partial__
+--
+-- @since 0.1.0.0
+instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => NumLiteral (LRInterval l r a) where
+  fromLit = unsafeLRInterval . fromInteger
+
 -- | Unwraps an 'LRInterval'.
 --
 -- @since 0.1.0.0
@@ -238,6 +244,12 @@ pattern MkLInterval x <-
 
 {-# COMPLETE MkLInterval #-}
 
+-- | __WARNING: Partial__
+--
+-- @since 0.1.0.0
+instance (KnownNat l, Num a, Ord a, Show a) => NumLiteral (LInterval l a) where
+  fromLit = unsafeLInterval . fromInteger
+
 -- | Unwraps an 'LInterval'.
 --
 -- @since 0.1.0.0
@@ -361,6 +373,12 @@ pattern MkRInterval x <-
     MkRInterval x = unsafeRInterval x
 
 {-# COMPLETE MkRInterval #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1.0.0
+instance (KnownNat r, Num a, Ord a, Show a) => NumLiteral (RInterval r a) where
+  fromLit = unsafeRInterval . fromInteger
 
 -- | Unwraps an 'RInterval'.
 --
