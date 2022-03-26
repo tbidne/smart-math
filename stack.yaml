@@ -1,11 +1,6 @@
 resolver: nightly-2022-03-23
 packages:
 - .
-ghc-options:
-  -Wall -Wcompat -Werror -Widentities
-  -Wincomplete-record-updates -Wincomplete-uni-patterns
-  -Wmissing-home-modules -Wmissing-export-lists -Wpartial-fields
-  -Wredundant-constraints -Wunused-packages
 extra-deps:
 - git: https://github.com/tbidne/algebra-simple.git
   commit: afebd245bc3b50eaea50c2c22625a42908b1bcb8
