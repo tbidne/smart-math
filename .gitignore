@@ -2,3 +2,4 @@ dist-newstyle*
 .stack-work*
 result*
 cabal.project.local
+.ghc.environment*

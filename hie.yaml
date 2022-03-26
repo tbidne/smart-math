@@ -2,3 +2,6 @@ cradle:
   cabal:
     - path: "./src"
       component: "lib:smart-math"
+
+    - path: "./test/doctest"
+      component: "smart-math:test:doctest"
