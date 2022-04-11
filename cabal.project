@@ -11,4 +11,4 @@ package smart-math
 source-repository-package
     type: git
     location: https://github.com/tbidne/algebra-simple.git
-    tag: b077a59c704b2eebd6ee4d3fe5037bc790450915
+    tag: 9b609eeceec43271ee1e9524d8b4335c258af1de

@@ -49,8 +49,6 @@ common common-exts
 library
   import:           common-exts
   exposed-modules:
-    Numeric.Class.Boundless
-    Numeric.Class.Division
     Numeric.Data
     Numeric.Data.Fraction
     Numeric.Data.Interval
@@ -61,7 +59,7 @@ library
     Numeric.Data.Positive
 
   build-depends:
-    , algebra-simple    ^>=0.1.0.0
+    , algebra-simple    ^>=0.1
     , base              >=4.14.0.0 && <4.17
     , deepseq           ^>=1.4.4.0
     , random            ^>=1.2.0
