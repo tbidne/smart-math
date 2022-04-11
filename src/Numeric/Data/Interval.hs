@@ -4,7 +4,7 @@
 
 -- | Provides types for enforcing minimum and maximum bounds.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Numeric.Data.Interval
   ( -- * Left/Right-Interval
 
@@ -68,23 +68,23 @@ import Numeric.Class.Literal (NumLiteral (..))
 -- | Represents a closed interval that is bounded on both sides i.e.
 -- @LRInterval \@l \@r x@ represents \( x \in [l, r] \).
 --
--- @since 0.1.0.0
+-- @since 0.1
 type LRInterval :: Nat -> Nat -> Type -> Type
 newtype LRInterval l r a = UnsafeLRInterval a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
@@ -97,7 +97,7 @@ newtype LRInterval l r a = UnsafeLRInterval a
 -- >>> MkLRInterval @10 @15 12
 -- UnsafeLRInterval 12
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkLRInterval ::
   (KnownNat l, KnownNat r, Num a, Ord a, Show a) =>
   a ->
@@ -111,13 +111,13 @@ pattern MkLRInterval x <-
 
 -- | __WARNING: Partial__
 --
--- @since 0.1.0.0
+-- @since 0.1
 instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => NumLiteral (LRInterval l r a) where
   fromLit = unsafeLRInterval . fromInteger
 
 -- | Unwraps an 'LRInterval'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unLRInterval :: LRInterval l r a -> a
 unLRInterval (UnsafeLRInterval x) = x
 
@@ -127,7 +127,7 @@ unLRInterval (UnsafeLRInterval x) = x
 -- >>> $$(mkLRIntervalTH @0 @100 7)
 -- UnsafeLRInterval 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
 mkLRIntervalTH ::
   forall l r a.
@@ -158,7 +158,7 @@ mkLRIntervalTH x = maybe (error msg) liftTyped $ mkLRInterval x
 -- >>> mkLRInterval @10 @100 200
 -- Nothing
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkLRInterval ::
   forall l r a.
   (KnownNat l, KnownNat r, Num a, Ord a) =>
@@ -180,7 +180,7 @@ mkLRInterval x
 -- >>> unsafeLRInterval @0 @10 7
 -- UnsafeLRInterval 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 unsafeLRInterval ::
   forall l r a.
   (HasCallStack, KnownNat l, KnownNat r, Num a, Ord a, Show a) =>
@@ -196,30 +196,30 @@ unsafeLRInterval x = Maybe.fromMaybe (error msg) $ mkLRInterval x
 -- holds and a branch (i.e. 'unsafeLRInterval') is undesirable for performance
 -- reasons. Exercise extreme caution.
 --
--- @since 0.1.0.0
+-- @since 0.1
 reallyUnsafeLRInterval :: a -> LRInterval l r a
 reallyUnsafeLRInterval = UnsafeLRInterval
 
 -- | Represents a closed interval that is left-bounded i.e.
 -- @LInterval \@l x@ represents \( x \in [l, \infty) \).
 --
--- @since 0.1.0.0
+-- @since 0.1
 type LInterval :: Nat -> Type -> Type
 newtype LInterval l a = UnsafeLInterval a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
@@ -232,7 +232,7 @@ newtype LInterval l a = UnsafeLInterval a
 -- >>> MkLInterval @10 12
 -- UnsafeLInterval 12
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkLInterval ::
   (KnownNat l, Num a, Ord a, Show a) =>
   a ->
@@ -246,13 +246,13 @@ pattern MkLInterval x <-
 
 -- | __WARNING: Partial__
 --
--- @since 0.1.0.0
+-- @since 0.1
 instance (KnownNat l, Num a, Ord a, Show a) => NumLiteral (LInterval l a) where
   fromLit = unsafeLInterval . fromInteger
 
 -- | Unwraps an 'LInterval'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unLInterval :: LInterval l a -> a
 unLInterval (UnsafeLInterval x) = x
 
@@ -262,7 +262,7 @@ unLInterval (UnsafeLInterval x) = x
 -- >>> $$(mkLIntervalTH @0 7)
 -- UnsafeLInterval 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
 mkLIntervalTH ::
   forall l a.
@@ -290,7 +290,7 @@ mkLIntervalTH x = maybe (error msg) liftTyped $ mkLInterval x
 -- >>> mkLInterval @10 5
 -- Nothing
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkLInterval ::
   forall l a.
   (KnownNat l, Num a, Ord a) =>
@@ -310,7 +310,7 @@ mkLInterval x
 -- >>> unsafeLInterval @0 7
 -- UnsafeLInterval 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 unsafeLInterval ::
   forall l a.
   (HasCallStack, KnownNat l, Num a, Ord a, Show a) =>
@@ -326,30 +326,30 @@ unsafeLInterval x = Maybe.fromMaybe (error msg) $ mkLInterval x
 -- holds and a branch (i.e. 'unsafeLInterval') is undesirable for performance
 -- reasons. Exercise extreme caution.
 --
--- @since 0.1.0.0
+-- @since 0.1
 reallyUnsafeLInterval :: a -> LInterval l a
 reallyUnsafeLInterval = UnsafeLInterval
 
 -- | Represents a closed interval that is right-bounded i.e.
 -- @RInterval \@r x@ represents \( x \in (-\infty, r] \).
 --
--- @since 0.1.0.0
+-- @since 0.1
 type RInterval :: Nat -> Type -> Type
 newtype RInterval r a = UnsafeRInterval a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
@@ -362,7 +362,7 @@ newtype RInterval r a = UnsafeRInterval a
 -- >>> MkRInterval @10 5
 -- UnsafeRInterval 5
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkRInterval ::
   (KnownNat r, Num a, Ord a, Show a) =>
   a ->
@@ -376,13 +376,13 @@ pattern MkRInterval x <-
 
 -- | __WARNING: Partial__
 --
--- @since 0.1.0.0
+-- @since 0.1
 instance (KnownNat r, Num a, Ord a, Show a) => NumLiteral (RInterval r a) where
   fromLit = unsafeRInterval . fromInteger
 
 -- | Unwraps an 'RInterval'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unRInterval :: RInterval r a -> a
 unRInterval (UnsafeRInterval x) = x
 
@@ -392,7 +392,7 @@ unRInterval (UnsafeRInterval x) = x
 -- >>> $$(mkRIntervalTH @100 7)
 -- UnsafeRInterval 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
 mkRIntervalTH ::
   forall r a.
@@ -420,7 +420,7 @@ mkRIntervalTH x = maybe (error msg) liftTyped $ mkRInterval x
 -- >>> mkRInterval @0 5
 -- Nothing
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkRInterval ::
   forall r a.
   (KnownNat r, Num a, Ord a) =>
@@ -440,7 +440,7 @@ mkRInterval x
 -- >>> unsafeRInterval @10 7
 -- UnsafeRInterval 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 unsafeRInterval ::
   forall r a.
   (HasCallStack, KnownNat r, Num a, Ord a, Show a) =>
@@ -456,7 +456,7 @@ unsafeRInterval x = Maybe.fromMaybe (error msg) $ mkRInterval x
 -- holds and a branch (i.e. 'unsafeRInterval') is undesirable for performance
 -- reasons. Exercise extreme caution.
 --
--- @since 0.1.0.0
+-- @since 0.1
 reallyUnsafeRInterval :: a -> RInterval r a
 reallyUnsafeRInterval = UnsafeRInterval
 

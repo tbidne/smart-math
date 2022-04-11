@@ -3,7 +3,7 @@
 
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Numeric.Data.NonNegative
   ( -- * Type
     NonNegative (MkNonNegative),
@@ -54,23 +54,23 @@ import Numeric.Data.NonZero (NonZero (..))
 -- * 'Numeric.Algebra.Multiplicative.MGroup.MGroupIntegral'
 -- * 'Numeric.Algebra.Semiring.Semiring'
 --
--- @since 0.1.0.0
+-- @since 0.1
 type NonNegative :: Type -> Type
 newtype NonNegative a = UnsafeNonNegative a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
@@ -83,7 +83,7 @@ newtype NonNegative a = UnsafeNonNegative a
 -- >>> MkNonNegative 0
 -- UnsafeNonNegative 0
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkNonNegative :: (Num a, Ord a, Show a) => a -> NonNegative a
 pattern MkNonNegative x <-
   UnsafeNonNegative x
@@ -92,30 +92,30 @@ pattern MkNonNegative x <-
 
 {-# COMPLETE MkNonNegative #-}
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => ASemigroup (NonNegative a) where
   type AddConstraint (NonNegative a) = NonNegative a
   MkNonNegative x .+. MkNonNegative y = reallyUnsafeNonNegative $ x + y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => AMonoid (NonNegative a) where
   zero = reallyUnsafeNonNegative 0
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => MSemigroup (NonNegative a) where
   type MultConstraint (NonNegative a) = NonNegative a
   MkNonNegative x .*. MkNonNegative y = reallyUnsafeNonNegative $ x * y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => MMonoid (NonNegative a) where
   one = reallyUnsafeNonNegative 1
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (NonNegative a) where
   type DivConstraint (NonNegative a) = NonZero (NonNegative a)
   MkNonNegative x .%. MkNonZero (MkNonNegative d) = reallyUnsafeNonNegative $ x `divide` d
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Division a, Integral a, Show a) => MGroupIntegral (NonNegative a) where
   type ModResult (NonNegative a) = NonNegative a
   MkNonNegative x `gdivMod` MkNonZero (MkNonNegative d) =
@@ -123,16 +123,16 @@ instance (Division a, Integral a, Show a) => MGroupIntegral (NonNegative a) wher
 
 -- | __WARNING: Partial__
 --
--- @since 0.1.0.0
+-- @since 0.1
 instance (Num a, Ord a, Show a) => NumLiteral (NonNegative a) where
   fromLit = unsafeNonNegative . fromInteger
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => Semiring (NonNegative a)
 
 -- | Unwraps a 'NonNegative'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unNonNegative :: NonNegative a -> a
 unNonNegative (UnsafeNonNegative x) = x
 
@@ -142,7 +142,7 @@ unNonNegative (UnsafeNonNegative x) = x
 -- >>> $$(mkNonNegativeTH 1)
 -- UnsafeNonNegative 1
 --
--- @since 0.1.0.0
+-- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
 mkNonNegativeTH :: (Integral a, Lift a, Show a) => a -> Code Q (NonNegative a)
 #else
@@ -163,7 +163,7 @@ mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
 -- >>> mkNonNegative (-2)
 -- Nothing
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkNonNegative :: (Num a, Ord a) => a -> Maybe (NonNegative a)
 mkNonNegative x
   | x >= 0 = Just (UnsafeNonNegative x)
@@ -177,7 +177,7 @@ mkNonNegative x
 -- >>> unsafeNonNegative 7
 -- UnsafeNonNegative 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 unsafeNonNegative :: (HasCallStack, Num a, Ord a, Show a) => a -> NonNegative a
 unsafeNonNegative x
   | x >= 0 = UnsafeNonNegative x
@@ -191,6 +191,6 @@ unsafeNonNegative x
 -- holds and a branch (i.e. 'unsafeNonNegative') is undesirable for performance
 -- reasons. Exercise extreme caution.
 --
--- @since 0.1.0.0
+-- @since 0.1
 reallyUnsafeNonNegative :: a -> NonNegative a
 reallyUnsafeNonNegative = UnsafeNonNegative

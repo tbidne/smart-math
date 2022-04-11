@@ -3,7 +3,7 @@
 
 -- | Provides the 'Positive' type for enforcing a positive invariant.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Numeric.Data.Positive
   ( -- * Type
     Positive (MkPositive),
@@ -52,23 +52,23 @@ import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
 -- * 'Numeric.Algebra.Multiplicative.MGroup.MGroup'
 -- * 'Numeric.Algebra.Multiplicative.MGroup.MGroupIntegral'
 --
--- @since 0.1.0.0
+-- @since 0.1
 type Positive :: Type -> Type
 newtype Positive a = UnsafePositive a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
@@ -81,7 +81,7 @@ newtype Positive a = UnsafePositive a
 -- >>> MkPositive 7
 -- UnsafePositive 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkPositive :: (Num a, Ord a, Show a) => a -> Positive a
 pattern MkPositive x <-
   UnsafePositive x
@@ -90,34 +90,34 @@ pattern MkPositive x <-
 
 {-# COMPLETE MkPositive #-}
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => ASemigroup (Positive a) where
   type AddConstraint (Positive a) = Positive a
   MkPositive x .+. MkPositive y = UnsafePositive $ x + y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => MSemigroup (Positive a) where
   type MultConstraint (Positive a) = Positive a
   MkPositive x .*. MkPositive y = UnsafePositive $ x * y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => MMonoid (Positive a) where
   one = UnsafePositive 1
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (Positive a) where
   type DivConstraint (Positive a) = Positive a
   MkPositive x .%. MkPositive d = reallyUnsafePositive $ x `divide` d
 
 -- | __WARNING: Partial__
 --
--- @since 0.1.0.0
+-- @since 0.1
 instance (Num a, Ord a, Show a) => NumLiteral (Positive a) where
   fromLit = unsafePositive . fromInteger
 
 -- | Unwraps a 'Positive'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unPositive :: Positive a -> a
 unPositive (UnsafePositive x) = x
 
@@ -127,7 +127,7 @@ unPositive (UnsafePositive x) = x
 -- >>> $$(mkPositiveTH 1)
 -- UnsafePositive 1
 --
--- @since 0.1.0.0
+-- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
 mkPositiveTH :: (Integral a, Lift a, Show a) => a -> Code Q (Positive a)
 #else
@@ -148,7 +148,7 @@ mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
 -- >>> mkPositive 0
 -- Nothing
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkPositive :: (Num a, Ord a) => a -> Maybe (Positive a)
 mkPositive x
   | x > 0 = Just (UnsafePositive x)
@@ -162,7 +162,7 @@ mkPositive x
 -- >>> unsafePositive 7
 -- UnsafePositive 7
 --
--- @since 0.1.0.0
+-- @since 0.1
 unsafePositive :: (HasCallStack, Num a, Ord a, Show a) => a -> Positive a
 unsafePositive x
   | x > 0 = UnsafePositive x
@@ -176,7 +176,7 @@ unsafePositive x
 -- holds and a branch (i.e. 'unsafePositive') is undesirable for performance
 -- reasons. Exercise extreme caution.
 --
--- @since 0.1.0.0
+-- @since 0.1
 reallyUnsafePositive :: a -> Positive a
 reallyUnsafePositive = UnsafePositive
 
@@ -186,6 +186,6 @@ reallyUnsafePositive = UnsafePositive
 -- >>> positiveToNonZero $ unsafePositive 3
 -- UnsafePositive (UnsafeNonZero 3)
 --
--- @since 0.1.0.0
+-- @since 0.1
 positiveToNonZero :: Positive a -> Positive (NonZero a)
 positiveToNonZero = UnsafePositive . reallyUnsafeNonZero . unPositive

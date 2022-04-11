@@ -3,7 +3,7 @@
 
 -- | Provides the 'ModN' type for modular arithmetic.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Numeric.Data.ModN
   ( -- * Type
     ModN (MkModN),
@@ -47,25 +47,25 @@ import Numeric.Class.Literal (NumLiteral (..))
 -- * 'Numeric.Algebra.Semiring.Semiring'
 -- * 'Numeric.Algebra.Ring.Ring'
 --
--- @since 0.1.0.0
+-- @since 0.1
 type ModN :: Nat -> Type -> Type
 newtype ModN n a = UnsafeModN a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
   -- manual so we include the mod string
   showsPrec i (MkModN x) =
@@ -79,7 +79,7 @@ instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
 -- | Bidirectional pattern synonym for 'ModN'. Construction will apply
 -- modular reduction to the parameter.
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkModN :: forall n a. (KnownNat n, UpperBoundless a) => a -> ModN n a
 pattern MkModN x <-
   UnsafeModN x
@@ -88,31 +88,31 @@ pattern MkModN x <-
 
 {-# COMPLETE MkModN #-}
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Integer) where
   type AddConstraint (ModN n Integer) = ModN n Integer
   MkModN x .+. MkModN y = MkModN $ x + y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Natural) where
   type AddConstraint (ModN n Natural) = ModN n Natural
   MkModN x .+. MkModN y = MkModN $ x + y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Integer) where
   zero = MkModN 0
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Natural) where
   zero = MkModN 0
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => AGroup (ModN n Integer) where
   type SubtractConstraint (ModN n Integer) = ModN n Integer
   MkModN x .-. MkModN y = MkModN (x - y)
   aabs = id
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => AGroup (ModN n Natural) where
   type SubtractConstraint (ModN n Natural) = ModN n Natural
   MkModN x .-. MkModN y
@@ -123,43 +123,43 @@ instance KnownNat n => AGroup (ModN n Natural) where
 
   aabs = id
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Integer) where
   type MultConstraint (ModN n Integer) = ModN n Integer
   MkModN x .*. MkModN y = MkModN (x * y)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Natural) where
   type MultConstraint (ModN n Natural) = ModN n Natural
   MkModN x .*. MkModN y = MkModN (x * y)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => MMonoid (ModN n Integer) where
   one = MkModN 1
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => MMonoid (ModN n Natural) where
   one = MkModN 1
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => Semiring (ModN n Integer)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => Semiring (ModN n Natural)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => Ring (ModN n Integer)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat n => Ring (ModN n Natural)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (KnownNat n, UpperBoundless a) => NumLiteral (ModN n a) where
   fromLit = MkModN . fromInteger
 
 -- | Unwraps a 'ModN'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unModN :: ModN n a -> a
 unModN (UnsafeModN x) = x
 
@@ -172,7 +172,7 @@ unModN (UnsafeModN x) = x
 -- >>> mkModN @10 7
 -- MkModN 7 (mod 10)
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkModN :: forall n a. (KnownNat n, UpperBoundless a) => a -> ModN n a
 mkModN x = UnsafeModN x'
   where

@@ -6,7 +6,7 @@
 -- functions are 'isPrime' and 'findInverse', though others are exported for
 -- testing.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Numeric.Data.ModP.Internal
   ( -- * Primality Testing
     MaybePrime (..),
@@ -44,7 +44,7 @@ import System.Random.Stateful qualified as RandState
 -- | Result of running Miller-Rabin algorithm. At best we can determine if
 -- some @n@ is definitely composite or "probably prime".
 --
--- @since 0.1.0.0
+-- @since 0.1
 data MaybePrime
   = Composite
   | ProbablyPrime
@@ -71,7 +71,7 @@ instance Monoid MaybePrime where
 -- >>> isPrime 373
 -- ProbablyPrime
 --
--- @since 0.1.0.0
+-- @since 0.1
 isPrime :: Integer -> MaybePrime
 isPrime = isPrimeTrials 100
 
@@ -95,7 +95,7 @@ isPrime = isPrimeTrials 100
 --   fmap (\x -> (x, isPrimeTrials 1 x)) [p + p, p + p + p ..]
 -- @
 --
--- @since 0.1.0.0
+-- @since 0.1
 isPrimeTrials :: Word16 -> Integer -> MaybePrime
 isPrimeTrials _ 1 = Composite
 isPrimeTrials _ 2 = ProbablyPrime
@@ -116,7 +116,7 @@ isPrimeTrials numTrials n
 -- | Represents a modulus. When testing for primality, this is the \(n\) in
 -- \(n = 2^{r} d + 1\).
 --
--- @since 0.1.0.0
+-- @since 0.1
 newtype Modulus = MkModulus Integer
   deriving stock (Eq, Show)
   deriving newtype (Enum, Integral, Ord, Num, Real)
@@ -129,23 +129,23 @@ newtype Modulus = MkModulus Integer
 
 -- | The \(r\) in \(n = 2^{r} d + 1\).
 --
--- @since 0.1.0.0
+-- @since 0.1
 newtype Pow = MkPow Integer
   deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
 
 -- | The \(d\) in \(n = 2^{r} d + 1\).
 --
--- @since 0.1.0.0
+-- @since 0.1
 newtype Mult = MkMult Integer
   deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
 
 -- | Randomly generated \(m \in [2, n - 2] \) for testing \(n\)'s primality.
 --
--- @since 0.1.0.0
+-- @since 0.1
 newtype Rand = MkRand Integer
   deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance UniformRange Rand where
   uniformRM (MkRand l, MkRand u) = fmap MkRand . RandState.uniformRM (l, u)
 
@@ -178,7 +178,7 @@ millerRabin modulus@(MkModulus n) = go gen
 -- >>> trial 7 (factor2 (7 - 1)) 3
 -- ProbablyPrime
 --
--- @since 0.1.0.0
+-- @since 0.1
 trial :: Modulus -> (Pow, Mult) -> Rand -> MaybePrime
 trial modulus@(MkModulus n) (r, d) (MkRand a)
   -- x = 1 or n - 1 -> skip
@@ -203,7 +203,7 @@ trial modulus@(MkModulus n) (r, d) (MkRand a)
 -- >>> isWitness 7 pow testVal
 -- ProbablyPrime
 --
--- @since 0.1.0.0
+-- @since 0.1
 isWitness :: Modulus -> Pow -> Rand -> MaybePrime
 isWitness modulus@(MkModulus n) r (MkRand x) = coprimeToResult coprime
   where
@@ -222,7 +222,7 @@ isWitness modulus@(MkModulus n) r (MkRand x) = coprimeToResult coprime
 -- >>> take 5 $ sqProgression 7 3
 -- [3,2,4,2,4]
 --
--- @since 0.1.0.0
+-- @since 0.1
 sqProgression :: Modulus -> Integer -> [Integer]
 sqProgression (MkModulus n) = go
   where
@@ -241,7 +241,7 @@ sqProgression (MkModulus n) = go
 -- >>> factor2 20
 -- (MkPow 2,MkMult 5)
 --
--- @since 0.1.0.0
+-- @since 0.1
 factor2 :: Modulus -> (Pow, Mult)
 factor2 (MkModulus n) = go (MkPow 0, MkMult n)
   where
@@ -264,17 +264,17 @@ factor2 (MkModulus n) = go (MkPow 0, MkMult n)
 -- Also, this function requires division, it is partial when
 -- the modulus is 0.
 --
--- @since 0.1.0.0
+-- @since 0.1
 findInverse :: Integer -> Modulus -> Integer
 findInverse a (MkModulus p) = aInv `mod` p
   where
     (MkBezout _ _ (T' aInv)) = eec p a
 
--- | @since 0.1.0.0
+-- | @since 0.1
 findBezout :: Integer -> Modulus -> Bezout
 findBezout a (MkModulus p) = eec p a
 
--- | @since 0.1.0.0
+-- | @since 0.1
 data Bezout = MkBezout
   { bzGcd :: !R,
     bzS :: !S,
@@ -282,15 +282,15 @@ data Bezout = MkBezout
   }
   deriving (Eq, Show)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 newtype R = R' Integer
   deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 newtype S = S' Integer
   deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 newtype T = T' Integer
   deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
 

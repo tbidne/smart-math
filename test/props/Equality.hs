@@ -14,7 +14,7 @@ import GHC.Real qualified as Real
 -- Its monoid instance defaults to 1, and semigroup takes the largest
 -- non-one.
 --
--- @since 0.1.0.0
+-- @since 0.1
 newtype Epsilon a = MkEpsilon {unEpsilon :: a}
   deriving stock (Eq, Ord, Show)
   deriving newtype (Fractional, Num)
@@ -32,7 +32,7 @@ instance (Fractional a, Ord a) => Monoid (Epsilon a) where
 
 -- | Types of equality.
 --
--- @since 0.1.0.0
+-- @since 0.1
 data EqTy
   = EqExact
   | EqRatio
@@ -56,7 +56,7 @@ data EqTy
 -- For example, if we want to compare two floating points for approximate
 -- equality, we can check @MkEqEpsilon 1.0 x == MkEqEpsilon 1.0 y@.
 --
--- @since 0.1.0.0
+-- @since 0.1
 type Equality :: EqTy -> Type -> Type
 data Equality eq a where
   -- | Exact quality.

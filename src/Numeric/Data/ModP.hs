@@ -3,7 +3,7 @@
 
 -- | Provides the 'ModP' type for modular arithmetic.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Numeric.Data.ModP
   ( -- * Type
     ModP (MkModP),
@@ -67,25 +67,25 @@ import Numeric.Data.NonZero (NonZero (..))
 -- * 'Numeric.Algebra.Ring.Ring'
 -- * 'Numeric.Algebra.Field.Field'
 --
--- @since 0.1.0.0
+-- @since 0.1
 type ModP :: Nat -> Type -> Type
 newtype ModP p a = UnsafeModP a
   deriving stock
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       Eq,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Generic,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Lift,
-      -- | @since 0.1.0.0
+      -- | @since 0.1
       Ord
     )
   deriving anyclass
-    ( -- | @since 0.1.0.0
+    ( -- | @since 0.1
       NFData
     )
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
   -- manual so we show "MkModP" instead of "UnsafeModP"
   showsPrec i (UnsafeModP x) =
@@ -107,7 +107,7 @@ instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
 -- >>> MkModP @7 12
 -- MkModP 5 (mod 7)
 --
--- @since 0.1.0.0
+-- @since 0.1
 pattern MkModP :: (HasCallStack, KnownNat p, UpperBoundless a) => a -> ModP p a
 pattern MkModP x <-
   UnsafeModP x
@@ -116,31 +116,31 @@ pattern MkModP x <-
 
 {-# COMPLETE MkModP #-}
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Integer) where
   type AddConstraint (ModP p Integer) = ModP p Integer
   MkModP x .+. MkModP y = unsafeModP $ x + y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Natural) where
   type AddConstraint (ModP p Natural) = ModP p Natural
   MkModP x .+. MkModP y = unsafeModP $ x + y
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Integer) where
   zero = MkModP 0
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Natural) where
   zero = MkModP 0
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => AGroup (ModP p Integer) where
   type SubtractConstraint (ModP p Integer) = ModP p Integer
   MkModP x .-. MkModP y = unsafeModP (x - y)
   aabs = id
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => AGroup (ModP p Natural) where
   type SubtractConstraint (ModP p Natural) = ModP p Natural
   MkModP x .-. MkModP y
@@ -151,59 +151,59 @@ instance KnownNat p => AGroup (ModP p Natural) where
 
   aabs = id
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Integer) where
   type MultConstraint (ModP p Integer) = ModP p Integer
   MkModP x .*. MkModP y = unsafeModP (x * y)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Natural) where
   type MultConstraint (ModP p Natural) = ModP p Natural
   MkModP x .*. MkModP y = unsafeModP (x * y)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => MMonoid (ModP p Integer) where
   one = MkModP 1
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => MMonoid (ModP p Natural) where
   one = MkModP 1
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => MGroup (ModP p Integer) where
   type DivConstraint (ModP p Integer) = NonZero (ModP p Integer)
   x .%. d = x .*. invert d
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => MGroup (ModP p Natural) where
   type DivConstraint (ModP p Natural) = NonZero (ModP p Natural)
   x .%. d = x .*. invert d
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => Semiring (ModP p Integer)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => Semiring (ModP p Natural)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => Ring (ModP p Integer)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => Ring (ModP p Natural)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => Field (ModP p Integer)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance KnownNat p => Field (ModP p Natural)
 
--- | @since 0.1.0.0
+-- | @since 0.1
 instance (KnownNat p, UpperBoundless a) => NumLiteral (ModP p a) where
   fromLit = MkModP . fromInteger
 
 -- | Unwraps a 'ModP'.
 --
--- @since 0.1.0.0
+-- @since 0.1
 unModP :: ModP p a -> a
 unModP (UnsafeModP x) = x
 
@@ -220,7 +220,7 @@ unModP (UnsafeModP x) = x
 -- >>> mkModP @10 7
 -- Nothing
 --
--- @since 0.1.0.0
+-- @since 0.1
 mkModP :: forall p a. (KnownNat p, UpperBoundless a) => a -> Maybe (ModP p a)
 mkModP x = case ModPI.isPrime p' of
   Composite -> Nothing
@@ -235,7 +235,7 @@ mkModP x = case ModPI.isPrime p' of
 -- >>> $$(mkModPTH @11 7)
 -- MkModP 7 (mod 11)
 --
--- @since 0.1.0.0
+-- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
 mkModPTH :: forall p a. (KnownNat p, Lift a, UpperBoundless a) => a -> Code Q (ModP p a)
 #else
@@ -256,7 +256,7 @@ mkModPTH = maybe (error err) liftTyped . mkModP
 -- >>> unsafeModP @7 12
 -- MkModP 5 (mod 7)
 --
--- @since 0.1.0.0
+-- @since 0.1
 unsafeModP :: forall p a. (HasCallStack, KnownNat p, UpperBoundless a) => a -> ModP p a
 unsafeModP x = case mkModP x of
   Just mp -> mp
@@ -272,7 +272,7 @@ unsafeModP x = case mkModP x of
 -- intended only for when we absolutely know @p@ is prime and the check
 -- is undesirable for performance reasons. Exercise extreme caution.
 --
--- @since 0.1.0.0
+-- @since 0.1
 reallyUnsafeModP :: forall p a. (KnownNat p, UpperBoundless a) => a -> ModP p a
 reallyUnsafeModP = UnsafeModP . (`mod` p')
   where
@@ -292,7 +292,7 @@ reallyUnsafeModP = UnsafeModP . (`mod` p')
 -- >>> invert $ unsafeAMonoidNonZero $ MkModP @19 12
 -- MkModP 8 (mod 19)
 --
--- @since 0.1.0.0
+-- @since 0.1
 invert :: forall p a. (KnownNat p, UpperBoundless a) => NonZero (ModP p a) -> ModP p a
 invert (MkNonZero (UnsafeModP d)) = reallyUnsafeModP $ toUpperBoundless $ ModPI.findInverse d' p'
   where

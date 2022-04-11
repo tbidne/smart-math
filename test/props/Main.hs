@@ -1,6 +1,6 @@
 -- | Entrypoint for property tests.
 --
--- @since 0.1.0.0
+-- @since 0.1
 module Main (main) where
 
 import Control.Monad qualified as M
@@ -28,7 +28,7 @@ import Text.Read qualified as TR
 -- | Runs property tests. The environment variable @MAX_RUNS@ controls
 -- how many test runs we do (default 100).
 --
--- @since 0.1.0.0
+-- @since 0.1
 main :: IO ()
 main = do
   maxRuns <-
