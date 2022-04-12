@@ -27,8 +27,7 @@ fractionAddNum :: TestTree
 fractionAddNum = asemigroupAddNum Gens.fraction MkEqExact "Fraction" "fractionAddNum"
 
 asemigroupAddNum ::
-  ( AddConstraint a ~ a,
-    ASemigroup a,
+  ( ASemigroup a,
     Num a,
     Show a
   ) =>
@@ -66,8 +65,7 @@ positiveAssoc :: TestTree
 positiveAssoc = asemigroupAssoc Gens.positive "Positive" "positiveAssoc"
 
 asemigroupAssoc ::
-  ( AddConstraint a ~ a,
-    ASemigroup a,
+  ( ASemigroup a,
     Show a
   ) =>
   Gen a ->

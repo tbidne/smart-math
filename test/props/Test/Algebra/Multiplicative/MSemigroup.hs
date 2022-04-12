@@ -27,8 +27,7 @@ fractionMultNum :: TestTree
 fractionMultNum = msemigroupMultNum Gens.fraction MkEqExact "Fraction" "fractionMultNum"
 
 msemigroupMultNum ::
-  ( MultConstraint a ~ a,
-    MSemigroup a,
+  ( MSemigroup a,
     Num a,
     Show a
   ) =>
@@ -66,8 +65,7 @@ positiveAssoc :: TestTree
 positiveAssoc = msemigroupAssoc Gens.positive "Positive" "positiveAssoc"
 
 msemigroupAssoc ::
-  ( MultConstraint a ~ a,
-    MSemigroup a,
+  ( MSemigroup a,
     Show a
   ) =>
   Gen a ->

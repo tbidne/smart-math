@@ -94,7 +94,6 @@ pattern MkNonNegative x <-
 
 -- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => ASemigroup (NonNegative a) where
-  type AddConstraint (NonNegative a) = NonNegative a
   MkNonNegative x .+. MkNonNegative y = reallyUnsafeNonNegative $ x + y
 
 -- | @since 0.1
@@ -103,7 +102,6 @@ instance (Eq a, Num a, Ord a, Show a) => AMonoid (NonNegative a) where
 
 -- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => MSemigroup (NonNegative a) where
-  type MultConstraint (NonNegative a) = NonNegative a
   MkNonNegative x .*. MkNonNegative y = reallyUnsafeNonNegative $ x * y
 
 -- | @since 0.1
@@ -112,7 +110,6 @@ instance (Eq a, Num a, Ord a, Show a) => MMonoid (NonNegative a) where
 
 -- | @since 0.1
 instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (NonNegative a) where
-  type DivConstraint (NonNegative a) = NonZero (NonNegative a)
   MkNonNegative x .%. MkNonZero (MkNonNegative d) = reallyUnsafeNonNegative $ x `divide` d
 
 -- | @since 0.1

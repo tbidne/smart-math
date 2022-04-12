@@ -41,8 +41,7 @@ nonNegativeId :: TestTree
 nonNegativeId = amonoidIdentity Gens.nonNegative MkEqExact "NonNegative" "nonNegativeId"
 
 amonoidIdentity ::
-  ( AddConstraint a ~ a,
-    AMonoid a,
+  ( AMonoid a,
     Show a
   ) =>
   Gen a ->

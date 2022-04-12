@@ -90,12 +90,10 @@ pattern MkModN x <-
 
 -- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Integer) where
-  type AddConstraint (ModN n Integer) = ModN n Integer
   MkModN x .+. MkModN y = MkModN $ x + y
 
 -- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Natural) where
-  type AddConstraint (ModN n Natural) = ModN n Natural
   MkModN x .+. MkModN y = MkModN $ x + y
 
 -- | @since 0.1
@@ -108,13 +106,11 @@ instance KnownNat n => AMonoid (ModN n Natural) where
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Integer) where
-  type SubtractConstraint (ModN n Integer) = ModN n Integer
   MkModN x .-. MkModN y = MkModN (x - y)
   aabs = id
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Natural) where
-  type SubtractConstraint (ModN n Natural) = ModN n Natural
   MkModN x .-. MkModN y
     | x >= y = MkModN (x - y)
     | otherwise = MkModN (n' - y + x)
@@ -125,12 +121,10 @@ instance KnownNat n => AGroup (ModN n Natural) where
 
 -- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Integer) where
-  type MultConstraint (ModN n Integer) = ModN n Integer
   MkModN x .*. MkModN y = MkModN (x * y)
 
 -- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Natural) where
-  type MultConstraint (ModN n Natural) = ModN n Natural
   MkModN x .*. MkModN y = MkModN (x * y)
 
 -- | @since 0.1

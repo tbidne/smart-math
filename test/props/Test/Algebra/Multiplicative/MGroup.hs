@@ -58,15 +58,10 @@ nonZeroDivIdent :: TestTree
 nonZeroDivIdent = agroupDivIdent Gens.nonZero MkEqExact "NonZero" "nonZeroDivIdent"
 
 positiveDivIdent :: TestTree
-positiveDivIdent = T.askOption $ \(MkMaxRuns limit) ->
-  Utils.testPropertyCompat "Positive" "positiveDivIdent" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll Gens.positive
-        one === x .%. x
+positiveDivIdent = agroupDivIdent Gens.positiveNonZero MkEqExact "Positive" "positiveDivIdent"
 
 mgroupDivEq ::
-  (MGroup a, DivConstraint a ~ NonZero a, Show a) =>
+  (MGroup a, Show a) =>
   (a -> a -> a) ->
   Gen a ->
   Gen (NonZero a) ->
@@ -85,7 +80,7 @@ mgroupDivEq expectedFn gen genNZ eqCons desc propName = T.askOption $ \(MkMaxRun
         eqCons expected === eqCons actual
 
 agroupDivIdent ::
-  (MGroup a, DivConstraint a ~ NonZero a, Show a) =>
+  (MGroup a, Show a) =>
   Gen (NonZero a) ->
   (a -> Equality eq a) ->
   TestName ->

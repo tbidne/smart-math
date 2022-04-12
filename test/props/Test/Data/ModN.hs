@@ -8,7 +8,7 @@ import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import MaxRuns (MaxRuns (..))
-import Numeric.Algebra.Additive.AGroup (AGroup (..), SubtractConstraint)
+import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Class.Boundless (UpperBoundless)
@@ -103,8 +103,7 @@ mkModN' = H.property $ do
 
 addTotal' ::
   forall a.
-  ( AddConstraint (ModN 65536 a) ~ ModN 65536 a,
-    ASemigroup (ModN 65536 a),
+  ( ASemigroup (ModN 65536 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -119,8 +118,7 @@ addTotal' = H.property $ do
 
 subTotal' ::
   forall a.
-  ( SubtractConstraint (ModN 65536 a) ~ ModN 65536 a,
-    AGroup (ModN 65536 a),
+  ( AGroup (ModN 65536 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -135,8 +133,7 @@ subTotal' = H.property $ do
 
 multTotal' ::
   forall a.
-  ( MultConstraint (ModN 65536 a) ~ ModN 65536 a,
-    MSemigroup (ModN 65536 a),
+  ( MSemigroup (ModN 65536 a),
     Show a,
     TestBounds a,
     UpperBoundless a

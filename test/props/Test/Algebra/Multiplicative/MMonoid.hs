@@ -43,8 +43,7 @@ positiveId :: TestTree
 positiveId = mmonoidIdentity Gens.positive MkEqExact "Positive" "positiveId"
 
 mmonoidIdentity ::
-  ( MultConstraint a ~ a,
-    MMonoid a,
+  ( MMonoid a,
     Show a
   ) =>
   Gen a ->

@@ -1,6 +1,6 @@
 {
   description = "A package for mathematical smart constructors";
-  inputs.algebra-simple-src.url = "github:tbidne/algebra-simple/main";
+  inputs.algebra-simple-src.url = "github:tbidne/algebra-simple/no-tfs";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   outputs =
@@ -20,7 +20,7 @@
           name = "smart-math";
           root = ./.;
           modifier = drv:
-            pkgs.haskell.lib.addBuildTools drv (with pkgs.haskellPackages; [
+            pkgs.haskell.lib.addBuildTools drv (with compiler; [
               cabal-install
               haskell-language-server
               ghcid

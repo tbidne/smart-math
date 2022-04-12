@@ -3,6 +3,6 @@ packages:
 - .
 extra-deps:
 - git: https://github.com/tbidne/algebra-simple.git
-  commit: 9b609eeceec43271ee1e9524d8b4335c258af1de
+  commit: acc79c140fc3cf3530337a2d4ddc0f2cc6c2ef08
 nix:
   shell-file: nix/stack.nix

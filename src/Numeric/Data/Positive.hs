@@ -92,12 +92,10 @@ pattern MkPositive x <-
 
 -- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => ASemigroup (Positive a) where
-  type AddConstraint (Positive a) = Positive a
   MkPositive x .+. MkPositive y = UnsafePositive $ x + y
 
 -- | @since 0.1
 instance (Eq a, Num a, Ord a, Show a) => MSemigroup (Positive a) where
-  type MultConstraint (Positive a) = Positive a
   MkPositive x .*. MkPositive y = UnsafePositive $ x * y
 
 -- | @since 0.1
@@ -106,8 +104,7 @@ instance (Eq a, Num a, Ord a, Show a) => MMonoid (Positive a) where
 
 -- | @since 0.1
 instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (Positive a) where
-  type DivConstraint (Positive a) = Positive a
-  MkPositive x .%. MkPositive d = reallyUnsafePositive $ x `divide` d
+  MkPositive x .%. MkNonZero (MkPositive d) = reallyUnsafePositive $ x `divide` d
 
 -- | __WARNING: Partial__
 --
@@ -184,8 +181,8 @@ reallyUnsafePositive = UnsafePositive
 --
 -- ==== __Examples__
 -- >>> positiveToNonZero $ unsafePositive 3
--- UnsafePositive (UnsafeNonZero 3)
+-- UnsafeNonZero (UnsafePositive 3)
 --
 -- @since 0.1
-positiveToNonZero :: Positive a -> Positive (NonZero a)
-positiveToNonZero = UnsafePositive . reallyUnsafeNonZero . unPositive
+positiveToNonZero :: Positive a -> NonZero (Positive a)
+positiveToNonZero = reallyUnsafeNonZero

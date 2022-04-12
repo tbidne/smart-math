@@ -21,6 +21,7 @@ module Gens
     fractionNonZero,
     modPNonZero,
     nonNegativeNonZero,
+    positiveNonZero,
   )
 where
 
@@ -31,6 +32,7 @@ import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Multiplicative.MGroup qualified as MGroup
+import Numeric.Data qualified as Pos
 import Numeric.Data.Fraction (Fraction (..))
 import Numeric.Data.ModN (ModN (..), mkModN)
 import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
@@ -81,6 +83,9 @@ modPNonZero = MGroup.unsafeAMonoidNonZero . reallyUnsafeModP <$> pos
 
 nonNegativeNonZero :: MonadGen m => m (NonZero (NonNegative Natural))
 nonNegativeNonZero = MGroup.unsafeAMonoidNonZero . unsafeNonNegative <$> naturalNZ
+
+positiveNonZero :: MonadGen m => m (NonZero (Positive Natural))
+positiveNonZero = Pos.positiveToNonZero . unsafePositive <$> naturalNZ
 
 nzBounds :: (Integral a, MonadGen m) => (Range a -> m a) -> a -> a -> m a
 nzBounds gen lower upper =

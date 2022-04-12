@@ -118,12 +118,10 @@ pattern MkModP x <-
 
 -- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Integer) where
-  type AddConstraint (ModP p Integer) = ModP p Integer
   MkModP x .+. MkModP y = unsafeModP $ x + y
 
 -- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Natural) where
-  type AddConstraint (ModP p Natural) = ModP p Natural
   MkModP x .+. MkModP y = unsafeModP $ x + y
 
 -- | @since 0.1
@@ -136,13 +134,11 @@ instance KnownNat p => AMonoid (ModP p Natural) where
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Integer) where
-  type SubtractConstraint (ModP p Integer) = ModP p Integer
   MkModP x .-. MkModP y = unsafeModP (x - y)
   aabs = id
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Natural) where
-  type SubtractConstraint (ModP p Natural) = ModP p Natural
   MkModP x .-. MkModP y
     | x >= y = unsafeModP (x - y)
     | otherwise = unsafeModP (p' - y + x)
@@ -153,12 +149,10 @@ instance KnownNat p => AGroup (ModP p Natural) where
 
 -- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Integer) where
-  type MultConstraint (ModP p Integer) = ModP p Integer
   MkModP x .*. MkModP y = unsafeModP (x * y)
 
 -- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Natural) where
-  type MultConstraint (ModP p Natural) = ModP p Natural
   MkModP x .*. MkModP y = unsafeModP (x * y)
 
 -- | @since 0.1
@@ -171,12 +165,10 @@ instance KnownNat p => MMonoid (ModP p Natural) where
 
 -- | @since 0.1
 instance KnownNat p => MGroup (ModP p Integer) where
-  type DivConstraint (ModP p Integer) = NonZero (ModP p Integer)
   x .%. d = x .*. invert d
 
 -- | @since 0.1
 instance KnownNat p => MGroup (ModP p Natural) where
-  type DivConstraint (ModP p Natural) = NonZero (ModP p Natural)
   x .%. d = x .*. invert d
 
 -- | @since 0.1

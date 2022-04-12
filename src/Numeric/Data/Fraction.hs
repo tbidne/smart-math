@@ -224,12 +224,10 @@ instance Division (Fraction Natural) where
 
 -- | @since 0.1
 instance ASemigroup (Fraction Integer) where
-  type AddConstraint (Fraction Integer) = Fraction Integer
   (.+.) = (+)
 
 -- | @since 0.1
 instance ASemigroup (Fraction Natural) where
-  type AddConstraint (Fraction Natural) = Fraction Natural
   (.+.) = (+)
 
 -- | @since 0.1
@@ -242,18 +240,15 @@ instance AMonoid (Fraction Natural) where
 
 -- | @since 0.1
 instance AGroup (Fraction Integer) where
-  type SubtractConstraint (Fraction Integer) = Fraction Integer
   (.-.) = (-)
   aabs = abs
 
 -- | @since 0.1
 instance MSemigroup (Fraction Integer) where
-  type MultConstraint (Fraction Integer) = Fraction Integer
   (.*.) = (*)
 
 -- | @since 0.1
 instance MSemigroup (Fraction Natural) where
-  type MultConstraint (Fraction Natural) = Fraction Natural
   (.*.) = (*)
 
 -- | @since 0.1
@@ -266,12 +261,10 @@ instance MMonoid (Fraction Natural) where
 
 -- | @since 0.1
 instance MGroup (Fraction Integer) where
-  type DivConstraint (Fraction Integer) = NonZero (Fraction Integer)
   x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
 
 -- | @since 0.1
 instance MGroup (Fraction Natural) where
-  type DivConstraint (Fraction Natural) = NonZero (Fraction Natural)
   x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
 
 -- | @since 0.1

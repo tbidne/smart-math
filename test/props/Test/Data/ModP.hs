@@ -136,8 +136,7 @@ invertNat = T.askOption $ \(MkMaxRuns limit) ->
 
 addTotal' ::
   forall a.
-  ( AddConstraint (ModP 65537 a) ~ ModP 65537 a,
-    ASemigroup (ModP 65537 a),
+  ( ASemigroup (ModP 65537 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -152,8 +151,7 @@ addTotal' = H.property $ do
 
 subTotal' ::
   forall a.
-  ( SubtractConstraint (ModP 65537 a) ~ ModP 65537 a,
-    AGroup (ModP 65537 a),
+  ( AGroup (ModP 65537 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -168,8 +166,7 @@ subTotal' = H.property $ do
 
 multTotal' ::
   forall a.
-  ( MultConstraint (ModP 65537 a) ~ ModP 65537 a,
-    MSemigroup (ModP 65537 a),
+  ( MSemigroup (ModP 65537 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -185,8 +182,6 @@ multTotal' = H.property $ do
 divTotal' ::
   forall a.
   ( AMonoid (ModP 65537 a),
-    MultConstraint (ModP 65537 a) ~ ModP 65537 a,
-    DivConstraint (ModP 65537 a) ~ NonZero (ModP 65537 a),
     MGroup (ModP 65537 a),
     Show a,
     TestBounds a,
@@ -202,7 +197,6 @@ divTotal' = H.property $ do
 invert' ::
   forall a.
   ( AMonoid (ModP 65537 a),
-    MultConstraint (ModP 65537 a) ~ ModP 65537 a,
     MGroup (ModP 65537 a),
     Show a,
     TestBounds a,
