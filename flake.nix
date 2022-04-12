@@ -1,6 +1,6 @@
 {
   description = "A package for mathematical smart constructors";
-  inputs.algebra-simple-src.url = "github:tbidne/algebra-simple/no-tfs";
+  inputs.algebra-simple-src.url = "github:tbidne/algebra-simple/main";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   outputs =

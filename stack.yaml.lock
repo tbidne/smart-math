@@ -10,11 +10,11 @@ packages:
     git: https://github.com/tbidne/algebra-simple.git
     pantry-tree:
       size: 3703
-      sha256: ba1f9bc7e93a7247c25155e4b05ed408360410e1b6ff71f9747ab1c777259c4e
-    commit: acc79c140fc3cf3530337a2d4ddc0f2cc6c2ef08
+      sha256: 9f56b2457e89aa7901d87aca0708acd961893282a70a720c9c5ea84e9144f30f
+    commit: 13cd114bd46a7f76ba21138e03dd8066d5583a0c
   original:
     git: https://github.com/tbidne/algebra-simple.git
-    commit: acc79c140fc3cf3530337a2d4ddc0f2cc6c2ef08
+    commit: 13cd114bd46a7f76ba21138e03dd8066d5583a0c
 snapshots:
 - completed:
     size: 517915
