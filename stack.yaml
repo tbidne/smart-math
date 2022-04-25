@@ -1,8 +1,8 @@
-resolver: nightly-2022-03-23
+resolver: lts-19.4
 packages:
 - .
 extra-deps:
 - git: https://github.com/tbidne/algebra-simple.git
-  commit: 13cd114bd46a7f76ba21138e03dd8066d5583a0c
+  commit: 1b2bd9fd21ecf5ed6635cc5c14d06ab533950df3
 nix:
   shell-file: nix/stack.nix

@@ -6,18 +6,18 @@
 packages:
 - completed:
     name: algebra-simple
-    version: '0.1'
-    git: https://github.com/tbidne/algebra-simple.git
     pantry-tree:
-      size: 3703
-      sha256: 9f56b2457e89aa7901d87aca0708acd961893282a70a720c9c5ea84e9144f30f
-    commit: 13cd114bd46a7f76ba21138e03dd8066d5583a0c
-  original:
+      sha256: 7f0f0d9cb0901ea1cceb599ee0862f11a246228e8557d0ca318f650aa7dd8741
+      size: 3764
+    commit: 1b2bd9fd21ecf5ed6635cc5c14d06ab533950df3
     git: https://github.com/tbidne/algebra-simple.git
-    commit: 13cd114bd46a7f76ba21138e03dd8066d5583a0c
+    version: '0.1'
+  original:
+    commit: 1b2bd9fd21ecf5ed6635cc5c14d06ab533950df3
+    git: https://github.com/tbidne/algebra-simple.git
 snapshots:
 - completed:
-    size: 517915
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2022/3/23.yaml
-    sha256: cb8f5a11e08dfb56a756ae96455346488efb1dadef3d8670d8c566ce6625e6ce
-  original: nightly-2022-03-23
+    sha256: d4ee004c46ba878d2f304f5d748d493057be579192a8d148527f3ba55c9df57f
+    size: 618683
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/4.yaml
+  original: lts-19.4
