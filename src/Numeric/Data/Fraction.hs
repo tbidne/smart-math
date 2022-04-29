@@ -47,6 +47,7 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
+import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
@@ -233,15 +234,16 @@ instance ASemigroup (Fraction Natural) where
 -- | @since 0.1
 instance AMonoid (Fraction Integer) where
   zero = 0 :%: 1
+  aabs = abs
 
 -- | @since 0.1
 instance AMonoid (Fraction Natural) where
   zero = 0 :%: 1
+  aabs = abs
 
 -- | @since 0.1
 instance AGroup (Fraction Integer) where
   (.-.) = (-)
-  aabs = abs
 
 -- | @since 0.1
 instance MSemigroup (Fraction Integer) where
@@ -275,6 +277,12 @@ instance Semiring (Fraction Natural)
 
 -- | @since 0.1
 instance Ring (Fraction Integer)
+
+-- | @since 0.1
+instance Semifield (Fraction Natural)
+
+-- | @since 0.1
+instance Semifield (Fraction Integer)
 
 -- | @since 0.1
 instance Field (Fraction Integer)

@@ -91,20 +91,20 @@ pattern MkPositive x <-
 {-# COMPLETE MkPositive #-}
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => ASemigroup (Positive a) where
-  MkPositive x .+. MkPositive y = UnsafePositive $ x + y
+instance (Eq a, Num a) => ASemigroup (Positive a) where
+  UnsafePositive x .+. UnsafePositive y = UnsafePositive $ x + y
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => MSemigroup (Positive a) where
-  MkPositive x .*. MkPositive y = UnsafePositive $ x * y
+instance (Eq a, Num a) => MSemigroup (Positive a) where
+  UnsafePositive x .*. UnsafePositive y = UnsafePositive $ x * y
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => MMonoid (Positive a) where
+instance (Eq a, Num a) => MMonoid (Positive a) where
   one = UnsafePositive 1
 
 -- | @since 0.1
-instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (Positive a) where
-  MkPositive x .%. MkNonZero (MkPositive d) = reallyUnsafePositive $ x `divide` d
+instance (Eq a, Division a, Num a) => MGroup (Positive a) where
+  UnsafePositive x .%. MkNonZero (UnsafePositive d) = UnsafePositive $ x `divide` d
 
 -- | __WARNING: Partial__
 --

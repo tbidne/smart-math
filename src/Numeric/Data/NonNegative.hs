@@ -35,6 +35,7 @@ import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), MGroupIntegral (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
+import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
@@ -93,29 +94,30 @@ pattern MkNonNegative x <-
 {-# COMPLETE MkNonNegative #-}
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => ASemigroup (NonNegative a) where
-  MkNonNegative x .+. MkNonNegative y = reallyUnsafeNonNegative $ x + y
+instance (Eq a, Num a) => ASemigroup (NonNegative a) where
+  UnsafeNonNegative x .+. UnsafeNonNegative y = UnsafeNonNegative $ x + y
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => AMonoid (NonNegative a) where
-  zero = reallyUnsafeNonNegative 0
+instance (Eq a, Num a) => AMonoid (NonNegative a) where
+  zero = UnsafeNonNegative 0
+  aabs = id
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => MSemigroup (NonNegative a) where
-  MkNonNegative x .*. MkNonNegative y = reallyUnsafeNonNegative $ x * y
+instance (Eq a, Num a) => MSemigroup (NonNegative a) where
+  UnsafeNonNegative x .*. UnsafeNonNegative y = UnsafeNonNegative $ x * y
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => MMonoid (NonNegative a) where
-  one = reallyUnsafeNonNegative 1
+instance (Eq a, Num a) => MMonoid (NonNegative a) where
+  one = UnsafeNonNegative 1
 
 -- | @since 0.1
-instance (Eq a, Division a, Num a, Ord a, Show a) => MGroup (NonNegative a) where
-  MkNonNegative x .%. MkNonZero (MkNonNegative d) = reallyUnsafeNonNegative $ x `divide` d
+instance (Eq a, Division a, Num a) => MGroup (NonNegative a) where
+  UnsafeNonNegative x .%. MkNonZero (UnsafeNonNegative d) = UnsafeNonNegative $ x `divide` d
 
 -- | @since 0.1
-instance (Division a, Integral a, Show a) => MGroupIntegral (NonNegative a) where
+instance (Division a, Integral a) => MGroupIntegral (NonNegative a) where
   type ModResult (NonNegative a) = NonNegative a
-  MkNonNegative x `gdivMod` MkNonZero (MkNonNegative d) =
+  UnsafeNonNegative x `gdivMod` MkNonZero (UnsafeNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d
 
 -- | __WARNING: Partial__
@@ -125,7 +127,10 @@ instance (Num a, Ord a, Show a) => NumLiteral (NonNegative a) where
   fromLit = unsafeNonNegative . fromInteger
 
 -- | @since 0.1
-instance (Eq a, Num a, Ord a, Show a) => Semiring (NonNegative a)
+instance (Eq a, Num a) => Semiring (NonNegative a)
+
+-- | @since 0.1
+instance (Division a, Eq a, Num a) => Semifield (NonNegative a)
 
 -- | Unwraps a 'NonNegative'.
 --

@@ -99,15 +99,16 @@ instance KnownNat n => ASemigroup (ModN n Natural) where
 -- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Integer) where
   zero = MkModN 0
+  aabs = id
 
 -- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Natural) where
   zero = MkModN 0
+  aabs = id
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Integer) where
   MkModN x .-. MkModN y = MkModN (x - y)
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Natural) where
@@ -116,8 +117,6 @@ instance KnownNat n => AGroup (ModN n Natural) where
     | otherwise = MkModN (n' - y + x)
     where
       n' = natVal @n Proxy
-
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Integer) where

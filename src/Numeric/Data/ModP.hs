@@ -43,6 +43,7 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
+import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Literal (NumLiteral (..))
@@ -127,15 +128,16 @@ instance KnownNat p => ASemigroup (ModP p Natural) where
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Integer) where
   zero = MkModP 0
+  aabs = id
 
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Natural) where
   zero = MkModP 0
+  aabs = id
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Integer) where
   MkModP x .-. MkModP y = unsafeModP (x - y)
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Natural) where
@@ -144,8 +146,6 @@ instance KnownNat p => AGroup (ModP p Natural) where
     | otherwise = unsafeModP (p' - y + x)
     where
       p' = natVal @p Proxy
-
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Integer) where
@@ -182,6 +182,12 @@ instance KnownNat p => Ring (ModP p Integer)
 
 -- | @since 0.1
 instance KnownNat p => Ring (ModP p Natural)
+
+-- | @since 0.1
+instance KnownNat p => Semifield (ModP p Integer)
+
+-- | @since 0.1
+instance KnownNat p => Semifield (ModP p Natural)
 
 -- | @since 0.1
 instance KnownNat p => Field (ModP p Integer)

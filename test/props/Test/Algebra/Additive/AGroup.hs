@@ -5,12 +5,10 @@ import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
-import Numeric.Algebra.Additive.AGroup (AGroup (..), aabs)
+import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Test.Tasty (TestName, TestTree)
 import Test.Tasty qualified as T
-import Utils ((<=>))
 import Utils qualified
 
 props :: TestTree
@@ -18,8 +16,7 @@ props =
   T.testGroup
     "Additive Group"
     [ subProps,
-      subIdentProps,
-      absProps
+      subIdentProps
     ]
 
 subProps :: TestTree
@@ -50,24 +47,6 @@ modNSubIdent = agroupSubIdent Gens.modN "ModN" "modNSubIdent"
 modPSubIdent :: TestTree
 modPSubIdent = agroupSubIdent Gens.modP "ModP" "modPSubIdent"
 
-absProps :: TestTree
-absProps =
-  T.testGroup
-    "Absolute Value"
-    [ fractionAbs,
-      modNAbs,
-      modPAbs
-    ]
-
-fractionAbs :: TestTree
-fractionAbs = agroupAbs Gens.fraction MkEqExact "Fraction" "fractionAbs"
-
-modNAbs :: TestTree
-modNAbs = agroupAbs Gens.modN MkEqExact "ModN" "modNAbs"
-
-modPAbs :: TestTree
-modPAbs = agroupAbs Gens.modP MkEqExact "ModP" "modPAbs"
-
 agroupSubEq ::
   ( AGroup a,
     Num a,
@@ -79,40 +58,6 @@ agroupSubEq ::
   PropertyName ->
   TestTree
 agroupSubEq = Utils.binaryEq (-) (.-.)
-
-agroupAbs ::
-  ( AGroup a,
-    Ord a,
-    Show a
-  ) =>
-  Gen a ->
-  (a -> Equality eq a) ->
-  TestName ->
-  PropertyName ->
-  TestTree
-agroupAbs gen eqCons desc propName = T.askOption $ \(MkMaxRuns limit) ->
-  Utils.testPropertyCompat desc propName $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll gen
-        y <- H.forAll gen
-
-        -- idempotence: |x| = ||x||
-        let eqX = eqCons x
-            eqAbs = eqCons (aabs x)
-        eqAbs === eqCons (aabs (aabs x))
-
-        -- non-negative: |x| >= 0
-        let eqZero = eqCons zero
-        H.diff eqAbs (>=) eqZero
-
-        -- positive-definite: |x| == 0 <=> x == 0
-        H.diff (eqAbs == eqZero) (<=>) (eqX == eqZero)
-
-        -- triangle equality: |x + y| <= |x| + |y|
-        let sumAbs = eqCons $ aabs x .+. aabs y
-            absSum = eqCons $ aabs (x .+. y)
-        H.diff absSum (<=) sumAbs
 
 agroupSubIdent ::
   ( AGroup a,
