@@ -54,6 +54,9 @@ import Control.DeepSeq (NFData)
 import Data.Kind (Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (..))
+#if !MIN_VERSION_prettyprinter(1, 7, 1)
+import Data.Text.Prettyprint.Doc (Pretty (..))
+#endif
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
@@ -64,6 +67,9 @@ import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Class.Literal (NumLiteral (..))
+#if MIN_VERSION_prettyprinter(1, 7, 1)
+import Prettyprinter (Pretty (..))
+#endif
 
 -- | Represents a closed interval that is bounded on both sides i.e.
 -- @LRInterval \@l \@r x@ represents \( x \in [l, r] \).
@@ -108,6 +114,10 @@ pattern MkLRInterval x <-
     MkLRInterval x = unsafeLRInterval x
 
 {-# COMPLETE MkLRInterval #-}
+
+-- | @since 0.1
+instance Pretty a => Pretty (LRInterval l r a) where
+  pretty (UnsafeLRInterval x) = pretty x
 
 -- | __WARNING: Partial__
 --
@@ -244,6 +254,10 @@ pattern MkLInterval x <-
 
 {-# COMPLETE MkLInterval #-}
 
+-- | @since 0.1
+instance Pretty a => Pretty (LInterval l a) where
+  pretty (UnsafeLInterval x) = pretty x
+
 -- | __WARNING: Partial__
 --
 -- @since 0.1
@@ -373,6 +387,10 @@ pattern MkRInterval x <-
     MkRInterval x = unsafeRInterval x
 
 {-# COMPLETE MkRInterval #-}
+
+-- | @since 0.1
+instance Pretty a => Pretty (RInterval r a) where
+  pretty (UnsafeRInterval x) = pretty x
 
 -- | __WARNING: Partial__
 --

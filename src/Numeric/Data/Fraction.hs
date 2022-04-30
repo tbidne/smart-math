@@ -26,6 +26,9 @@ where
 import Control.DeepSeq (NFData)
 import Data.Kind (Type)
 import Data.Maybe qualified as May
+#if !MIN_VERSION_prettyprinter(1, 7, 1)
+import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
+#endif
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.Read (Read (..))
@@ -53,6 +56,9 @@ import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
+#if MIN_VERSION_prettyprinter(1, 7, 1)
+import Prettyprinter (Pretty (..), (<+>))
+#endif
 import Text.ParserCombinators.ReadPrec qualified as ReadP
 import Text.Read.Lex qualified as L
 
@@ -147,6 +153,10 @@ instance (Integral a, Show a) => Show (Fraction a) where
     showParen
       (i >= 11)
       (showsPrec 11 n . showString " :%: " . showsPrec 11 d)
+
+-- | @since 0.1
+instance Pretty a => Pretty (Fraction a) where
+  pretty (UnsafeFraction n d) = pretty n <+> pretty @String ":%:" <+> pretty d
 
 -- | @since 0.1
 instance (Eq a, UpperBoundless a) => Eq (Fraction a) where

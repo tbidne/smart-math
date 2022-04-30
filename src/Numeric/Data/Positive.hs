@@ -24,6 +24,9 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Kind (Type)
+#if !MIN_VERSION_prettyprinter(1, 7, 1)
+import Data.Text.Prettyprint.Doc (Pretty (..))
+#endif
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -39,6 +42,9 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
+#if MIN_VERSION_prettyprinter(1, 7, 1)
+import Prettyprinter (Pretty (..))
+#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -89,6 +95,10 @@ pattern MkPositive x <-
     MkPositive x = unsafePositive x
 
 {-# COMPLETE MkPositive #-}
+
+-- | @since 0.1
+instance Pretty a => Pretty (Positive a) where
+  pretty (UnsafePositive x) = pretty x
 
 -- | @since 0.1
 instance (Eq a, Num a) => ASemigroup (Positive a) where

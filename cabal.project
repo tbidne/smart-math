@@ -6,7 +6,7 @@ package smart-math
     -Wall -Wcompat -Werror -Widentities
     -Wincomplete-record-updates -Wincomplete-uni-patterns
     -Wmissing-home-modules -Wmissing-export-lists -Wpartial-fields
-    -Wredundant-constraints -Wunused-packages
+    -Wredundant-constraints -Wunused-packages -Wmissing-deriving-strategies
 
 source-repository-package
     type: git

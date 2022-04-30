@@ -32,6 +32,7 @@ exts =
     "-XDeriveGeneric",
     "-XDeriveLift",
     "-XDerivingStrategies",
+    "-XDerivingVia",
     "-XFlexibleContexts",
     "-XFlexibleInstances",
     "-XGeneralizedNewtypeDeriving",

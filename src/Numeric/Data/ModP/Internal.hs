@@ -48,7 +48,7 @@ import System.Random.Stateful qualified as RandState
 data MaybePrime
   = Composite
   | ProbablyPrime
-  deriving (Eq, Show)
+  deriving stock (Eq, Show)
 
 instance Semigroup MaybePrime where
   Composite <> _ = Composite
@@ -131,19 +131,22 @@ newtype Modulus = MkModulus Integer
 --
 -- @since 0.1
 newtype Pow = MkPow Integer
-  deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
+  deriving stock (Eq, Show, Ord)
+  deriving (Enum, Integral, Num, Real) via Integer
 
 -- | The \(d\) in \(n = 2^{r} d + 1\).
 --
 -- @since 0.1
 newtype Mult = MkMult Integer
-  deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
+  deriving stock (Eq, Show, Ord)
+  deriving (Enum, Integral, Num, Real) via Integer
 
 -- | Randomly generated \(m \in [2, n - 2] \) for testing \(n\)'s primality.
 --
 -- @since 0.1
 newtype Rand = MkRand Integer
-  deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
+  deriving stock (Eq, Show, Ord)
+  deriving (Enum, Integral, Num, Real) via Integer
 
 -- | @since 0.1
 instance UniformRange Rand where
@@ -280,19 +283,22 @@ data Bezout = MkBezout
     bzS :: !S,
     bzT :: !T
   }
-  deriving (Eq, Show)
+  deriving stock (Eq, Show)
 
 -- | @since 0.1
 newtype R = R' Integer
-  deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
+  deriving stock (Eq, Show, Ord)
+  deriving (Enum, Integral, Num, Real) via Integer
 
 -- | @since 0.1
 newtype S = S' Integer
-  deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
+  deriving stock (Eq, Show, Ord)
+  deriving (Enum, Integral, Num, Real) via Integer
 
 -- | @since 0.1
 newtype T = T' Integer
-  deriving (Enum, Eq, Integral, Show, Ord, Num, Real)
+  deriving stock (Eq, Show, Ord)
+  deriving (Enum, Integral, Num, Real) via Integer
 
 -- Solves for Bezout's identity using the extended euclidean algorithm:
 -- https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode

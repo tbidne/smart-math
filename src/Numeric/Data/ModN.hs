@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -19,6 +20,9 @@ where
 import Control.DeepSeq (NFData)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
+#if !MIN_VERSION_prettyprinter(1, 7, 1)
+import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
+#endif
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.TypeNats (KnownNat, Nat, natVal)
@@ -32,6 +36,9 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Literal (NumLiteral (..))
+#if MIN_VERSION_prettyprinter(1, 7, 1)
+import Prettyprinter (Pretty (..), (<+>))
+#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -87,6 +94,16 @@ pattern MkModN x <-
     MkModN x = mkModN x
 
 {-# COMPLETE MkModN #-}
+
+-- | @since 0.1
+instance (KnownNat n, Pretty a) => Pretty (ModN n a) where
+  pretty (UnsafeModN x) =
+    pretty x
+      <+> pretty @String "(mod"
+      <+> pretty n'
+      <> pretty @String ")"
+    where
+      n' = natVal @n Proxy
 
 -- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Integer) where

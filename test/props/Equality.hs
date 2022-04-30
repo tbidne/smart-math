@@ -37,7 +37,7 @@ data EqTy
   = EqExact
   | EqRatio
   | EqEpsilon
-  deriving (Show)
+  deriving stock (Show)
 
 -- | 'Equality' is intended for when we need to associate types to different
 -- notions of equality, and wrapping these types manually in a newtype is not
@@ -67,7 +67,7 @@ data Equality eq a where
   -- its semigroup instance.
   MkEqEpsilon :: RealFloat a => Epsilon a -> a -> Equality 'EqEpsilon a
 
-deriving instance Show a => Show (Equality eq a)
+deriving stock instance Show a => Show (Equality eq a)
 
 unEquality :: Equality eq a -> a
 unEquality (MkEqExact x) = x

@@ -25,6 +25,9 @@ where
 import Control.DeepSeq (NFData)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
+#if !MIN_VERSION_prettyprinter(1, 7, 1)
+import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
+#endif
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.Stack (HasCallStack)
@@ -50,6 +53,9 @@ import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (NonZero (..))
+#if MIN_VERSION_prettyprinter(1, 7, 1)
+import Prettyprinter (Pretty (..), (<+>))
+#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -116,6 +122,15 @@ pattern MkModP x <-
     MkModP x = unsafeModP x
 
 {-# COMPLETE MkModP #-}
+
+-- | @since 0.1
+instance (KnownNat p, Pretty a) => Pretty (ModP p a) where
+  pretty (UnsafeModP x) = pretty x
+    <+> pretty @String "(mod"
+    <+> pretty p'
+    <> pretty @String ")"
+    where
+      p' = natVal @p Proxy
 
 -- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Integer) where
