@@ -116,12 +116,10 @@ instance KnownNat n => ASemigroup (ModN n Natural) where
 -- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Integer) where
   zero = MkModN 0
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Natural) where
   zero = MkModN 0
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Integer) where

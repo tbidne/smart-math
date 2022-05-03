@@ -38,6 +38,7 @@ import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), MGroupIntegral (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
+import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
@@ -110,7 +111,6 @@ instance (Eq a, Num a) => ASemigroup (NonNegative a) where
 -- | @since 0.1
 instance (Eq a, Num a) => AMonoid (NonNegative a) where
   zero = UnsafeNonNegative 0
-  aabs = id
 
 -- | @since 0.1
 instance (Eq a, Num a) => MSemigroup (NonNegative a) where
@@ -129,6 +129,10 @@ instance (Division a, Integral a) => MGroupIntegral (NonNegative a) where
   type ModResult (NonNegative a) = NonNegative a
   UnsafeNonNegative x `gdivMod` MkNonZero (UnsafeNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d
+
+-- | @since 0.1
+instance Normed (NonNegative a) where
+  norm = id
 
 -- | __WARNING: Partial__
 --

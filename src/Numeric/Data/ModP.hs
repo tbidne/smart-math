@@ -125,10 +125,11 @@ pattern MkModP x <-
 
 -- | @since 0.1
 instance (KnownNat p, Pretty a) => Pretty (ModP p a) where
-  pretty (UnsafeModP x) = pretty x
-    <+> pretty @String "(mod"
-    <+> pretty p'
-    <> pretty @String ")"
+  pretty (UnsafeModP x) =
+    pretty x
+      <+> pretty @String "(mod"
+      <+> pretty p'
+      <> pretty @String ")"
     where
       p' = natVal @p Proxy
 
@@ -143,12 +144,10 @@ instance KnownNat p => ASemigroup (ModP p Natural) where
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Integer) where
   zero = MkModP 0
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Natural) where
   zero = MkModP 0
-  aabs = id
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Integer) where

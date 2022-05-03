@@ -9,6 +9,7 @@ import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
+import Numeric.Algebra.Normed (Normed (..))
 import Test.Tasty (TestName, TestTree)
 import Test.Tasty qualified as T
 import Utils ((<=>))
@@ -59,22 +60,15 @@ absProps :: TestTree
 absProps =
   T.testGroup
     "Absolute Value"
-    [ fractionAbs,
-      modNAbs,
-      modPAbs
+    [ fractionAbs
     ]
 
 fractionAbs :: TestTree
 fractionAbs = amonoidAbs Gens.fraction MkEqExact "Fraction" "fractionAbs"
 
-modNAbs :: TestTree
-modNAbs = amonoidAbs Gens.modN MkEqExact "ModN" "modNAbs"
-
-modPAbs :: TestTree
-modPAbs = amonoidAbs Gens.modP MkEqExact "ModP" "modPAbs"
-
 amonoidAbs ::
   ( AMonoid a,
+    Normed a,
     Ord a,
     Show a
   ) =>
@@ -92,8 +86,8 @@ amonoidAbs gen eqCons desc propName = T.askOption $ \(MkMaxRuns limit) ->
 
         -- idempotence: |x| = ||x||
         let eqX = eqCons x
-            eqAbs = eqCons (aabs x)
-        eqAbs === eqCons (aabs (aabs x))
+            eqAbs = eqCons (norm x)
+        eqAbs === eqCons (norm (norm x))
 
         -- non-negative: |x| >= 0
         let eqZero = eqCons zero
@@ -103,6 +97,6 @@ amonoidAbs gen eqCons desc propName = T.askOption $ \(MkMaxRuns limit) ->
         H.diff (eqAbs == eqZero) (<=>) (eqX == eqZero)
 
         -- triangle equality: |x + y| <= |x| + |y|
-        let sumAbs = eqCons $ aabs x .+. aabs y
-            absSum = eqCons $ aabs (x .+. y)
+        let sumAbs = eqCons $ norm x .+. norm y
+            absSum = eqCons $ norm (x .+. y)
         H.diff absSum (<=) sumAbs

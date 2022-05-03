@@ -49,6 +49,7 @@ import Numeric.Algebra.Field (Field)
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
+import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
@@ -244,12 +245,10 @@ instance ASemigroup (Fraction Natural) where
 -- | @since 0.1
 instance AMonoid (Fraction Integer) where
   zero = 0 :%: 1
-  aabs = abs
 
 -- | @since 0.1
 instance AMonoid (Fraction Natural) where
   zero = 0 :%: 1
-  aabs = abs
 
 -- | @since 0.1
 instance AGroup (Fraction Integer) where
@@ -278,6 +277,14 @@ instance MGroup (Fraction Integer) where
 -- | @since 0.1
 instance MGroup (Fraction Natural) where
   x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
+
+-- | @since 0.1
+instance Normed (Fraction Integer) where
+  norm = abs
+
+-- | @since 0.1
+instance Normed (Fraction Natural) where
+  norm = abs
 
 -- | @since 0.1
 instance Semiring (Fraction Integer)

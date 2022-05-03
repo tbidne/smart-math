@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1651191248,
-        "narHash": "sha256-+XHMBEexoROz4E0X6cxJeXyf1w2ROelH5q9DwYSF3v8=",
+        "lastModified": 1651550395,
+        "narHash": "sha256-ZecYRXm18yFdTqR+DWIAj/zP6oF/oiuOe2cLytP2yWo=",
         "owner": "tbidne",
         "repo": "algebra-simple",
-        "rev": "2659ded1579b90fee73a56ff81beb42a90cdba5b",
+        "rev": "0f0c1879fc1717e39a4ae7bec22d316868c74366",
         "type": "github"
       },
       "original": {

@@ -39,6 +39,7 @@ import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
+import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
@@ -115,6 +116,10 @@ instance (Eq a, Num a) => MMonoid (Positive a) where
 -- | @since 0.1
 instance (Eq a, Division a, Num a) => MGroup (Positive a) where
   UnsafePositive x .%. MkNonZero (UnsafePositive d) = UnsafePositive $ x `divide` d
+
+-- | @since 0.1
+instance Normed (Positive a) where
+  norm = id
 
 -- | __WARNING: Partial__
 --
