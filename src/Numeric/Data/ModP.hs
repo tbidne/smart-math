@@ -23,6 +23,7 @@ module Numeric.Data.ModP
 where
 
 import Control.DeepSeq (NFData)
+import Data.Data (Data)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
@@ -79,6 +80,8 @@ type ModP :: Nat -> Type -> Type
 newtype ModP p a = UnsafeModP a
   deriving stock
     ( -- | @since 0.1
+      Data,
+      -- | @since 0.1
       Eq,
       -- | @since 0.1
       Generic,

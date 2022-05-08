@@ -23,6 +23,7 @@ module Numeric.Data.Positive
 where
 
 import Control.DeepSeq (NFData)
+import Data.Data (Data)
 import Data.Kind (Type)
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
 import Data.Text.Prettyprint.Doc (Pretty (..))
@@ -64,6 +65,8 @@ type Positive :: Type -> Type
 newtype Positive a = UnsafePositive a
   deriving stock
     ( -- | @since 0.1
+      Data,
+      -- | @since 0.1
       Eq,
       -- | @since 0.1
       Generic,

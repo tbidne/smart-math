@@ -25,6 +25,7 @@ common common-exts
     NoStarIsType
     BangPatterns
     DataKinds
+    DeriveDataTypeable
     DeriveGeneric
     DeriveLift
     DerivingStrategies
