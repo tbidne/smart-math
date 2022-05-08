@@ -196,7 +196,7 @@ reallyUnsafePositive = UnsafePositive
 --
 -- ==== __Examples__
 -- >>> positiveToNonZero $ unsafePositive 3
--- UnsafeNonZero (UnsafePositive 3)
+-- UnsafeNonZero {unNonZero = UnsafePositive 3}
 --
 -- @since 0.1
 positiveToNonZero :: Positive a -> NonZero (Positive a)
