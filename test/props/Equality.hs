@@ -15,6 +15,7 @@ import GHC.Real qualified as Real
 -- non-one.
 --
 -- @since 0.1
+type Epsilon :: Type -> Type
 newtype Epsilon a = MkEpsilon {unEpsilon :: a}
   deriving stock (Eq, Ord, Show)
   deriving newtype (Fractional, Num)
@@ -33,6 +34,7 @@ instance (Fractional a, Ord a) => Monoid (Epsilon a) where
 -- | Types of equality.
 --
 -- @since 0.1
+type EqTy :: Type
 data EqTy
   = EqExact
   | EqRatio

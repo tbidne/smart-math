@@ -36,6 +36,7 @@ module Numeric.Data.ModP.Internal
   )
 where
 
+import Data.Kind (Type)
 import Data.Word (Word16)
 import System.Random (UniformRange)
 import System.Random qualified as Rand
@@ -45,6 +46,7 @@ import System.Random.Stateful qualified as RandState
 -- some @n@ is definitely composite or "probably prime".
 --
 -- @since 0.1
+type MaybePrime :: Type
 data MaybePrime
   = Composite
   | ProbablyPrime
@@ -117,6 +119,7 @@ isPrimeTrials numTrials n
 -- \(n = 2^{r} d + 1\).
 --
 -- @since 0.1
+type Modulus :: Type
 newtype Modulus = MkModulus Integer
   deriving stock (Eq, Show)
   deriving newtype (Enum, Integral, Ord, Num, Real)
@@ -130,6 +133,7 @@ newtype Modulus = MkModulus Integer
 -- | The \(r\) in \(n = 2^{r} d + 1\).
 --
 -- @since 0.1
+type Pow :: Type
 newtype Pow = MkPow Integer
   deriving stock (Eq, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer
@@ -137,6 +141,7 @@ newtype Pow = MkPow Integer
 -- | The \(d\) in \(n = 2^{r} d + 1\).
 --
 -- @since 0.1
+type Mult :: Type
 newtype Mult = MkMult Integer
   deriving stock (Eq, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer
@@ -144,6 +149,7 @@ newtype Mult = MkMult Integer
 -- | Randomly generated \(m \in [2, n - 2] \) for testing \(n\)'s primality.
 --
 -- @since 0.1
+type Rand :: Type
 newtype Rand = MkRand Integer
   deriving stock (Eq, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer
@@ -277,7 +283,8 @@ findInverse a (MkModulus p) = aInv `mod` p
 findBezout :: Integer -> Modulus -> Bezout
 findBezout a (MkModulus p) = eec p a
 
--- | @since 0.1
+-- | @since 0.1t
+type Bezout :: Type
 data Bezout = MkBezout
   { bzGcd :: !R,
     bzS :: !S,
@@ -286,16 +293,19 @@ data Bezout = MkBezout
   deriving stock (Eq, Show)
 
 -- | @since 0.1
+type R :: Type
 newtype R = R' Integer
   deriving stock (Eq, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer
 
 -- | @since 0.1
+type S :: Type
 newtype S = S' Integer
   deriving stock (Eq, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer
 
 -- | @since 0.1
+type T :: Type
 newtype T = T' Integer
   deriving stock (Eq, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer

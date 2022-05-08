@@ -6,6 +6,7 @@ module MaxRuns
   )
 where
 
+import Data.Kind (Type)
 import Data.Tagged (Tagged (..))
 import Hedgehog (TestLimit)
 import Test.Tasty.Options (IsOption (..))
@@ -14,6 +15,7 @@ import Text.Read qualified as TR
 -- | Sets the maximum successful runs for each test.
 --
 -- @since 0.1
+type MaxRuns :: Type
 newtype MaxRuns = MkMaxRuns TestLimit
   deriving stock (Show)
   deriving (Num) via TestLimit
