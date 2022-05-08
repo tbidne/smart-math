@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'ModP' type for modular arithmetic.
 --
@@ -54,6 +55,7 @@ import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (NonZero (..))
+import Optics.Core (A_Lens, LabelOptic (..), lens)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
@@ -77,7 +79,10 @@ import Prettyprinter (Pretty (..), (<+>))
 --
 -- @since 0.1
 type ModP :: Nat -> Type -> Type
-newtype ModP p a = UnsafeModP a
+newtype ModP p a = UnsafeModP
+  { -- | @since 0.1
+    unModP :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Data,
@@ -94,6 +99,10 @@ newtype ModP p a = UnsafeModP a
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+instance (k ~ A_Lens, n ~ a, KnownNat p, UpperBoundless a) => LabelOptic "unModP" k (ModP p n) (ModP p n) a a where
+  labelOptic = lens unModP (\_ x -> reallyUnsafeModP x)
 
 -- | @since 0.1
 instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
@@ -215,12 +224,6 @@ instance KnownNat p => Field (ModP p Natural)
 -- | @since 0.1
 instance (KnownNat p, UpperBoundless a) => NumLiteral (ModP p a) where
   fromLit = MkModP . fromInteger
-
--- | Unwraps a 'ModP'.
---
--- @since 0.1
-unModP :: ModP p a -> a
-unModP (UnsafeModP x) = x
 
 -- | Constructor for 'ModP'. Fails if @p@ is not prime. This uses the
 -- Miller-Rabin primality test, which has complexity \(O(k \log^3 p)\), and we

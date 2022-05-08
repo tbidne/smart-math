@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'Positive' type for enforcing a positive invariant.
 --
@@ -44,6 +45,7 @@ import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
+import Optics.Core (A_Getter, LabelOptic (..), to)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 #endif
@@ -62,7 +64,10 @@ import Prettyprinter (Pretty (..))
 --
 -- @since 0.1
 type Positive :: Type -> Type
-newtype Positive a = UnsafePositive a
+newtype Positive a = UnsafePositive
+  { -- | @since 0.1
+    unPositive :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Data,
@@ -89,7 +94,7 @@ newtype Positive a = UnsafePositive a
 --
 -- ==== __Examples__
 -- >>> MkPositive 7
--- UnsafePositive 7
+-- UnsafePositive {unPositive = 7}
 --
 -- @since 0.1
 pattern MkPositive :: (Num a, Ord a, Show a) => a -> Positive a
@@ -99,6 +104,10 @@ pattern MkPositive x <-
     MkPositive x = unsafePositive x
 
 {-# COMPLETE MkPositive #-}
+
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "unPositive" k (Positive n) (Positive n) a a where
+  labelOptic = to unPositive
 
 -- | @since 0.1
 instance Pretty a => Pretty (Positive a) where
@@ -130,17 +139,11 @@ instance Normed (Positive a) where
 instance (Num a, Ord a, Show a) => NumLiteral (Positive a) where
   fromLit = unsafePositive . fromInteger
 
--- | Unwraps a 'Positive'.
---
--- @since 0.1
-unPositive :: Positive a -> a
-unPositive (UnsafePositive x) = x
-
 -- | Template haskell for creating a 'Positive' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkPositiveTH 1)
--- UnsafePositive 1
+-- UnsafePositive {unPositive = 1}
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -158,7 +161,7 @@ mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
 --
 -- ==== __Examples__
 -- >>> mkPositive 7
--- Just (UnsafePositive 7)
+-- Just (UnsafePositive {unPositive = 7})
 --
 -- >>> mkPositive 0
 -- Nothing
@@ -175,7 +178,7 @@ mkPositive x
 --
 -- ==== __Examples__
 -- >>> unsafePositive 7
--- UnsafePositive 7
+-- UnsafePositive {unPositive = 7}
 --
 -- @since 0.1
 unsafePositive :: (HasCallStack, Num a, Ord a, Show a) => a -> Positive a
@@ -199,7 +202,7 @@ reallyUnsafePositive = UnsafePositive
 --
 -- ==== __Examples__
 -- >>> positiveToNonZero $ unsafePositive 3
--- UnsafeNonZero {unNonZero = UnsafePositive 3}
+-- UnsafeNonZero {unNonZero = UnsafePositive {unPositive = 3}}
 --
 -- @since 0.1
 positiveToNonZero :: Positive a -> NonZero (Positive a)

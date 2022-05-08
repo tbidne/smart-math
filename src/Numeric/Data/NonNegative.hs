@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
 --
@@ -45,6 +46,7 @@ import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
+import Optics.Core (A_Getter, LabelOptic (..), to)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 #endif
@@ -65,7 +67,10 @@ import Prettyprinter (Pretty (..))
 --
 -- @since 0.1
 type NonNegative :: Type -> Type
-newtype NonNegative a = UnsafeNonNegative a
+newtype NonNegative a = UnsafeNonNegative
+  { -- | @since 0.1
+    unNonNegative :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Data,
@@ -92,7 +97,7 @@ newtype NonNegative a = UnsafeNonNegative a
 --
 -- ==== __Examples__
 -- >>> MkNonNegative 0
--- UnsafeNonNegative 0
+-- UnsafeNonNegative {unNonNegative = 0}
 --
 -- @since 0.1
 pattern MkNonNegative :: (Num a, Ord a, Show a) => a -> NonNegative a
@@ -102,6 +107,10 @@ pattern MkNonNegative x <-
     MkNonNegative x = unsafeNonNegative x
 
 {-# COMPLETE MkNonNegative #-}
+
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "unNonNegative" k (NonNegative n) (NonNegative n) a a where
+  labelOptic = to unNonNegative
 
 -- | @since 0.1
 instance Pretty a => Pretty (NonNegative a) where
@@ -149,17 +158,11 @@ instance (Eq a, Num a) => Semiring (NonNegative a)
 -- | @since 0.1
 instance (Division a, Eq a, Num a) => Semifield (NonNegative a)
 
--- | Unwraps a 'NonNegative'.
---
--- @since 0.1
-unNonNegative :: NonNegative a -> a
-unNonNegative (UnsafeNonNegative x) = x
-
 -- | Template haskell for creating a 'NonNegative' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkNonNegativeTH 1)
--- UnsafeNonNegative 1
+-- UnsafeNonNegative {unNonNegative = 1}
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -177,7 +180,7 @@ mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
 --
 -- ==== __Examples__
 -- >>> mkNonNegative 0
--- Just (UnsafeNonNegative 0)
+-- Just (UnsafeNonNegative {unNonNegative = 0})
 --
 -- >>> mkNonNegative (-2)
 -- Nothing
@@ -194,7 +197,7 @@ mkNonNegative x
 --
 -- ==== __Examples__
 -- >>> unsafeNonNegative 7
--- UnsafeNonNegative 7
+-- UnsafeNonNegative {unNonNegative = 7}
 --
 -- @since 0.1
 unsafeNonNegative :: (HasCallStack, Num a, Ord a, Show a) => a -> NonNegative a

@@ -38,6 +38,8 @@ exts =
     "-XFlexibleInstances",
     "-XGeneralizedNewtypeDeriving",
     "-XImportQualifiedPost",
+    "-XMultiParamTypeClasses",
+    "-XMultiWayIf",
     "-XNegativeLiterals",
     "-XNumericUnderscores",
     "-XPatternSynonyms",

@@ -36,6 +36,7 @@ common common-exts
     GeneralizedNewtypeDeriving
     ImportQualifiedPost
     LambdaCase
+    MultiParamTypeClasses
     MultiWayIf
     NegativeLiterals
     NumericUnderscores
@@ -63,6 +64,7 @@ library
     , algebra-simple    ^>=0.1
     , base              >=4.14.0.0 && <4.17
     , deepseq           ^>=1.4.4.0
+    , optics-core       ^>=0.4
     , prettyprinter     >=1.4.0    && <1.8
     , random            ^>=1.2.0
     , template-haskell  >=2.16.0.0 && <2.19.0.0

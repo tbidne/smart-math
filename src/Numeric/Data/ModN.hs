@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- | Provides the 'ModN' type for modular arithmetic.
@@ -37,6 +38,7 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Literal (NumLiteral (..))
+import Optics.Core (A_Lens, LabelOptic (..), lens)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
@@ -57,7 +59,10 @@ import Prettyprinter (Pretty (..), (<+>))
 --
 -- @since 0.1
 type ModN :: Nat -> Type -> Type
-newtype ModN n a = UnsafeModN a
+newtype ModN n a = UnsafeModN
+  { -- | @since 0.1
+    unModN :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Data,
@@ -74,6 +79,10 @@ newtype ModN n a = UnsafeModN a
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+instance (k ~ A_Lens, a ~ b, KnownNat n, UpperBoundless b) => LabelOptic "unModN" k (ModN n a) (ModN n a) b b where
+  labelOptic = lens unModN (\_ x -> mkModN x)
 
 -- | @since 0.1
 instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
@@ -167,12 +176,6 @@ instance KnownNat n => Ring (ModN n Natural)
 -- | @since 0.1
 instance (KnownNat n, UpperBoundless a) => NumLiteral (ModN n a) where
   fromLit = MkModN . fromInteger
-
--- | Unwraps a 'ModN'.
---
--- @since 0.1
-unModN :: ModN n a -> a
-unModN (UnsafeModN x) = x
 
 -- | Constructor for 'ModN'.
 --

@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides types for enforcing minimum and maximum bounds.
 --
@@ -68,6 +69,7 @@ import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Class.Literal (NumLiteral (..))
+import Optics.Core (A_Getter, LabelOptic (..), to)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 #endif
@@ -77,7 +79,10 @@ import Prettyprinter (Pretty (..))
 --
 -- @since 0.1
 type LRInterval :: Nat -> Nat -> Type -> Type
-newtype LRInterval l r a = UnsafeLRInterval a
+newtype LRInterval l r a = UnsafeLRInterval
+  { -- | @since 0.1
+    unLRInterval :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Data,
@@ -97,6 +102,10 @@ newtype LRInterval l r a = UnsafeLRInterval a
       NFData
     )
 
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "unLRInterval" k (LRInterval l r n) (LRInterval l r n) a a where
+  labelOptic = to unLRInterval
+
 -- | Bidirectional pattern synonym for 'LRInterval'. Construction fails when
 -- the value is not within the range.
 --
@@ -104,7 +113,7 @@ newtype LRInterval l r a = UnsafeLRInterval a
 --
 -- ==== __Examples__
 -- >>> MkLRInterval @10 @15 12
--- UnsafeLRInterval 12
+-- UnsafeLRInterval {unLRInterval = 12}
 --
 -- @since 0.1
 pattern MkLRInterval ::
@@ -128,17 +137,11 @@ instance Pretty a => Pretty (LRInterval l r a) where
 instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => NumLiteral (LRInterval l r a) where
   fromLit = unsafeLRInterval . fromInteger
 
--- | Unwraps an 'LRInterval'.
---
--- @since 0.1
-unLRInterval :: LRInterval l r a -> a
-unLRInterval (UnsafeLRInterval x) = x
-
 -- | Template haskell for creating an 'LRInterval' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkLRIntervalTH @0 @100 7)
--- UnsafeLRInterval 7
+-- UnsafeLRInterval {unLRInterval = 7}
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -163,7 +166,7 @@ mkLRIntervalTH x = maybe (error msg) liftTyped $ mkLRInterval x
 --
 -- ==== __Examples__
 -- >>> mkLRInterval @10 @100 50
--- Just (UnsafeLRInterval 50)
+-- Just (UnsafeLRInterval {unLRInterval = 50})
 --
 -- >>> mkLRInterval @10 @100 5
 -- Nothing
@@ -191,7 +194,7 @@ mkLRInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeLRInterval @0 @10 7
--- UnsafeLRInterval 7
+-- UnsafeLRInterval {unLRInterval = 7}
 --
 -- @since 0.1
 unsafeLRInterval ::
@@ -218,7 +221,10 @@ reallyUnsafeLRInterval = UnsafeLRInterval
 --
 -- @since 0.1
 type LInterval :: Nat -> Type -> Type
-newtype LInterval l a = UnsafeLInterval a
+newtype LInterval l a = UnsafeLInterval
+  { -- | @since 0.1
+    unLInterval :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -236,6 +242,10 @@ newtype LInterval l a = UnsafeLInterval a
       NFData
     )
 
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "unLInterval" k (LInterval l n) (LInterval l n) a a where
+  labelOptic = to unLInterval
+
 -- | Unidirectional pattern synonym for 'LInterval'. Construction fails when
 -- the value is not within the range.
 --
@@ -243,7 +253,7 @@ newtype LInterval l a = UnsafeLInterval a
 --
 -- ==== __Examples__
 -- >>> MkLInterval @10 12
--- UnsafeLInterval 12
+-- UnsafeLInterval {unLInterval = 12}
 --
 -- @since 0.1
 pattern MkLInterval ::
@@ -267,17 +277,11 @@ instance Pretty a => Pretty (LInterval l a) where
 instance (KnownNat l, Num a, Ord a, Show a) => NumLiteral (LInterval l a) where
   fromLit = unsafeLInterval . fromInteger
 
--- | Unwraps an 'LInterval'.
---
--- @since 0.1
-unLInterval :: LInterval l a -> a
-unLInterval (UnsafeLInterval x) = x
-
 -- | Template haskell for creating a 'LInterval' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkLIntervalTH @0 7)
--- UnsafeLInterval 7
+-- UnsafeLInterval {unLInterval = 7}
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -302,7 +306,7 @@ mkLIntervalTH x = maybe (error msg) liftTyped $ mkLInterval x
 --
 -- ==== __Examples__
 -- >>> mkLInterval @10 50
--- Just (UnsafeLInterval 50)
+-- Just (UnsafeLInterval {unLInterval = 50})
 --
 -- >>> mkLInterval @10 5
 -- Nothing
@@ -325,7 +329,7 @@ mkLInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeLInterval @0 7
--- UnsafeLInterval 7
+-- UnsafeLInterval {unLInterval = 7}
 --
 -- @since 0.1
 unsafeLInterval ::
@@ -352,7 +356,10 @@ reallyUnsafeLInterval = UnsafeLInterval
 --
 -- @since 0.1
 type RInterval :: Nat -> Type -> Type
-newtype RInterval r a = UnsafeRInterval a
+newtype RInterval r a = UnsafeRInterval
+  { -- | @since 0.1
+    unRInterval :: a
+  }
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -370,6 +377,10 @@ newtype RInterval r a = UnsafeRInterval a
       NFData
     )
 
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "unRInterval" k (RInterval r n) (RInterval r n) a a where
+  labelOptic = to unRInterval
+
 -- | Unidirectional pattern synonym for 'RInterval'.  Construction fails when
 -- the value is not within the range.
 --
@@ -377,7 +388,7 @@ newtype RInterval r a = UnsafeRInterval a
 --
 -- ==== __Examples__
 -- >>> MkRInterval @10 5
--- UnsafeRInterval 5
+-- UnsafeRInterval {unRInterval = 5}
 --
 -- @since 0.1
 pattern MkRInterval ::
@@ -401,17 +412,11 @@ instance Pretty a => Pretty (RInterval r a) where
 instance (KnownNat r, Num a, Ord a, Show a) => NumLiteral (RInterval r a) where
   fromLit = unsafeRInterval . fromInteger
 
--- | Unwraps an 'RInterval'.
---
--- @since 0.1
-unRInterval :: RInterval r a -> a
-unRInterval (UnsafeRInterval x) = x
-
 -- | Template haskell for creating an 'RInterval' at compile-time.
 --
 -- ==== __Examples__
 -- >>> $$(mkRIntervalTH @100 7)
--- UnsafeRInterval 7
+-- UnsafeRInterval {unRInterval = 7}
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -436,7 +441,7 @@ mkRIntervalTH x = maybe (error msg) liftTyped $ mkRInterval x
 --
 -- ==== __Examples__
 -- >>> mkRInterval @100 50
--- Just (UnsafeRInterval 50)
+-- Just (UnsafeRInterval {unRInterval = 50})
 --
 -- >>> mkRInterval @0 5
 -- Nothing
@@ -459,7 +464,7 @@ mkRInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeRInterval @10 7
--- UnsafeRInterval 7
+-- UnsafeRInterval {unRInterval = 7}
 --
 -- @since 0.1
 unsafeRInterval ::

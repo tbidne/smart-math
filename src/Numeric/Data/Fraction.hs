@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- | Provides the 'Fraction' type, a safer alternative to 'Ratio'.
@@ -58,6 +59,7 @@ import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
+import Optics.Core (A_Getter, LabelOptic (..), to)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
@@ -114,7 +116,12 @@ import Text.Read.Lex qualified as L
 --
 -- @since 0.1
 type Fraction :: Type -> Type
-data Fraction a = UnsafeFraction !a !a
+data Fraction a = UnsafeFraction
+  { -- | @since 0.1
+    numerator :: !a,
+    -- | @since 0.1
+    denominator :: !a
+  }
   deriving stock
     ( -- | @since 0.1
       Data,
@@ -150,6 +157,14 @@ pattern n :%: d <-
 {-# COMPLETE (:%:) #-}
 
 infixr 5 :%:
+
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "numerator" k (Fraction n) (Fraction n) a a where
+  labelOptic = to numerator
+
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n) => LabelOptic "denominator" k (Fraction n) (Fraction n) a a where
+  labelOptic = to denominator
 
 -- | @since 0.1
 instance (Integral a, Show a) => Show (Fraction a) where
@@ -361,26 +376,6 @@ mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 -- @since 0.1
 unsafeFraction :: (HasCallStack, UpperBoundless a) => a -> a -> Fraction a
 unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
-
--- | Returns the numerator.
---
--- ==== __Examples__
--- >>> numerator (-123 :%: 200)
--- -123
---
--- @since 0.1
-numerator :: UpperBoundless a => Fraction a -> a
-numerator (n :%: _) = n
-
--- | Returns the denominator.
---
--- ==== __Examples__
--- >>> denominator (4 :%: 17)
--- 17
---
--- @since 0.1
-denominator :: UpperBoundless a => Fraction a -> a
-denominator (_ :%: d) = d
 
 -- | Reduces a fraction:
 --
