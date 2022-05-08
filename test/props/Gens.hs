@@ -32,13 +32,13 @@ import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Multiplicative.MGroup qualified as MGroup
-import Numeric.Data qualified as Pos
 import Numeric.Data.Fraction (Fraction (..))
 import Numeric.Data.ModN (ModN (..), mkModN)
 import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
 import Numeric.Data.NonNegative (NonNegative (..), unsafeNonNegative)
 import Numeric.Data.NonZero (NonZero (..), unsafeNonZero)
 import Numeric.Data.Positive (Positive (..), unsafePositive)
+import Numeric.Data.Positive qualified as Pos
 import Test.TestBounds (TestBounds (..))
 
 integer :: MonadGen m => m Integer
