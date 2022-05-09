@@ -101,7 +101,15 @@ newtype ModP p a = UnsafeModP
     )
 
 -- | @since 0.1
-instance (k ~ A_Lens, n ~ a, KnownNat p, UpperBoundless a) => LabelOptic "unModP" k (ModP p n) (ModP p n) a a where
+instance
+  ( k ~ A_Lens,
+    a ~ x,
+    b ~ y,
+    KnownNat p,
+    UpperBoundless b
+  ) =>
+  LabelOptic "unModP" k (ModP p a) (ModP p b) x y
+  where
   labelOptic = lens unModP (\_ x -> reallyUnsafeModP x)
 
 -- | @since 0.1
