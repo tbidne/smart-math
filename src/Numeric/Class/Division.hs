@@ -20,63 +20,79 @@ class Division a where
 -- | @since 0.1
 instance Division Float where
   divide = (/)
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Double where
   divide = (/)
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Int where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Int8 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Int16 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Int32 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Int64 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Integer where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Word where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Word8 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Word16 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Word32 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Word64 where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division Natural where
   divide = div
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division (Ratio Integer) where
   divide = (/)
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division (Ratio Natural) where
   divide = (/)
+  {-# INLINEABLE divide #-}

@@ -161,10 +161,12 @@ infixr 5 :%:
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "numerator" k (Fraction n) (Fraction n) a a where
   labelOptic = to numerator
+  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "denominator" k (Fraction n) (Fraction n) a a where
   labelOptic = to denominator
+  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (Integral a, Show a) => Show (Fraction a) where
@@ -172,10 +174,12 @@ instance (Integral a, Show a) => Show (Fraction a) where
     showParen
       (i >= 11)
       (showsPrec 11 n . showString " :%: " . showsPrec 11 d)
+  {-# INLINEABLE showsPrec #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (Fraction a) where
   pretty (UnsafeFraction n d) = pretty n <+> pretty @String ":%:" <+> pretty d
+  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance (Eq a, UpperBoundless a) => Eq (Fraction a) where
@@ -184,6 +188,7 @@ instance (Eq a, UpperBoundless a) => Eq (Fraction a) where
     where
       n1 :%: d1 = reduce x
       n2 :%: d2 = reduce y
+  {-# INLINEABLE (==) #-}
 
 -- | @since 0.1
 instance UpperBoundless a => Ord (Fraction a) where
@@ -196,32 +201,46 @@ instance UpperBoundless a => Ord (Fraction a) where
         | isNeg x `xor` isNeg y = (>=)
         | otherwise = (<=)
       infix 4 `comp`
+  {-# INLINEABLE (<=) #-}
 
 -- | @since 0.1
 instance UpperBoundless a => Enum (Fraction a) where
   toEnum n = UnsafeFraction (fromIntegral n) 1
+  {-# INLINEABLE toEnum #-}
   fromEnum = fromInteger . truncate
+  {-# INLINEABLE fromEnum #-}
 
 -- | @since 0.1
 instance UpperBoundless a => Fractional (Fraction a) where
   (n1 :%: d1) / (n2 :%: d2) = unsafeFraction (n1 * d2) (n2 * d1)
+  {-# INLINEABLE (/) #-}
   recip (0 :%: _) = R.ratioZeroDenominatorError
   recip (n :%: d) = unsafeFraction d n
+  {-# INLINEABLE recip #-}
   fromRational (n :% d) = unsafeFraction (fromInteger n) (fromInteger d)
+  {-# INLINEABLE fromRational #-}
 
 -- | @since 0.1
 instance UpperBoundless a => Num (Fraction a) where
   (n1 :%: d1) + (n2 :%: d2) = unsafeFraction (n1 * d2 + n2 * d1) (d1 * d2)
+  {-# INLINEABLE (+) #-}
   (n1 :%: d1) - (n2 :%: d2) = unsafeFraction (n1 * d2 - n2 * d1) (d1 * d2)
+  {-# INLINEABLE (-) #-}
   (n1 :%: d1) * (n2 :%: d2) = unsafeFraction (n1 * n2) (d1 * d2)
+  {-# INLINEABLE (*) #-}
   negate (n :%: d) = UnsafeFraction (-n) d
+  {-# INLINEABLE negate #-}
   abs (n :%: d) = UnsafeFraction (abs n) (abs d)
+  {-# INLINEABLE abs #-}
   signum (n :%: d) = UnsafeFraction (signum n * signum d) 1
+  {-# INLINEABLE signum #-}
   fromInteger n1 = UnsafeFraction (fromInteger n1) 1
+  {-# INLINEABLE fromInteger #-}
 
 -- | @since 0.1
 instance UpperBoundless a => Real (Fraction a) where
   toRational (n :%: d) = R.reduce (fromIntegral n) (fromIntegral d)
+  {-# INLINEABLE toRational #-}
 
 -- | @since 0.1
 instance UpperBoundless a => RealFrac (Fraction a) where
@@ -229,6 +248,7 @@ instance UpperBoundless a => RealFrac (Fraction a) where
     (fromInteger (toInteger q), UnsafeFraction r d)
     where
       (q, r) = quotRem n d
+  {-# INLINEABLE properFraction #-}
 
 -- | @since 0.1
 instance (Read a, UpperBoundless a) => Read (Fraction a) where
@@ -243,66 +263,82 @@ instance (Read a, UpperBoundless a) => Read (Fraction a) where
               return (UnsafeFraction x y)
           )
       )
+  {-# INLINEABLE readPrec #-}
 
 -- | @since 0.1
 instance Division (Fraction Integer) where
   divide = (/)
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance Division (Fraction Natural) where
   divide = (/)
+  {-# INLINEABLE divide #-}
 
 -- | @since 0.1
 instance ASemigroup (Fraction Integer) where
   (.+.) = (+)
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance ASemigroup (Fraction Natural) where
   (.+.) = (+)
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance AMonoid (Fraction Integer) where
   zero = 0 :%: 1
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance AMonoid (Fraction Natural) where
   zero = 0 :%: 1
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance AGroup (Fraction Integer) where
   (.-.) = (-)
+  {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
 instance MSemigroup (Fraction Integer) where
   (.*.) = (*)
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance MSemigroup (Fraction Natural) where
   (.*.) = (*)
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance MMonoid (Fraction Integer) where
   one = 1 :%: 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance MMonoid (Fraction Natural) where
   one = 1 :%: 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance MGroup (Fraction Integer) where
   x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
+  {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance MGroup (Fraction Natural) where
   x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
+  {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance Normed (Fraction Integer) where
   norm = abs
+  {-# INLINEABLE norm #-}
 
 -- | @since 0.1
 instance Normed (Fraction Natural) where
   norm = abs
+  {-# INLINEABLE norm #-}
 
 -- | @since 0.1
 instance Semiring (Fraction Integer)
@@ -325,12 +361,14 @@ instance Field (Fraction Integer)
 -- | @since 0.1
 instance NumLiteral (Fraction Integer) where
   fromLit = fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance NumLiteral (Fraction Natural) where
   fromLit = fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Smart constructor for 'Fraction'. Returns 'Nothing' if the second
 -- parameter is 0. Reduces the fraction via 'reduce' if possible.
@@ -346,6 +384,7 @@ instance NumLiteral (Fraction Natural) where
 mkFraction :: UpperBoundless a => a -> a -> Maybe (Fraction a)
 mkFraction _ 0 = Nothing
 mkFraction n d = Just $ reduce (UnsafeFraction n d)
+{-# INLINEABLE mkFraction #-}
 
 -- | Template haskell for creating a 'Fraction' at compile-time.
 --
@@ -360,6 +399,7 @@ mkFractionTH :: (Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
 mkFractionTH :: (Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
 #endif
 mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
+{-# INLINEABLE mkFractionTH #-}
 
 -- | Variant of 'mkFraction' that throws 'R.ratioZeroDenominatorError' when
 -- given a denominator of 0.
@@ -376,6 +416,7 @@ mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 -- @since 0.1
 unsafeFraction :: (HasCallStack, UpperBoundless a) => a -> a -> Fraction a
 unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
+{-# INLINEABLE unsafeFraction #-}
 
 -- | Reduces a fraction:
 --
@@ -401,10 +442,12 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
     n' = n `quot` g
     d' = d `quot` g
     g = gcd n d
+{-# INLINEABLE reduce #-}
 
 xor :: Bool -> Bool -> Bool
 xor True False = True
 xor False True = True
 xor _ _ = False
+{-# INLINEABLE xor #-}
 
 infixr 2 `xor`

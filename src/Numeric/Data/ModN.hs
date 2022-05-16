@@ -91,6 +91,7 @@ instance
   LabelOptic "unModN" k (ModN n a) (ModN n b) x y
   where
   labelOptic = lens unModN (\_ x -> mkModN x)
+  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
@@ -102,6 +103,7 @@ instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
     where
       modStr = " (mod " <> show n' <> ")"
       n' = natVal @n Proxy
+  {-# INLINEABLE showsPrec #-}
 
 -- | Bidirectional pattern synonym for 'ModN'. Construction will apply
 -- modular reduction to the parameter.
@@ -124,26 +126,32 @@ instance (KnownNat n, Pretty a) => Pretty (ModN n a) where
       <> pretty @String ")"
     where
       n' = natVal @n Proxy
+  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Integer) where
   MkModN x .+. MkModN y = MkModN $ x + y
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance KnownNat n => ASemigroup (ModN n Natural) where
   MkModN x .+. MkModN y = MkModN $ x + y
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Integer) where
   zero = MkModN 0
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance KnownNat n => AMonoid (ModN n Natural) where
   zero = MkModN 0
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Integer) where
   MkModN x .-. MkModN y = MkModN (x - y)
+  {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
 instance KnownNat n => AGroup (ModN n Natural) where
@@ -152,22 +160,27 @@ instance KnownNat n => AGroup (ModN n Natural) where
     | otherwise = MkModN (n' - y + x)
     where
       n' = natVal @n Proxy
+  {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Integer) where
   MkModN x .*. MkModN y = MkModN (x * y)
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance KnownNat n => MSemigroup (ModN n Natural) where
   MkModN x .*. MkModN y = MkModN (x * y)
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance KnownNat n => MMonoid (ModN n Integer) where
   one = MkModN 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance KnownNat n => MMonoid (ModN n Natural) where
   one = MkModN 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance KnownNat n => Semiring (ModN n Integer)
@@ -184,6 +197,7 @@ instance KnownNat n => Ring (ModN n Natural)
 -- | @since 0.1
 instance (KnownNat n, UpperBoundless a) => NumLiteral (ModN n a) where
   fromLit = MkModN . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Constructor for 'ModN'.
 --
@@ -200,3 +214,4 @@ mkModN x = UnsafeModN x'
   where
     n' = fromIntegral $ natVal @n Proxy
     x' = x `mod` n'
+{-# INLINEABLE mkModN #-}

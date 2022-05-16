@@ -76,6 +76,7 @@ instance Monoid MaybePrime where
 -- @since 0.1
 isPrime :: Integer -> MaybePrime
 isPrime = isPrimeTrials 100
+{-# INLINEABLE isPrime #-}
 
 -- | 'isPrime' that takes in an additional 'Word16' parameter for the number
 -- of trials to run. The more trials, the more confident we can be in
@@ -104,6 +105,7 @@ isPrimeTrials _ 2 = ProbablyPrime
 isPrimeTrials numTrials n
   | even n = Composite
   | otherwise = millerRabin (MkModulus n) numTrials
+{-# INLINEABLE isPrimeTrials #-}
 
 -- $primality-helper
 -- For the following functions/types, a core concept is rewriting our \(n\) as
@@ -157,6 +159,7 @@ newtype Rand = MkRand Integer
 -- | @since 0.1
 instance UniformRange Rand where
   uniformRM (MkRand l, MkRand u) = fmap MkRand . RandState.uniformRM (l, u)
+  {-# INLINEABLE uniformRM #-}
 
 -- | Miller-Rabin algorithm. Takes in the \(n\) to be tested and the number
 -- of trials to perform. The higher the trials, the higher our confidence
@@ -175,6 +178,7 @@ millerRabin modulus@(MkModulus n) = go gen
        in case trial modulus powMult randomVal of
             Composite -> Composite
             ProbablyPrime -> go g' (k - 1)
+{-# INLINEABLE millerRabin #-}
 
 -- | For \(n, r, d, x\) with \(n = 2^{r} d + 1\) and \(x \in [2, n - 2] \),
 -- returns 'Composite' if \(n\) is definitely composite, 'ProbablyPrime'
@@ -196,6 +200,7 @@ trial modulus@(MkModulus n) (r, d) (MkRand a)
   | otherwise = isWitness modulus r (MkRand x)
   where
     x = a ^ d `mod` n
+{-# INLINEABLE trial #-}
 
 -- | For \(n, r, x\) with \(n = 2^{r} d + 1\) and some
 -- \(x \equiv a^d \pmod n \), returns 'Composite' if \(x\) is a witness to
@@ -220,6 +225,7 @@ isWitness modulus@(MkModulus n) r (MkRand x) = coprimeToResult coprime
     coprime = (n - 1) `elem` squares
     coprimeToResult True = ProbablyPrime
     coprimeToResult False = Composite
+{-# INLINEABLE isWitness #-}
 
 -- | For \(n, x\), returns the infinite progression
 --
@@ -236,6 +242,7 @@ sqProgression :: Modulus -> Integer -> [Integer]
 sqProgression (MkModulus n) = go
   where
     go !y = y : go (y ^ (2 :: Int) `mod` n)
+{-# INLINEABLE sqProgression #-}
 
 -- | Given \(n\), returns \((r, d)\) such that \(n = 2^r d\) with \(d\) odd
 -- i.e. \(2\) has been factored out.
@@ -258,6 +265,7 @@ factor2 (MkModulus n) = go (MkPow 0, MkMult n)
       | d == 2 = (r + 1, 1)
       | even d = go (r + 1, d `div` 2)
       | otherwise = (r, d)
+{-# INLINEABLE factor2 #-}
 
 -- | For \(a, p\), finds the multiplicative inverse of \(a\) in
 -- \(\mathbb{Z}/p\mathbb{Z}\). That is, finds /e/ such that
@@ -278,10 +286,12 @@ findInverse :: Integer -> Modulus -> Integer
 findInverse a (MkModulus p) = aInv `mod` p
   where
     (MkBezout _ _ (T' aInv)) = eec p a
+{-# INLINEABLE findInverse #-}
 
 -- | @since 0.1
 findBezout :: Integer -> Modulus -> Bezout
 findBezout a (MkModulus p) = eec p a
+{-# INLINEABLE findBezout #-}
 
 -- | @since 0.1t
 type Bezout :: Type
@@ -328,3 +338,4 @@ eec a b = go initOldR initR initOldS initS initOldT initT
           s' = oldS - S' q * s
           t' = oldT - T' q * t
        in go oldR' r' oldS' s' oldT' t'
+{-# INLINEABLE eec #-}

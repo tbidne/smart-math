@@ -111,46 +111,56 @@ pattern MkNonNegative x <-
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "unNonNegative" k (NonNegative n) (NonNegative n) a a where
   labelOptic = to unNonNegative
+  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (NonNegative a) where
   pretty (UnsafeNonNegative x) = pretty x
+  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => ASemigroup (NonNegative a) where
   UnsafeNonNegative x .+. UnsafeNonNegative y = UnsafeNonNegative $ x + y
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => AMonoid (NonNegative a) where
   zero = UnsafeNonNegative 0
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => MSemigroup (NonNegative a) where
   UnsafeNonNegative x .*. UnsafeNonNegative y = UnsafeNonNegative $ x * y
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => MMonoid (NonNegative a) where
   one = UnsafeNonNegative 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance (Eq a, Division a, Num a) => MGroup (NonNegative a) where
   UnsafeNonNegative x .%. MkNonZero (UnsafeNonNegative d) = UnsafeNonNegative $ x `divide` d
+  {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance (Division a, Integral a) => MGroupIntegral (NonNegative a) where
   type ModResult (NonNegative a) = NonNegative a
   UnsafeNonNegative x `mdivMod` MkNonZero (UnsafeNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d
+  {-# INLINEABLE mdivMod #-}
 
 -- | @since 0.1
 instance Normed (NonNegative a) where
   norm = id
+  {-# INLINEABLE norm #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (Num a, Ord a, Show a) => NumLiteral (NonNegative a) where
   fromLit = unsafeNonNegative . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => Semiring (NonNegative a)
@@ -174,6 +184,7 @@ mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
   where
     err =
       "Numeric.Data.NonNegative.mkNonNegativeTH: Passed value < 0: " <> show x
+{-# INLINEABLE mkNonNegativeTH #-}
 
 -- | Smart constructor for 'NonNegative'. Returns 'Nothing' if the second
 -- parameter is @< 0@.
@@ -190,6 +201,7 @@ mkNonNegative :: (Num a, Ord a) => a -> Maybe (NonNegative a)
 mkNonNegative x
   | x >= 0 = Just (UnsafeNonNegative x)
   | otherwise = Nothing
+{-# INLINEABLE mkNonNegative #-}
 
 -- | Variant of 'mkNonNegative' that throws an error when given a value < 0.
 --
@@ -206,6 +218,7 @@ unsafeNonNegative x
   | otherwise =
       error $
         "Numeric.Data.NonNegative.unsafeNonNegative: Passed value < 0: " <> show x
+{-# INLINEABLE unsafeNonNegative #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeNonNegative@
 -- i.e. it allows us to construct a 'NonNegative' __without__ checking the
@@ -216,3 +229,4 @@ unsafeNonNegative x
 -- @since 0.1
 reallyUnsafeNonNegative :: a -> NonNegative a
 reallyUnsafeNonNegative = UnsafeNonNegative
+{-# INLINEABLE reallyUnsafeNonNegative #-}

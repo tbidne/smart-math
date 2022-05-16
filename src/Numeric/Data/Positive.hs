@@ -108,36 +108,44 @@ pattern MkPositive x <-
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "unPositive" k (Positive n) (Positive n) a a where
   labelOptic = to unPositive
+  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (Positive a) where
   pretty (UnsafePositive x) = pretty x
+  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => ASemigroup (Positive a) where
   UnsafePositive x .+. UnsafePositive y = UnsafePositive $ x + y
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => MSemigroup (Positive a) where
   UnsafePositive x .*. UnsafePositive y = UnsafePositive $ x * y
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance (Eq a, Num a) => MMonoid (Positive a) where
   one = UnsafePositive 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance (Eq a, Division a, Num a) => MGroup (Positive a) where
   UnsafePositive x .%. MkNonZero (UnsafePositive d) = UnsafePositive $ x `divide` d
+  {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance Normed (Positive a) where
   norm = id
+  {-# INLINEABLE norm #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (Num a, Ord a, Show a) => NumLiteral (Positive a) where
   fromLit = unsafePositive . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Template haskell for creating a 'Positive' at compile-time.
 --
@@ -155,6 +163,7 @@ mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
   where
     err =
       "Numeric.Data.Positive.mkPositiveTH: Passed value <= 0: " <> show x
+{-# INLINEABLE mkPositiveTH #-}
 
 -- | Smart constructor for 'Positive'. Returns 'Nothing' if the second
 -- parameter is @<= 0@.
@@ -171,6 +180,7 @@ mkPositive :: (Num a, Ord a) => a -> Maybe (Positive a)
 mkPositive x
   | x > 0 = Just (UnsafePositive x)
   | otherwise = Nothing
+{-# INLINEABLE mkPositive #-}
 
 -- | Variant of 'mkPositive' that throws an error when given a value <= 0.
 --
@@ -187,6 +197,7 @@ unsafePositive x
   | otherwise =
       error $
         "Numeric.Data.Positive.unsafePositive: Passed value <= 0: " <> show x
+{-# INLINEABLE unsafePositive #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafePositive@
 -- i.e. it allows us to construct a 'Positive' __without__ checking the
@@ -197,6 +208,7 @@ unsafePositive x
 -- @since 0.1
 reallyUnsafePositive :: a -> Positive a
 reallyUnsafePositive = UnsafePositive
+{-# INLINEABLE reallyUnsafePositive #-}
 
 -- | Convenience function for adding a 'NonZero' proof to our 'Positive'.
 --
@@ -207,3 +219,4 @@ reallyUnsafePositive = UnsafePositive
 -- @since 0.1
 positiveToNonZero :: Positive a -> NonZero (Positive a)
 positiveToNonZero = reallyUnsafeNonZero
+{-# INLINEABLE positiveToNonZero #-}

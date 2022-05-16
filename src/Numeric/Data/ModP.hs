@@ -111,6 +111,7 @@ instance
   LabelOptic "unModP" k (ModP p a) (ModP p b) x y
   where
   labelOptic = lens unModP (\_ x -> reallyUnsafeModP x)
+  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
@@ -122,6 +123,7 @@ instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
     where
       modStr = " (mod " <> show p' <> ")"
       p' = natVal @p Proxy
+  {-# INLINEABLE showsPrec #-}
 
 -- | Bidirectional pattern synonym for 'ModP'. Construction fails when @p@ is
 -- not prime. Note that because this performs a primality check, construction
@@ -152,26 +154,32 @@ instance (KnownNat p, Pretty a) => Pretty (ModP p a) where
       <> pretty @String ")"
     where
       p' = natVal @p Proxy
+  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Integer) where
   MkModP x .+. MkModP y = unsafeModP $ x + y
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance KnownNat p => ASemigroup (ModP p Natural) where
   MkModP x .+. MkModP y = unsafeModP $ x + y
+  {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Integer) where
   zero = MkModP 0
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Natural) where
   zero = MkModP 0
+  {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Integer) where
   MkModP x .-. MkModP y = unsafeModP (x - y)
+  {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
 instance KnownNat p => AGroup (ModP p Natural) where
@@ -180,30 +188,37 @@ instance KnownNat p => AGroup (ModP p Natural) where
     | otherwise = unsafeModP (p' - y + x)
     where
       p' = natVal @p Proxy
+  {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Integer) where
   MkModP x .*. MkModP y = unsafeModP (x * y)
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance KnownNat p => MSemigroup (ModP p Natural) where
   MkModP x .*. MkModP y = unsafeModP (x * y)
+  {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
 instance KnownNat p => MMonoid (ModP p Integer) where
   one = MkModP 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance KnownNat p => MMonoid (ModP p Natural) where
   one = MkModP 1
+  {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance KnownNat p => MGroup (ModP p Integer) where
   x .%. d = x .*. invert d
+  {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance KnownNat p => MGroup (ModP p Natural) where
   x .%. d = x .*. invert d
+  {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance KnownNat p => Semiring (ModP p Integer)
@@ -232,6 +247,7 @@ instance KnownNat p => Field (ModP p Natural)
 -- | @since 0.1
 instance (KnownNat p, UpperBoundless a) => NumLiteral (ModP p a) where
   fromLit = MkModP . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Constructor for 'ModP'. Fails if @p@ is not prime. This uses the
 -- Miller-Rabin primality test, which has complexity \(O(k \log^3 p)\), and we
@@ -254,6 +270,7 @@ mkModP x = case ModPI.isPrime p' of
   where
     p' = toInteger $ natVal @p Proxy
     x' = x `mod` toUpperBoundless p'
+{-# INLINEABLE mkModP #-}
 
 -- | Template haskell for creating a 'ModP' at compile-time.
 --
@@ -273,6 +290,7 @@ mkModPTH = maybe (error err) liftTyped . mkModP
       "Numeric.Data.ModP.mkModPTH: Passed non-prime: "
         <> show p'
     p' = natVal @p Proxy
+{-# INLINEABLE mkModPTH #-}
 
 -- | Variant of 'mkModP' that throws an error when given a non-prime.
 --
@@ -291,6 +309,7 @@ unsafeModP x = case mkModP x of
       "Numeric.Data.ModP.unsafeModP: Passed non-prime: " <> show p'
   where
     p' = natVal @p Proxy
+{-# INLINEABLE unsafeModP #-}
 
 -- | This function reduces the argument modulo @p@ but does __not__ check
 -- that @p@ is prime. Note that the correct behavior of some functionality
@@ -303,6 +322,7 @@ reallyUnsafeModP :: forall p a. (KnownNat p, UpperBoundless a) => a -> ModP p a
 reallyUnsafeModP = UnsafeModP . (`mod` p')
   where
     p' = fromIntegral $ natVal @p Proxy
+{-# INLINEABLE reallyUnsafeModP #-}
 
 -- | Given non-zero \(d\), returns the inverse i.e. finds \(e\) s.t.
 --
@@ -324,7 +344,9 @@ invert (MkNonZero (UnsafeModP d)) = reallyUnsafeModP $ toUpperBoundless $ ModPI.
   where
     p' = MkModulus $ fromIntegral $ natVal @p Proxy
     d' = toInteger d
+{-# INLINEABLE invert #-}
 
 -- Note: obviously this is partial when @a@ is 'Natural'
 toUpperBoundless :: UpperBoundless a => Integer -> a
 toUpperBoundless = fromIntegral
+{-# INLINEABLE toUpperBoundless #-}

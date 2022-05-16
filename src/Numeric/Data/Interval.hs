@@ -105,6 +105,7 @@ newtype LRInterval l r a = UnsafeLRInterval
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "unLRInterval" k (LRInterval l r n) (LRInterval l r n) a a where
   labelOptic = to unLRInterval
+  {-# INLINEABLE labelOptic #-}
 
 -- | Bidirectional pattern synonym for 'LRInterval'. Construction fails when
 -- the value is not within the range.
@@ -130,12 +131,14 @@ pattern MkLRInterval x <-
 -- | @since 0.1
 instance Pretty a => Pretty (LRInterval l r a) where
   pretty (UnsafeLRInterval x) = pretty x
+  {-# INLINEABLE pretty #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => NumLiteral (LRInterval l r a) where
   fromLit = unsafeLRInterval . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Template haskell for creating an 'LRInterval' at compile-time.
 --
@@ -160,6 +163,7 @@ mkLRIntervalTH ::
 mkLRIntervalTH x = maybe (error msg) liftTyped $ mkLRInterval x
   where
     msg = lrErrMsg @l @r x "mkLRIntervalTH"
+{-# INLINEABLE mkLRIntervalTH #-}
 
 -- | Smart constructor for 'LRInterval'. Returns 'Nothing' if the given value
 -- is not within the bounds.
@@ -186,6 +190,7 @@ mkLRInterval x
   where
     l' = fromIntegral $ natVal @l Proxy
     r' = fromIntegral $ natVal @r Proxy
+{-# INLINEABLE mkLRInterval #-}
 
 -- | Variant of 'mkLRInterval' that throws an error when given a value out of
 -- bounds.
@@ -205,6 +210,7 @@ unsafeLRInterval ::
 unsafeLRInterval x = Maybe.fromMaybe (error msg) $ mkLRInterval x
   where
     msg = lrErrMsg @l @r x "unsafeLRInterval"
+{-# INLINEABLE unsafeLRInterval #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeLRInterval@
 -- i.e. it allows us to construct a 'LRInterval' __without__ checking the
@@ -215,6 +221,7 @@ unsafeLRInterval x = Maybe.fromMaybe (error msg) $ mkLRInterval x
 -- @since 0.1
 reallyUnsafeLRInterval :: a -> LRInterval l r a
 reallyUnsafeLRInterval = UnsafeLRInterval
+{-# INLINEABLE reallyUnsafeLRInterval #-}
 
 -- | Represents a closed interval that is left-bounded i.e.
 -- @LInterval \@l x@ represents \( x \in [l, \infty) \).
@@ -245,6 +252,7 @@ newtype LInterval l a = UnsafeLInterval
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "unLInterval" k (LInterval l n) (LInterval l n) a a where
   labelOptic = to unLInterval
+  {-# INLINEABLE labelOptic #-}
 
 -- | Unidirectional pattern synonym for 'LInterval'. Construction fails when
 -- the value is not within the range.
@@ -270,12 +278,14 @@ pattern MkLInterval x <-
 -- | @since 0.1
 instance Pretty a => Pretty (LInterval l a) where
   pretty (UnsafeLInterval x) = pretty x
+  {-# INLINEABLE pretty #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (KnownNat l, Num a, Ord a, Show a) => NumLiteral (LInterval l a) where
   fromLit = unsafeLInterval . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Template haskell for creating a 'LInterval' at compile-time.
 --
@@ -300,6 +310,7 @@ mkLIntervalTH ::
 mkLIntervalTH x = maybe (error msg) liftTyped $ mkLInterval x
   where
     msg = lErrMsg @l x "mkLIntervalTH"
+{-# INLINEABLE mkLIntervalTH #-}
 
 -- | Smart constructor for 'LInterval'. Returns 'Nothing' if the given value
 -- is not >= the bound.
@@ -322,6 +333,7 @@ mkLInterval x
   | otherwise = Nothing
   where
     l' = fromIntegral $ natVal @l Proxy
+{-# INLINEABLE mkLInterval #-}
 
 -- | Variant of 'mkLInterval' that throws an error when given a value out of bounds.
 --
@@ -340,6 +352,7 @@ unsafeLInterval ::
 unsafeLInterval x = Maybe.fromMaybe (error msg) $ mkLInterval x
   where
     msg = lErrMsg @l x "unsafeLInterval"
+{-# INLINEABLE unsafeLInterval #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeLInterval@
 -- i.e. it allows us to construct a 'LInterval' __without__ checking the
@@ -350,6 +363,7 @@ unsafeLInterval x = Maybe.fromMaybe (error msg) $ mkLInterval x
 -- @since 0.1
 reallyUnsafeLInterval :: a -> LInterval l a
 reallyUnsafeLInterval = UnsafeLInterval
+{-# INLINEABLE reallyUnsafeLInterval #-}
 
 -- | Represents a closed interval that is right-bounded i.e.
 -- @RInterval \@r x@ represents \( x \in (-\infty, r] \).
@@ -380,6 +394,7 @@ newtype RInterval r a = UnsafeRInterval
 -- | @since 0.1
 instance (k ~ A_Getter, a ~ n) => LabelOptic "unRInterval" k (RInterval r n) (RInterval r n) a a where
   labelOptic = to unRInterval
+  {-# INLINEABLE labelOptic #-}
 
 -- | Unidirectional pattern synonym for 'RInterval'.  Construction fails when
 -- the value is not within the range.
@@ -405,12 +420,14 @@ pattern MkRInterval x <-
 -- | @since 0.1
 instance Pretty a => Pretty (RInterval r a) where
   pretty (UnsafeRInterval x) = pretty x
+  {-# INLINEABLE pretty #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (KnownNat r, Num a, Ord a, Show a) => NumLiteral (RInterval r a) where
   fromLit = unsafeRInterval . fromInteger
+  {-# INLINEABLE fromLit #-}
 
 -- | Template haskell for creating an 'RInterval' at compile-time.
 --
@@ -435,6 +452,7 @@ mkRIntervalTH ::
 mkRIntervalTH x = maybe (error msg) liftTyped $ mkRInterval x
   where
     msg = rErrMsg @r x "mkRIntervalTH"
+{-# INLINEABLE mkRIntervalTH #-}
 
 -- | Smart constructor for 'RInterval'. Returns 'Nothing' if the given value
 -- is not <= the bound.
@@ -457,6 +475,7 @@ mkRInterval x
   | otherwise = Nothing
   where
     r' = fromIntegral $ natVal @r Proxy
+{-# INLINEABLE mkRInterval #-}
 
 -- | Variant of 'mkRInterval' that throws an error when given a value out of bounds.
 --
@@ -475,6 +494,7 @@ unsafeRInterval ::
 unsafeRInterval x = Maybe.fromMaybe (error msg) $ mkRInterval x
   where
     msg = rErrMsg @r x "unsafeRInterval"
+{-# INLINEABLE unsafeRInterval #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeRInterval@
 -- i.e. it allows us to construct a 'RInterval' __without__ checking the
@@ -485,6 +505,7 @@ unsafeRInterval x = Maybe.fromMaybe (error msg) $ mkRInterval x
 -- @since 0.1
 reallyUnsafeRInterval :: a -> RInterval r a
 reallyUnsafeRInterval = UnsafeRInterval
+{-# INLINEABLE reallyUnsafeRInterval #-}
 
 lrErrMsg :: forall l r a. (KnownNat l, KnownNat r, Show a) => a -> String -> String
 lrErrMsg x fnName = header <> msg
@@ -499,6 +520,7 @@ lrErrMsg x fnName = header <> msg
         <> show r'
         <> "], received: "
         <> show x
+{-# INLINEABLE lrErrMsg #-}
 
 lErrMsg :: forall l a. (KnownNat l, Show a) => a -> String -> String
 lErrMsg x fnName = header <> msg
@@ -510,6 +532,7 @@ lErrMsg x fnName = header <> msg
         <> show l'
         <> ", \8734), received: "
         <> show x
+{-# INLINEABLE lErrMsg #-}
 
 rErrMsg :: forall l a. (KnownNat l, Show a) => a -> String -> String
 rErrMsg x fnName = header <> msg
@@ -521,3 +544,4 @@ rErrMsg x fnName = header <> msg
         <> show l'
         <> "], received: "
         <> show x
+{-# INLINEABLE rErrMsg #-}
