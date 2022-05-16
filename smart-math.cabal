@@ -51,6 +51,8 @@ common common-exts
 library
   import:           common-exts
   exposed-modules:
+    Numeric.Class.Boundless
+    Numeric.Class.Division
     Numeric.Data.Fraction
     Numeric.Data.Interval
     Numeric.Data.ModN

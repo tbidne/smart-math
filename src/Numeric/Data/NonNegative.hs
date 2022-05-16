@@ -139,7 +139,7 @@ instance (Eq a, Division a, Num a) => MGroup (NonNegative a) where
 -- | @since 0.1
 instance (Division a, Integral a) => MGroupIntegral (NonNegative a) where
   type ModResult (NonNegative a) = NonNegative a
-  UnsafeNonNegative x `gdivMod` MkNonZero (UnsafeNonNegative d) =
+  UnsafeNonNegative x `mdivMod` MkNonZero (UnsafeNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d
 
 -- | @since 0.1
