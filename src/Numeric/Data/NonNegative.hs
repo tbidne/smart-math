@@ -17,6 +17,10 @@ module Numeric.Data.NonNegative
 
     -- * Elimination
     unNonNegative,
+
+    -- * Optics
+    nonNegativeRPrism,
+    rmatching,
   )
 where
 
@@ -45,7 +49,8 @@ import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
-import Optics.Core (A_Getter, LabelOptic (..), to)
+import Numeric.Data.Optics (rmatching)
+import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 #endif
@@ -104,11 +109,6 @@ pattern MkNonNegative x <-
     MkNonNegative x = unsafeNonNegative x
 
 {-# COMPLETE MkNonNegative #-}
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "unNonNegative" k (NonNegative n) (NonNegative n) a a where
-  labelOptic = to unNonNegative
-  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (NonNegative a) where
@@ -227,3 +227,27 @@ unsafeNonNegative x
 reallyUnsafeNonNegative :: a -> NonNegative a
 reallyUnsafeNonNegative = UnsafeNonNegative
 {-# INLINEABLE reallyUnsafeNonNegative #-}
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> nn = $$(mkNonNegativeTH 2)
+-- >>> nn ^. nonNegativeRPrism
+-- 2
+--
+-- >>> rmatching nonNegativeRPrism 3
+-- Right (UnsafeNonNegative {unNonNegative = 3})
+--
+-- >>> rmatching nonNegativeRPrism (-2)
+-- Left (-2)
+--
+-- @since 0.1
+nonNegativeRPrism :: (Num a, Ord a) => ReversedPrism' (NonNegative a) a
+nonNegativeRPrism = re (prism unNonNegative g)
+  where
+    g x = case mkNonNegative x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE nonNegativeRPrism #-}

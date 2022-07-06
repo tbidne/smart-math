@@ -21,6 +21,12 @@ module Numeric.Data.Fraction
 
     -- * Functions
     reduce,
+
+    -- * Optics
+    fractionRPrism,
+    numeratorLens,
+    denominatorGetter,
+    rmatching,
   )
 where
 
@@ -58,7 +64,16 @@ import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..))
-import Optics.Core (A_Getter, LabelOptic (..), to)
+import Numeric.Data.Optics (rmatching)
+import Optics.Core
+  ( Getter,
+    Lens',
+    ReversedPrism',
+    ReversibleOptic (re),
+    lens,
+    prism,
+    to,
+  )
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
@@ -154,16 +169,6 @@ pattern n :%: d <-
 {-# COMPLETE (:%:) #-}
 
 infixr 5 :%:
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "numerator" k (Fraction n) (Fraction n) a a where
-  labelOptic = to numerator
-  {-# INLINEABLE labelOptic #-}
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "denominator" k (Fraction n) (Fraction n) a a where
-  labelOptic = to denominator
-  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (Integral a, Show a) => Show (Fraction a) where
@@ -440,6 +445,62 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
     d' = d `quot` g
     g = gcd n d
 {-# INLINEABLE reduce #-}
+
+-- | 'Lens' for the numerator.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.), (.~))
+-- >>> unsafeFraction 2 5 ^. numeratorLens
+-- 2
+--
+-- >>> (numeratorLens .~ 7) (unsafeFraction 2 5)
+-- 7 :%: 5
+--
+-- @since 0.1
+numeratorLens :: (Eq a, Num a) => Lens' (Fraction a) a
+numeratorLens = lens f g
+  where
+    f = numerator
+    g (UnsafeFraction _ d) n = UnsafeFraction n d
+{-# INLINEABLE numeratorLens #-}
+
+-- | 'Getter' for the denominator.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> unsafeFraction 2 5 ^. denominatorGetter
+-- 5
+--
+-- @since 0.1
+denominatorGetter :: (Eq a, Num a) => Getter (Fraction a) a
+denominatorGetter = to denominator
+{-# INLINEABLE denominatorGetter #-}
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> f = $$(mkFractionTH 2 8)
+-- >>> f ^. fractionRPrism
+-- (1,4)
+--
+-- >>> rmatching fractionRPrism (0, 4)
+-- Right (0 :%: 1)
+--
+-- >>> rmatching fractionRPrism (1, 0)
+-- Left (1,0)
+--
+-- @since 0.1
+fractionRPrism :: (Num a, Ord a, UpperBoundless a) => ReversedPrism' (Fraction a) (a, a)
+fractionRPrism = re (prism (\(UnsafeFraction n d) -> (n, d)) g)
+  where
+    g x = case uncurry mkFraction x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE fractionRPrism #-}
 
 xor :: Bool -> Bool -> Bool
 xor True False = True

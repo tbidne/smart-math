@@ -21,6 +21,10 @@ module Numeric.Data.Interval
     -- ** Elimination
     unLRInterval,
 
+    -- ** Optics
+    lrIntervalRPrism,
+    rmatching,
+
     -- * Left-Interval
 
     -- ** Type
@@ -35,6 +39,9 @@ module Numeric.Data.Interval
     -- ** Elimination
     unLInterval,
 
+    -- ** Optics
+    lIntervalRPrism,
+
     -- * Right-Interval
 
     -- ** Type
@@ -48,6 +55,9 @@ module Numeric.Data.Interval
 
     -- ** Elimination
     unRInterval,
+
+    -- ** Optics
+    rIntervalRPrism,
   )
 where
 
@@ -68,10 +78,14 @@ import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Class.Literal (NumLiteral (..))
-import Optics.Core (A_Getter, LabelOptic (..), to)
+import Numeric.Data.Optics (rmatching)
+import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 #endif
+
+-- $setup
+-- >>> :set -XTemplateHaskell
 
 -- | Represents a closed interval that is bounded on both sides i.e.
 -- @LRInterval \@l \@r x@ represents \( x \in [l, r] \).
@@ -98,11 +112,6 @@ newtype LRInterval l r a = UnsafeLRInterval
     ( -- | @since 0.1
       NFData
     )
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "unLRInterval" k (LRInterval l r n) (LRInterval l r n) a a where
-  labelOptic = to unLRInterval
-  {-# INLINEABLE labelOptic #-}
 
 -- | Bidirectional pattern synonym for 'LRInterval'. Construction fails when
 -- the value is not within the range.
@@ -220,6 +229,30 @@ reallyUnsafeLRInterval :: a -> LRInterval l r a
 reallyUnsafeLRInterval = UnsafeLRInterval
 {-# INLINEABLE reallyUnsafeLRInterval #-}
 
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> x = $$(mkLRIntervalTH @1 @5 2)
+-- >>> x ^. lrIntervalRPrism
+-- 2
+--
+-- >>> rmatching (lrIntervalRPrism @1 @5) 3
+-- Right (UnsafeLRInterval {unLRInterval = 3})
+--
+-- >>> rmatching (lrIntervalRPrism @1 @5) 7
+-- Left 7
+--
+-- @since 0.1
+lrIntervalRPrism :: (KnownNat l, KnownNat r, Num a, Ord a) => ReversedPrism' (LRInterval l r a) a
+lrIntervalRPrism = re (prism unLRInterval g)
+  where
+    g x = case mkLRInterval x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE lrIntervalRPrism #-}
+
 -- | Represents a closed interval that is left-bounded i.e.
 -- @LInterval \@l x@ represents \( x \in [l, \infty) \).
 --
@@ -245,11 +278,6 @@ newtype LInterval l a = UnsafeLInterval
     ( -- | @since 0.1
       NFData
     )
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "unLInterval" k (LInterval l n) (LInterval l n) a a where
-  labelOptic = to unLInterval
-  {-# INLINEABLE labelOptic #-}
 
 -- | Unidirectional pattern synonym for 'LInterval'. Construction fails when
 -- the value is not within the range.
@@ -362,6 +390,30 @@ reallyUnsafeLInterval :: a -> LInterval l a
 reallyUnsafeLInterval = UnsafeLInterval
 {-# INLINEABLE reallyUnsafeLInterval #-}
 
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> x = $$(mkLIntervalTH @8 10)
+-- >>> x ^. lIntervalRPrism
+-- 10
+--
+-- >>> rmatching (lIntervalRPrism @8) 10
+-- Right (UnsafeLInterval {unLInterval = 10})
+--
+-- >>> rmatching (lIntervalRPrism @8) 5
+-- Left 5
+--
+-- @since 0.1
+lIntervalRPrism :: (KnownNat l, Num a, Ord a) => ReversedPrism' (LInterval l a) a
+lIntervalRPrism = re (prism unLInterval g)
+  where
+    g x = case mkLInterval x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE lIntervalRPrism #-}
+
 -- | Represents a closed interval that is right-bounded i.e.
 -- @RInterval \@r x@ represents \( x \in (-\infty, r] \).
 --
@@ -387,11 +439,6 @@ newtype RInterval r a = UnsafeRInterval
     ( -- | @since 0.1
       NFData
     )
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "unRInterval" k (RInterval r n) (RInterval r n) a a where
-  labelOptic = to unRInterval
-  {-# INLINEABLE labelOptic #-}
 
 -- | Unidirectional pattern synonym for 'RInterval'.  Construction fails when
 -- the value is not within the range.
@@ -503,6 +550,30 @@ unsafeRInterval x = Maybe.fromMaybe (error msg) $ mkRInterval x
 reallyUnsafeRInterval :: a -> RInterval r a
 reallyUnsafeRInterval = UnsafeRInterval
 {-# INLINEABLE reallyUnsafeRInterval #-}
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> x = $$(mkRIntervalTH @8 5)
+-- >>> x ^. rIntervalRPrism
+-- 5
+--
+-- >>> rmatching (rIntervalRPrism @8) 5
+-- Right (UnsafeRInterval {unRInterval = 5})
+--
+-- >>> rmatching (rIntervalRPrism @8) 10
+-- Left 10
+--
+-- @since 0.1
+rIntervalRPrism :: (KnownNat r, Num a, Ord a) => ReversedPrism' (RInterval r a) a
+rIntervalRPrism = re (prism unRInterval g)
+  where
+    g x = case mkRInterval x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE rIntervalRPrism #-}
 
 lrErrMsg :: forall l r a. (KnownNat l, KnownNat r, Show a) => a -> String -> String
 lrErrMsg x fnName = header <> msg

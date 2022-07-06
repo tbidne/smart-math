@@ -15,6 +15,9 @@ module Numeric.Data.ModN
 
     -- * Elimination
     unModN,
+
+    -- * Optics
+    modNLens,
   )
 where
 
@@ -37,7 +40,7 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Literal (NumLiteral (..))
-import Optics.Core (A_Lens, LabelOptic (..), lens)
+import Optics.Core (Lens', lens)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
@@ -76,19 +79,6 @@ newtype ModN n a = UnsafeModN
     ( -- | @since 0.1
       NFData
     )
-
--- | @since 0.1
-instance
-  ( k ~ A_Lens,
-    a ~ x,
-    b ~ y,
-    KnownNat n,
-    UpperBoundless b
-  ) =>
-  LabelOptic "unModN" k (ModN n a) (ModN n b) x y
-  where
-  labelOptic = lens unModN (\_ x -> mkModN x)
-  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
@@ -212,3 +202,20 @@ mkModN x = UnsafeModN x'
     n' = fromIntegral $ natVal @n Proxy
     x' = x `mod` n'
 {-# INLINEABLE mkModN #-}
+
+-- | 'Lens'' for 'ModN'.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.), (.~))
+-- >>> n = mkModN @7 9
+-- >>> n ^. modNLens
+-- 2
+--
+-- >>> (modNLens .~ 2) n
+-- MkModN 2 (mod 7)
+--
+-- @since 0.1
+modNLens :: (KnownNat n, Num a, Ord a, UpperBoundless a) => Lens' (ModN n a) a
+modNLens = lens unModN (\_ x -> mkModN x)
+{-# INLINEABLE modNLens #-}

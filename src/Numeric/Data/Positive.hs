@@ -20,6 +20,10 @@ module Numeric.Data.Positive
 
     -- * Functions
     positiveToNonZero,
+
+    -- * Optics
+    positiveRPrism,
+    rmatching,
   )
 where
 
@@ -44,7 +48,15 @@ import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
-import Optics.Core (A_Getter, LabelOptic (..), to)
+import Numeric.Data.Optics (rmatching)
+import Optics.Core
+  ( A_Getter,
+    LabelOptic (..),
+    ReversedPrism',
+    ReversibleOptic (re),
+    prism,
+    to,
+  )
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
 #endif
@@ -217,3 +229,27 @@ reallyUnsafePositive = UnsafePositive
 positiveToNonZero :: Positive a -> NonZero (Positive a)
 positiveToNonZero = reallyUnsafeNonZero
 {-# INLINEABLE positiveToNonZero #-}
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> pos = $$(mkPositiveTH 2)
+-- >>> pos ^. positiveRPrism
+-- 2
+--
+-- >>> rmatching positiveRPrism 3
+-- Right (UnsafePositive {unPositive = 3})
+--
+-- >>> rmatching positiveRPrism 0
+-- Left 0
+--
+-- @since 0.1
+positiveRPrism :: (Num a, Ord a) => ReversedPrism' (Positive a) a
+positiveRPrism = re (prism unPositive g)
+  where
+    g x = case mkPositive x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE positiveRPrism #-}

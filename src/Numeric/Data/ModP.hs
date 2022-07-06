@@ -20,6 +20,10 @@ module Numeric.Data.ModP
 
     -- * Functions
     invert,
+
+    -- * Optics
+    modPRPrism,
+    rmatching,
   )
 where
 
@@ -54,7 +58,8 @@ import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (NonZero (..))
-import Optics.Core (A_Lens, LabelOptic (..), lens)
+import Numeric.Data.Optics (rmatching)
+import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
@@ -96,19 +101,6 @@ newtype ModP p a = UnsafeModP
     ( -- | @since 0.1
       NFData
     )
-
--- | @since 0.1
-instance
-  ( k ~ A_Lens,
-    a ~ x,
-    b ~ y,
-    KnownNat p,
-    UpperBoundless b
-  ) =>
-  LabelOptic "unModP" k (ModP p a) (ModP p b) x y
-  where
-  labelOptic = lens unModP (\_ x -> reallyUnsafeModP x)
-  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
@@ -347,3 +339,27 @@ invert (MkNonZero (UnsafeModP d)) = reallyUnsafeModP $ toUpperBoundless $ ModPI.
 toUpperBoundless :: UpperBoundless a => Integer -> a
 toUpperBoundless = fromIntegral
 {-# INLINEABLE toUpperBoundless #-}
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+--
+-- >>> import Optics.Core ((^.))
+-- >>> n = $$(mkModPTH @7 9)
+-- >>> n ^. modPRPrism
+-- 2
+--
+-- >>> rmatching (modPRPrism @7) 9
+-- Right (MkModP 2 (mod 7))
+--
+-- >>> rmatching (modPRPrism @6) 9
+-- Left 9
+--
+-- @since 0.1
+modPRPrism :: (KnownNat p, UpperBoundless a) => ReversedPrism' (ModP p a) a
+modPRPrism = re (prism unModP g)
+  where
+    g x = case mkModP x of
+      Nothing -> Left x
+      Just x' -> Right x'
+{-# INLINEABLE modPRPrism #-}
