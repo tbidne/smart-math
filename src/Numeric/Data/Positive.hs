@@ -65,13 +65,9 @@ import Prettyprinter (Pretty (..))
 -- >>> :set -XTemplateHaskell
 
 -- | Newtype wrapper that attaches a 'Positive' invariant to some @a@.
--- 'Positive' is a:
---
--- * 'Numeric.Algebra.Additive.ASemigroup.ASemigroup'
--- * 'Numeric.Algebra.Multiplicative.MSemigroup.MSemigroup'
--- * 'Numeric.Algebra.Multiplicative.MMonoid.MMonoid'
--- * 'Numeric.Algebra.Multiplicative.MGroup.MGroup'
--- * 'Numeric.Algebra.Multiplicative.MGroup.MGroupIntegral'
+-- 'Positive' is an 'Numeric.Algebra.Additive.ASemigroup.ASemigroup' and
+-- 'Numeric.Algebra.Multiplicative.MGroup.MGroup' i.e. supports addition,
+-- multiplication, and division.
 --
 -- @since 0.1
 type Positive :: Type -> Type

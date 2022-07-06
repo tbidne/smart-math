@@ -49,15 +49,8 @@ import Prettyprinter (Pretty (..), (<+>))
 -- >>> :set -XTemplateHaskell
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/n\mathbb{Z} \).
--- 'ModN' is a:
---
--- * 'Numeric.Algebra.Additive.ASemigroup.ASemigroup'
--- * 'Numeric.Algebra.Additive.AMonoid.AMonoid'
--- * 'Numeric.Algebra.Additive.AGroup.AGroup'
--- * 'Numeric.Algebra.Multiplicative.MSemigroup.MSemigroup'
--- * 'Numeric.Algebra.Multiplicative.MMonoid.MMonoid'
--- * 'Numeric.Algebra.Semiring.Semiring'
--- * 'Numeric.Algebra.Ring.Ring'
+-- 'ModN' is a 'Numeric.Algebra.Ring.Ring' i.e. supports addition, subtraction,
+-- and multiplication.
 --
 -- @since 0.1
 type ModN :: Nat -> Type -> Type

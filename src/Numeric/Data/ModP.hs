@@ -69,17 +69,8 @@ import Prettyprinter (Pretty (..), (<+>))
 -- >>> import Numeric.Algebra.Multiplicative.MGroup (unsafeAMonoidNonZero)
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/p\mathbb{Z} \) for prime @p@.
--- 'ModP' is a:
---
--- * 'Numeric.Algebra.Additive.ASemigroup.ASemigroup'
--- * 'Numeric.Algebra.Additive.AMonoid.AMonoid'
--- * 'Numeric.Algebra.Additive.AGroup.AGroup'
--- * 'Numeric.Algebra.Multiplicative.MSemigroup.MSemigroup'
--- * 'Numeric.Algebra.Multiplicative.MMonoid.MMonoid'
--- * 'Numeric.Algebra.Multiplicative.MGroup.MGroup'
--- * 'Numeric.Algebra.Semiring.Semiring'
--- * 'Numeric.Algebra.Ring.Ring'
--- * 'Numeric.Algebra.Field.Field'
+-- 'ModP' is a 'Numeric.Algebra.Field.Field' i.e. supports addition,
+-- subtraction, multiplication, and division.
 --
 -- @since 0.1
 type ModP :: Nat -> Type -> Type

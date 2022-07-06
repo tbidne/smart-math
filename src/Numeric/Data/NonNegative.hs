@@ -59,15 +59,8 @@ import Prettyprinter (Pretty (..))
 -- >>> :set -XTemplateHaskell
 
 -- | Newtype wrapper that attaches a 'NonNegative' invariant to some @a@.
--- 'NonNegative' is a:
---
--- * 'Numeric.Algebra.Additive.ASemigroup.ASemigroup'
--- * 'Numeric.Algebra.Additive.AMonoid.AMonoid'
--- * 'Numeric.Algebra.Multiplicative.MSemigroup.MSemigroup'
--- * 'Numeric.Algebra.Multiplicative.MMonoid.MMonoid'
--- * 'Numeric.Algebra.Multiplicative.MGroup.MGroup'
--- * 'Numeric.Algebra.Multiplicative.MGroup.MGroupIntegral'
--- * 'Numeric.Algebra.Semiring.Semiring'
+-- 'NonNegative' is a 'Numeric.Algebra.Semifield.Semifield' i.e. supports
+-- addition, multiplication, and division.
 --
 -- @since 0.1
 type NonNegative :: Type -> Type
