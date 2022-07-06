@@ -25,7 +25,6 @@ module Numeric.Data.Fraction
 where
 
 import Control.DeepSeq (NFData)
-import Data.Data (Data)
 import Data.Kind (Type)
 import Data.Maybe qualified as May
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
@@ -124,8 +123,6 @@ data Fraction a = UnsafeFraction
   }
   deriving stock
     ( -- | @since 0.1
-      Data,
-      -- | @since 0.1
       Generic,
       -- | @since 0.1
       Lift

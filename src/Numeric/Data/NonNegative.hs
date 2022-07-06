@@ -22,7 +22,6 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (..))
-import Data.Data (Data)
 import Data.Kind (Type)
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
 import Data.Text.Prettyprint.Doc (Pretty (..))
@@ -73,8 +72,6 @@ newtype NonNegative a = UnsafeNonNegative
   }
   deriving stock
     ( -- | @since 0.1
-      Data,
-      -- | @since 0.1
       Eq,
       -- | @since 0.1
       Generic,

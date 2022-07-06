@@ -52,7 +52,6 @@ module Numeric.Data.Interval
 where
 
 import Control.DeepSeq (NFData)
-import Data.Data (Data)
 import Data.Kind (Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (..))
@@ -85,8 +84,6 @@ newtype LRInterval l r a = UnsafeLRInterval
   }
   deriving stock
     ( -- | @since 0.1
-      Data,
-      -- | @since 0.1
       Eq,
       -- | @since 0.1
       Generic,
