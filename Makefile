@@ -1,12 +1,26 @@
 # core
 
+ARGS = ""
+
 .PHONY: build
 build:
-	cabal build all
+	if [ -z "$(ARGS)" ]; then \
+		cabal build; \
+	else \
+		cabal build $(ARGS); \
+	fi
+
+.PHONY: clean
+clean:
+	cabal clean
 
 .PHONY: test
 test:
-	RUN_DOCTEST=true cabal test
+	if [ -z "$(ARGS)" ]; then \
+		RUN_DOCTEST=true cabal test; \
+	else \
+		RUN_DOCTEST=true cabal test $(ARGS); \
+	fi
 
 .PHONY: doctest
 doctest:
@@ -18,11 +32,15 @@ props:
 
 .PHONY: repl
 repl:
-	cabal repl
+	if [ -z "$(ARGS)" ]; then \
+		cabal repl; \
+	else \
+		cabal repl $(ARGS); \
+	fi
 
 .PHONY: watch
 watch:
-	ghcid --command "cabal repl"
+	ghcid --command "cabal repl $(ARGS)"
 
 # ci
 
