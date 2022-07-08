@@ -66,6 +66,7 @@ positiveAssoc = asemigroupAssoc Gens.positive "Positive" "positiveAssoc"
 
 asemigroupAssoc ::
   ( ASemigroup a,
+    Eq a,
     Show a
   ) =>
   Gen a ->

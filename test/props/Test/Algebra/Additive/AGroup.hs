@@ -61,6 +61,7 @@ agroupSubEq = Utils.binaryEq (-) (.-.)
 
 agroupSubIdent ::
   ( AGroup a,
+    Eq a,
     Show a
   ) =>
   Gen a ->

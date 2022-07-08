@@ -121,22 +121,22 @@ instance Pretty a => Pretty (Positive a) where
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => ASemigroup (Positive a) where
+instance Num a => ASemigroup (Positive a) where
   UnsafePositive x .+. UnsafePositive y = UnsafePositive $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => MSemigroup (Positive a) where
+instance Num a => MSemigroup (Positive a) where
   UnsafePositive x .*. UnsafePositive y = UnsafePositive $ x * y
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => MMonoid (Positive a) where
+instance Num a => MMonoid (Positive a) where
   one = UnsafePositive 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance (Eq a, Division a, Num a) => MGroup (Positive a) where
+instance (Division a, Num a) => MGroup (Positive a) where
   UnsafePositive x .%. MkNonZero (UnsafePositive d) = UnsafePositive $ x `divide` d
   {-# INLINEABLE (.%.) #-}
 

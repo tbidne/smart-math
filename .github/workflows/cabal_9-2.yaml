@@ -1,4 +1,4 @@
-name: "9.2"
+name: "cabal_9-2"
 
 on:
   push:
@@ -24,20 +24,20 @@ jobs:
 
       - name: Compile
         run: |
-          nix-shell nix/ghc_9-2.nix --command \
+          nix-shell nix/cabal_9-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always"
 
-      - name: DocTest
+      - name: Doc Tests
         run: |
-          nix-shell nix/ghc_9-2.nix --command \
+          nix-shell nix/cabal_9-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
-             RUN_DOCTEST=true cabal test doctest --test-show-details=direct"
+             RUN_DOCTEST=true cabal test doctest"
 
       - name: Property Tests
         run: |
-          nix-shell nix/ghc_9-2.nix --command \
+          nix-shell nix/cabal_9-2.nix --command \
             "cabal update && \
              cabal build --write-ghc-environment-files=always && \
-             MAX_RUNS=100000 cabal test props --test-show-details=direct"
+             MAX_RUNS=100000 cabal test props"

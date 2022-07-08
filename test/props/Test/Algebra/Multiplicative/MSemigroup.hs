@@ -65,7 +65,8 @@ positiveAssoc :: TestTree
 positiveAssoc = msemigroupAssoc Gens.positive "Positive" "positiveAssoc"
 
 msemigroupAssoc ::
-  ( MSemigroup a,
+  ( Eq a,
+    MSemigroup a,
     Show a
   ) =>
   Gen a ->

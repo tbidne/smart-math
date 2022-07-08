@@ -109,27 +109,27 @@ instance Pretty a => Pretty (NonNegative a) where
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => ASemigroup (NonNegative a) where
+instance Num a => ASemigroup (NonNegative a) where
   UnsafeNonNegative x .+. UnsafeNonNegative y = UnsafeNonNegative $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => AMonoid (NonNegative a) where
+instance Num a => AMonoid (NonNegative a) where
   zero = UnsafeNonNegative 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => MSemigroup (NonNegative a) where
+instance Num a => MSemigroup (NonNegative a) where
   UnsafeNonNegative x .*. UnsafeNonNegative y = UnsafeNonNegative $ x * y
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => MMonoid (NonNegative a) where
+instance Num a => MMonoid (NonNegative a) where
   one = UnsafeNonNegative 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance (Eq a, Division a, Num a) => MGroup (NonNegative a) where
+instance (Division a, Num a) => MGroup (NonNegative a) where
   UnsafeNonNegative x .%. MkNonZero (UnsafeNonNegative d) = UnsafeNonNegative $ x `divide` d
   {-# INLINEABLE (.%.) #-}
 
@@ -153,10 +153,10 @@ instance (Num a, Ord a, Show a) => NumLiteral (NonNegative a) where
   {-# INLINEABLE fromLit #-}
 
 -- | @since 0.1
-instance (Eq a, Num a) => Semiring (NonNegative a)
+instance Num a => Semiring (NonNegative a)
 
 -- | @since 0.1
-instance (Division a, Eq a, Num a) => Semifield (NonNegative a)
+instance (Division a, Num a) => Semifield (NonNegative a)
 
 -- | Template haskell for creating a 'NonNegative' at compile-time.
 --
