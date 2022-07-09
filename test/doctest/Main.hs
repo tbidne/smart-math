@@ -1,14 +1,15 @@
 module Main (main) where
 
-import System.Environment qualified as Env
+import System.Environment.Guard (ExpectEnv (..), guardOrElse')
 import Test.DocTest qualified as DT
 
 main :: IO ()
-main = do
-  shouldRun <- Env.lookupEnv "RUN_DOCTEST"
-  case shouldRun of
-    Just "true" -> DT.doctest args
-    _ -> putStrLn "*** Doctests Disabled ***"
+main =
+  guardOrElse'
+    "RUN_DOCTEST"
+    ExpectEnvSet
+    (DT.doctest args)
+    (putStrLn "*** Doctests Disabled ***")
   where
     args = files <> exts
 
