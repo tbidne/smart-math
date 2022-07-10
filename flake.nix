@@ -4,10 +4,10 @@
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   outputs =
-    { flake-utils
+    { algebra-simple-src
+    , flake-utils
     , nixpkgs
     , self
-    , algebra-simple-src
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
