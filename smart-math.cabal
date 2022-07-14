@@ -58,7 +58,6 @@ library
     Numeric.Data.ModP
     Numeric.Data.ModP.Internal
     Numeric.Data.NonNegative
-    Numeric.Data.Optics
     Numeric.Data.Positive
 
   build-depends:

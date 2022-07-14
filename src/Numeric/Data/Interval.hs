@@ -22,7 +22,7 @@ module Numeric.Data.Interval
     unLRInterval,
 
     -- ** Optics
-    lrIntervalRPrism,
+    _MkLRInterval,
     rmatching,
 
     -- * Left-Interval
@@ -40,7 +40,7 @@ module Numeric.Data.Interval
     unLInterval,
 
     -- ** Optics
-    lIntervalRPrism,
+    _MkLInterval,
 
     -- * Right-Interval
 
@@ -57,7 +57,7 @@ module Numeric.Data.Interval
     unRInterval,
 
     -- ** Optics
-    rIntervalRPrism,
+    _MkRInterval,
   )
 where
 
@@ -78,7 +78,7 @@ import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Class.Literal (NumLiteral (..))
-import Numeric.Data.Optics (rmatching)
+import Numeric.Data.NonZero (rmatching)
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
@@ -235,23 +235,23 @@ reallyUnsafeLRInterval = UnsafeLRInterval
 --
 -- >>> import Optics.Core ((^.))
 -- >>> x = $$(mkLRIntervalTH @1 @5 2)
--- >>> x ^. lrIntervalRPrism
+-- >>> x ^. _MkLRInterval
 -- 2
 --
--- >>> rmatching (lrIntervalRPrism @1 @5) 3
+-- >>> rmatching (_MkLRInterval @1 @5) 3
 -- Right (UnsafeLRInterval {unLRInterval = 3})
 --
--- >>> rmatching (lrIntervalRPrism @1 @5) 7
+-- >>> rmatching (_MkLRInterval @1 @5) 7
 -- Left 7
 --
 -- @since 0.1
-lrIntervalRPrism :: (KnownNat l, KnownNat r, Num a, Ord a) => ReversedPrism' (LRInterval l r a) a
-lrIntervalRPrism = re (prism unLRInterval g)
+_MkLRInterval :: (KnownNat l, KnownNat r, Num a, Ord a) => ReversedPrism' (LRInterval l r a) a
+_MkLRInterval = re (prism unLRInterval g)
   where
     g x = case mkLRInterval x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE lrIntervalRPrism #-}
+{-# INLINEABLE _MkLRInterval #-}
 
 -- | Represents a closed interval that is left-bounded i.e.
 -- @LInterval \@l x@ represents \( x \in [l, \infty) \).
@@ -396,23 +396,23 @@ reallyUnsafeLInterval = UnsafeLInterval
 --
 -- >>> import Optics.Core ((^.))
 -- >>> x = $$(mkLIntervalTH @8 10)
--- >>> x ^. lIntervalRPrism
+-- >>> x ^. _MkLInterval
 -- 10
 --
--- >>> rmatching (lIntervalRPrism @8) 10
+-- >>> rmatching (_MkLInterval @8) 10
 -- Right (UnsafeLInterval {unLInterval = 10})
 --
--- >>> rmatching (lIntervalRPrism @8) 5
+-- >>> rmatching (_MkLInterval @8) 5
 -- Left 5
 --
 -- @since 0.1
-lIntervalRPrism :: (KnownNat l, Num a, Ord a) => ReversedPrism' (LInterval l a) a
-lIntervalRPrism = re (prism unLInterval g)
+_MkLInterval :: (KnownNat l, Num a, Ord a) => ReversedPrism' (LInterval l a) a
+_MkLInterval = re (prism unLInterval g)
   where
     g x = case mkLInterval x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE lIntervalRPrism #-}
+{-# INLINEABLE _MkLInterval #-}
 
 -- | Represents a closed interval that is right-bounded i.e.
 -- @RInterval \@r x@ represents \( x \in (-\infty, r] \).
@@ -557,23 +557,23 @@ reallyUnsafeRInterval = UnsafeRInterval
 --
 -- >>> import Optics.Core ((^.))
 -- >>> x = $$(mkRIntervalTH @8 5)
--- >>> x ^. rIntervalRPrism
+-- >>> x ^. _MkRInterval
 -- 5
 --
--- >>> rmatching (rIntervalRPrism @8) 5
+-- >>> rmatching (_MkRInterval @8) 5
 -- Right (UnsafeRInterval {unRInterval = 5})
 --
--- >>> rmatching (rIntervalRPrism @8) 10
+-- >>> rmatching (_MkRInterval @8) 10
 -- Left 10
 --
 -- @since 0.1
-rIntervalRPrism :: (KnownNat r, Num a, Ord a) => ReversedPrism' (RInterval r a) a
-rIntervalRPrism = re (prism unRInterval g)
+_MkRInterval :: (KnownNat r, Num a, Ord a) => ReversedPrism' (RInterval r a) a
+_MkRInterval = re (prism unRInterval g)
   where
     g x = case mkRInterval x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE rIntervalRPrism #-}
+{-# INLINEABLE _MkRInterval #-}
 
 lrErrMsg :: forall l r a. (KnownNat l, KnownNat r, Show a) => a -> String -> String
 lrErrMsg x fnName = header <> msg

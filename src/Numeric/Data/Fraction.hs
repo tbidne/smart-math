@@ -23,9 +23,8 @@ module Numeric.Data.Fraction
     reduce,
 
     -- * Optics
-    fractionRPrism,
-    numeratorLens,
-    denominatorGetter,
+    -- $optics
+    _MkFraction,
     rmatching,
   )
 where
@@ -63,11 +62,11 @@ import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
-import Numeric.Data.NonZero (NonZero (..))
-import Numeric.Data.Optics (rmatching)
+import Numeric.Data.NonZero (NonZero (..), rmatching)
 import Optics.Core
-  ( Getter,
-    Lens',
+  ( A_Getter,
+    A_Lens,
+    LabelOptic (..),
     ReversedPrism',
     ReversibleOptic (re),
     lens,
@@ -146,6 +145,16 @@ data Fraction a = UnsafeFraction
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+instance (k ~ A_Lens, a ~ n, b ~ n) => LabelOptic "numerator" k (Fraction n) (Fraction n) a b where
+  labelOptic = lens numerator (\(UnsafeFraction _ d) n' -> UnsafeFraction n' d)
+  {-# INLINE labelOptic #-}
+
+-- | @since 0.1
+instance (k ~ A_Getter, a ~ n, b ~ n) => LabelOptic "denominator" k (Fraction n) (Fraction n) a b where
+  labelOptic = to denominator
+  {-# INLINE labelOptic #-}
 
 -- | Bidirectional pattern synonym for 'Fraction'. The constructor is an alias
 -- for 'unsafeFraction'.
@@ -446,37 +455,23 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
     g = gcd n d
 {-# INLINEABLE reduce #-}
 
--- | 'Lens' for the numerator.
+-- $optics
+-- In addition to '_MkFraction', we have 'LabelOptic' instances for
+-- "numerator" and "denominator".
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.), (.~))
--- >>> unsafeFraction 2 5 ^. numeratorLens
+-- >>> :set -XOverloadedLabels
+-- >>> import Optics.Core (view, set)
+-- >>> let x = unsafeFraction 2 7
+-- >>> view #numerator x
 -- 2
 --
--- >>> (numeratorLens .~ 7) (unsafeFraction 2 5)
--- 7 :%: 5
+-- >>> set #numerator 5 x
+-- 5 :%: 7
 --
--- @since 0.1
-numeratorLens :: (Eq a, Num a) => Lens' (Fraction a) a
-numeratorLens = lens f g
-  where
-    f = numerator
-    g (UnsafeFraction _ d) n = UnsafeFraction n d
-{-# INLINEABLE numeratorLens #-}
-
--- | 'Getter' for the denominator.
---
--- ==== __Examples__
---
--- >>> import Optics.Core ((^.))
--- >>> unsafeFraction 2 5 ^. denominatorGetter
--- 5
---
--- @since 0.1
-denominatorGetter :: (Eq a, Num a) => Getter (Fraction a) a
-denominatorGetter = to denominator
-{-# INLINEABLE denominatorGetter #-}
+-- >>> view #denominator x
+-- 7
 
 -- | 'ReversedPrism'' that enables total elimination and partial construction.
 --
@@ -484,23 +479,23 @@ denominatorGetter = to denominator
 --
 -- >>> import Optics.Core ((^.))
 -- >>> f = $$(mkFractionTH 2 8)
--- >>> f ^. fractionRPrism
+-- >>> f ^. _MkFraction
 -- (1,4)
 --
--- >>> rmatching fractionRPrism (0, 4)
+-- >>> rmatching _MkFraction (0, 4)
 -- Right (0 :%: 1)
 --
--- >>> rmatching fractionRPrism (1, 0)
+-- >>> rmatching _MkFraction (1, 0)
 -- Left (1,0)
 --
 -- @since 0.1
-fractionRPrism :: (Num a, Ord a, UpperBoundless a) => ReversedPrism' (Fraction a) (a, a)
-fractionRPrism = re (prism (\(UnsafeFraction n d) -> (n, d)) g)
+_MkFraction :: (Num a, Ord a, UpperBoundless a) => ReversedPrism' (Fraction a) (a, a)
+_MkFraction = re (prism (\(UnsafeFraction n d) -> (n, d)) g)
   where
     g x = case uncurry mkFraction x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE fractionRPrism #-}
+{-# INLINEABLE _MkFraction #-}
 
 xor :: Bool -> Bool -> Bool
 xor True False = True

@@ -22,7 +22,7 @@ module Numeric.Data.Positive
     positiveToNonZero,
 
     -- * Optics
-    positiveRPrism,
+    _MkPositive,
     rmatching,
   )
 where
@@ -47,8 +47,7 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
-import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero)
-import Numeric.Data.Optics (rmatching)
+import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero, rmatching)
 import Optics.Core
   ( A_Getter,
     LabelOptic (..),
@@ -232,20 +231,20 @@ positiveToNonZero = reallyUnsafeNonZero
 --
 -- >>> import Optics.Core ((^.))
 -- >>> pos = $$(mkPositiveTH 2)
--- >>> pos ^. positiveRPrism
+-- >>> pos ^. _MkPositive
 -- 2
 --
--- >>> rmatching positiveRPrism 3
+-- >>> rmatching _MkPositive 3
 -- Right (UnsafePositive {unPositive = 3})
 --
--- >>> rmatching positiveRPrism 0
+-- >>> rmatching _MkPositive 0
 -- Left 0
 --
 -- @since 0.1
-positiveRPrism :: (Num a, Ord a) => ReversedPrism' (Positive a) a
-positiveRPrism = re (prism unPositive g)
+_MkPositive :: (Num a, Ord a) => ReversedPrism' (Positive a) a
+_MkPositive = re (prism unPositive g)
   where
     g x = case mkPositive x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE positiveRPrism #-}
+{-# INLINEABLE _MkPositive #-}

@@ -22,7 +22,7 @@ module Numeric.Data.ModP
     invert,
 
     -- * Optics
-    modPRPrism,
+    _MkModP,
     rmatching,
   )
 where
@@ -57,8 +57,7 @@ import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
-import Numeric.Data.NonZero (NonZero (..))
-import Numeric.Data.Optics (rmatching)
+import Numeric.Data.NonZero (NonZero (..), rmatching)
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
@@ -337,20 +336,20 @@ toUpperBoundless = fromIntegral
 --
 -- >>> import Optics.Core ((^.))
 -- >>> n = $$(mkModPTH @7 9)
--- >>> n ^. modPRPrism
+-- >>> n ^. _MkModP
 -- 2
 --
--- >>> rmatching (modPRPrism @7) 9
+-- >>> rmatching (_MkModP @7) 9
 -- Right (MkModP 2 (mod 7))
 --
--- >>> rmatching (modPRPrism @6) 9
+-- >>> rmatching (_MkModP @6) 9
 -- Left 9
 --
 -- @since 0.1
-modPRPrism :: (KnownNat p, UpperBoundless a) => ReversedPrism' (ModP p a) a
-modPRPrism = re (prism unModP g)
+_MkModP :: (KnownNat p, UpperBoundless a) => ReversedPrism' (ModP p a) a
+_MkModP = re (prism unModP g)
   where
     g x = case mkModP x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE modPRPrism #-}
+{-# INLINEABLE _MkModP #-}

@@ -17,7 +17,7 @@ module Numeric.Data.ModN
     unModN,
 
     -- * Optics
-    modNLens,
+    _MkModN,
   )
 where
 
@@ -196,19 +196,21 @@ mkModN x = UnsafeModN x'
     x' = x `mod` n'
 {-# INLINEABLE mkModN #-}
 
--- | 'Lens'' for 'ModN'.
+-- | 'Lens'' for 'ModN'. Despite being a 'Lens', we use prism/iso syntax for
+-- consistency with other optics in this package and to witness that
+-- 'ModN' is _nearly_ an Iso.
 --
 -- ==== __Examples__
 --
 -- >>> import Optics.Core ((^.), (.~))
 -- >>> n = mkModN @7 9
--- >>> n ^. modNLens
+-- >>> n ^. _MkModN
 -- 2
 --
--- >>> (modNLens .~ 2) n
+-- >>> (_MkModN .~ 2) n
 -- MkModN 2 (mod 7)
 --
 -- @since 0.1
-modNLens :: (KnownNat n, Num a, Ord a, UpperBoundless a) => Lens' (ModN n a) a
-modNLens = lens unModN (\_ x -> mkModN x)
-{-# INLINEABLE modNLens #-}
+_MkModN :: (KnownNat n, Num a, Ord a, UpperBoundless a) => Lens' (ModN n a) a
+_MkModN = lens unModN (\_ x -> mkModN x)
+{-# INLINEABLE _MkModN #-}

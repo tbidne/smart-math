@@ -19,7 +19,7 @@ module Numeric.Data.NonNegative
     unNonNegative,
 
     -- * Optics
-    nonNegativeRPrism,
+    _MkNonNegative,
     rmatching,
   )
 where
@@ -48,8 +48,7 @@ import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
 import Numeric.Class.Literal (NumLiteral (..))
-import Numeric.Data.NonZero (NonZero (..))
-import Numeric.Data.Optics (rmatching)
+import Numeric.Data.NonZero (NonZero (..), rmatching)
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
@@ -227,20 +226,20 @@ reallyUnsafeNonNegative = UnsafeNonNegative
 --
 -- >>> import Optics.Core ((^.))
 -- >>> nn = $$(mkNonNegativeTH 2)
--- >>> nn ^. nonNegativeRPrism
+-- >>> nn ^. _MkNonNegative
 -- 2
 --
--- >>> rmatching nonNegativeRPrism 3
+-- >>> rmatching _MkNonNegative 3
 -- Right (UnsafeNonNegative {unNonNegative = 3})
 --
--- >>> rmatching nonNegativeRPrism (-2)
+-- >>> rmatching _MkNonNegative (-2)
 -- Left (-2)
 --
 -- @since 0.1
-nonNegativeRPrism :: (Num a, Ord a) => ReversedPrism' (NonNegative a) a
-nonNegativeRPrism = re (prism unNonNegative g)
+_MkNonNegative :: (Num a, Ord a) => ReversedPrism' (NonNegative a) a
+_MkNonNegative = re (prism unNonNegative g)
   where
     g x = case mkNonNegative x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE nonNegativeRPrism #-}
+{-# INLINEABLE _MkNonNegative #-}
