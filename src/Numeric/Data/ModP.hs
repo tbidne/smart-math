@@ -104,23 +104,12 @@ instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
       p' = natVal @p Proxy
   {-# INLINEABLE showsPrec #-}
 
--- | Bidirectional pattern synonym for 'ModP'. Construction fails when @p@ is
--- not prime. Note that because this performs a primality check, construction
--- is __not__ \(O(1)\). See 'mkModP' for details. For much faster construction,
--- when you are /sure/ @p@ is prime, see 'reallyUnsafeModP'.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> MkModP @7 12
--- MkModP 5 (mod 7)
+-- | Unidirectional pattern synonym for 'ModP'. This allows us to pattern
+-- match on a modp term without exposing the unsafe internal details.
 --
 -- @since 0.1
-pattern MkModP :: (HasCallStack, KnownNat p, UpperBoundless a) => a -> ModP p a
-pattern MkModP x <-
-  UnsafeModP x
-  where
-    MkModP x = unsafeModP x
+pattern MkModP :: a -> ModP p a
+pattern MkModP x <- UnsafeModP x
 
 {-# COMPLETE MkModP #-}
 
@@ -147,12 +136,12 @@ instance KnownNat p => ASemigroup (ModP p Natural) where
 
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Integer) where
-  zero = MkModP 0
+  zero = unsafeModP 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance KnownNat p => AMonoid (ModP p Natural) where
-  zero = MkModP 0
+  zero = unsafeModP 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
@@ -181,12 +170,12 @@ instance KnownNat p => MSemigroup (ModP p Natural) where
 
 -- | @since 0.1
 instance KnownNat p => MMonoid (ModP p Integer) where
-  one = MkModP 1
+  one = unsafeModP 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance KnownNat p => MMonoid (ModP p Natural) where
-  one = MkModP 1
+  one = unsafeModP 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
@@ -225,7 +214,7 @@ instance KnownNat p => Field (ModP p Natural)
 
 -- | @since 0.1
 instance (KnownNat p, UpperBoundless a) => NumLiteral (ModP p a) where
-  fromLit = MkModP . fromInteger
+  fromLit = unsafeModP . fromInteger
   {-# INLINEABLE fromLit #-}
 
 -- | Constructor for 'ModP'. Fails if @p@ is not prime. This uses the
@@ -311,10 +300,10 @@ reallyUnsafeModP = UnsafeModP . (`mod` p')
 --
 -- ==== __Examples__
 --
--- >>> invert $ unsafeAMonoidNonZero $ MkModP @7 5
+-- >>> invert $ unsafeAMonoidNonZero $ unsafeModP @7 5
 -- MkModP 3 (mod 7)
 --
--- >>> invert $ unsafeAMonoidNonZero $ MkModP @19 12
+-- >>> invert $ unsafeAMonoidNonZero $ unsafeModP @19 12
 -- MkModP 8 (mod 19)
 --
 -- @since 0.1

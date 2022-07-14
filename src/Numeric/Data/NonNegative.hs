@@ -84,21 +84,12 @@ newtype NonNegative a = UnsafeNonNegative
       NFData
     )
 
--- | Bidirectional pattern synonym for 'NonNegative'. Construction fails when
--- the given value is positive.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> MkNonNegative 0
--- UnsafeNonNegative {unNonNegative = 0}
+-- | Unidirectional pattern synonym for 'NonNegative'. This allows us to pattern
+-- match on a non-negative term without exposing the unsafe internal details.
 --
 -- @since 0.1
-pattern MkNonNegative :: (Num a, Ord a, Show a) => a -> NonNegative a
-pattern MkNonNegative x <-
-  UnsafeNonNegative x
-  where
-    MkNonNegative x = unsafeNonNegative x
+pattern MkNonNegative :: a -> NonNegative a
+pattern MkNonNegative x <- UnsafeNonNegative x
 
 {-# COMPLETE MkNonNegative #-}
 

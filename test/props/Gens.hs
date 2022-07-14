@@ -32,7 +32,7 @@ import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Multiplicative.MGroup qualified as MGroup
-import Numeric.Data.Fraction (Fraction (..))
+import Numeric.Data.Fraction (Fraction (..), unsafeFraction)
 import Numeric.Data.ModN (ModN (..), mkModN)
 import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
 import Numeric.Data.NonNegative (NonNegative (..), unsafeNonNegative)
@@ -48,7 +48,7 @@ natural :: MonadGen m => m Natural
 natural = HG.integral $ HR.exponential minVal maxVal
 
 fraction :: MonadGen m => m (Fraction Integer)
-fraction = (:%:) <$> integer <*> integerNZ
+fraction = unsafeFraction <$> integer <*> integerNZ
 
 modN :: MonadGen m => m (ModN 10 Natural)
 modN = mkModN <$> natural
@@ -74,7 +74,7 @@ naturalNZ :: MonadGen m => m Natural
 naturalNZ = HG.integral $ HR.exponential 1 maxVal
 
 fractionNonZero :: MonadGen m => m (NonZero (Fraction Integer))
-fractionNonZero = fmap MGroup.unsafeAMonoidNonZero $ (:%:) <$> integerNZ <*> integerNZ
+fractionNonZero = fmap MGroup.unsafeAMonoidNonZero $ unsafeFraction <$> integerNZ <*> integerNZ
 
 modPNonZero :: (GenBase m ~ Identity, MonadGen m) => m (NonZero (ModP 17 Natural))
 modPNonZero = MGroup.unsafeAMonoidNonZero . reallyUnsafeModP <$> pos

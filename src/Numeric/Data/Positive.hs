@@ -91,21 +91,12 @@ newtype Positive a = UnsafePositive
       NFData
     )
 
--- | Bidirectional pattern synonym for 'Positive'. Construction fails when
--- the given value is non-positive.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> MkPositive 7
--- UnsafePositive {unPositive = 7}
+-- | Unidirectional pattern synonym for 'Positive'. This allows us to pattern
+-- match on a positive term without exposing the unsafe internal details.
 --
 -- @since 0.1
-pattern MkPositive :: (Num a, Ord a, Show a) => a -> Positive a
-pattern MkPositive x <-
-  UnsafePositive x
-  where
-    MkPositive x = unsafePositive x
+pattern MkPositive :: a -> Positive a
+pattern MkPositive x <- UnsafePositive x
 
 {-# COMPLETE MkPositive #-}
 

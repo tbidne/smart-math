@@ -5,7 +5,7 @@ import Hedgehog ((===))
 import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
 import Numeric.Class.Boundless (UpperBoundless)
-import Numeric.Data.Fraction (Fraction (..))
+import Numeric.Data.Fraction (Fraction (..), (%!))
 import Numeric.Data.Fraction qualified as Frac
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
@@ -38,7 +38,7 @@ eqMult = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         x@(n :%: d) <- H.forAll Gens.fraction
         k <- H.forAll Gens.integerNZ
-        x === (n * k :%: d * k)
+        x === (n * k) %! (d * k)
 
 eqZero :: TestTree
 eqZero = T.askOption $ \(MkMaxRuns limit) ->
@@ -47,7 +47,7 @@ eqZero = T.askOption $ \(MkMaxRuns limit) ->
       H.property $ do
         d1 <- H.forAll Gens.integerNZ
         d2 <- H.forAll Gens.integerNZ
-        (0 :%: d1) === (0 :%: d2)
+        0 %! d1 === 0 %! d2
 
 reduceProps :: TestTree
 reduceProps =

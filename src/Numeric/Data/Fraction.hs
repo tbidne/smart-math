@@ -13,7 +13,9 @@ module Numeric.Data.Fraction
     -- * Creation
     mkFraction,
     mkFractionTH,
+    (%%),
     unsafeFraction,
+    (%!),
 
     -- * Elimination
     numerator,
@@ -112,19 +114,19 @@ import Text.Read.Lex qualified as L
 --
 -- ==== __Examples__
 --
--- >>> 2 :%: 6 == 1 :%: 3
+-- >>> 2 %! 6 == 1 %! 3
 -- True
 --
--- >>> 1 :%: 1 == -1 :%: -1
+-- >>> 1 %! 1 == -1 %! -1
 -- True
 --
--- >>> 1 :%: 7 >= 1 :%: -2
+-- >>> 1 %! 7 >= 1 %! -2
 -- True
 --
--- >>> -1 :%: 7 >= 1 :%: -2
+-- >>> -1 %! 7 >= 1 %! -2
 -- True
 --
--- >>> read @(Fraction Integer) $ show (123 :%: -3461)
+-- >>> read @(Fraction Integer) $ show (123 %! -3461)
 -- (-123) :%: 3461
 --
 -- @since 0.1
@@ -156,24 +158,12 @@ instance (k ~ A_Getter, a ~ n, b ~ n) => LabelOptic "denominator" k (Fraction n)
   labelOptic = to denominator
   {-# INLINE labelOptic #-}
 
--- | Bidirectional pattern synonym for 'Fraction'. The constructor is an alias
--- for 'unsafeFraction'.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> 2 :%: 4
--- 1 :%: 2
---
--- >>> 1 :%: 0
--- *** Exception: Ratio has zero denominator
+-- | Unidirectional pattern synonym for 'Fraction'. This allows us to pattern
+-- match on a fraction term without exposing the unsafe internal details.
 --
 -- @since 0.1
-pattern (:%:) :: (HasCallStack, UpperBoundless a) => a -> a -> Fraction a
-pattern n :%: d <-
-  UnsafeFraction n d
-  where
-    n :%: d = unsafeFraction n d
+pattern (:%:) :: a -> a -> Fraction a
+pattern n :%: d <- UnsafeFraction n d
 
 {-# COMPLETE (:%:) #-}
 
@@ -298,12 +288,12 @@ instance ASemigroup (Fraction Natural) where
 
 -- | @since 0.1
 instance AMonoid (Fraction Integer) where
-  zero = 0 :%: 1
+  zero = UnsafeFraction 0 1
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance AMonoid (Fraction Natural) where
-  zero = 0 :%: 1
+  zero = UnsafeFraction 0 1
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
@@ -323,22 +313,22 @@ instance MSemigroup (Fraction Natural) where
 
 -- | @since 0.1
 instance MMonoid (Fraction Integer) where
-  one = 1 :%: 1
+  one = UnsafeFraction 1 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance MMonoid (Fraction Natural) where
-  one = 1 :%: 1
+  one = UnsafeFraction 1 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance MGroup (Fraction Integer) where
-  x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
+  x .%. MkNonZero (n :%: d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance MGroup (Fraction Natural) where
-  x .%. MkNonZero (n :%: d) = x .*. (d :%: n)
+  x .%. MkNonZero (n :%: d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
@@ -412,6 +402,24 @@ mkFractionTH :: (Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
 mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 {-# INLINEABLE mkFractionTH #-}
 
+-- | Infix version of 'mkFractionTH'.
+--
+-- ==== __Examples__
+--
+-- >>> $$(7 %% 2)
+-- 7 :%: 2
+--
+-- @since 0.1
+#if MIN_VERSION_template_haskell(2,17,0)
+(%%) :: (Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
+#else
+(%%) :: (Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
+#endif
+n %% d = mkFractionTH n d
+{-# INLINE (%%) #-}
+
+infixl 7 %%
+
 -- | Variant of 'mkFraction' that throws 'R.ratioZeroDenominatorError' when
 -- given a denominator of 0.
 --
@@ -429,6 +437,25 @@ unsafeFraction :: (HasCallStack, UpperBoundless a) => a -> a -> Fraction a
 unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
 {-# INLINEABLE unsafeFraction #-}
 
+-- | Infix version of 'unsafeFraction'.
+--
+-- __WARNING: Partial__
+--
+-- ==== __Examples__
+--
+-- >>> 7 %! 2
+-- 7 :%: 2
+--
+-- >>> 7 %! 0
+-- *** Exception: Ratio has zero denominator
+--
+-- @since 0.1
+(%!) :: UpperBoundless a => a -> a -> Fraction a
+n %! d = unsafeFraction n d
+{-# INLINE (%!) #-}
+
+infixl 7 %!
+
 -- | Reduces a fraction:
 --
 -- 1. Removes common factors.
@@ -436,13 +463,13 @@ unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
 -- 3. @reduce (0 :%: _) --> 0 :%: 1@.
 --
 -- ==== __Examples__
--- >>> reduce (7 :%: 2)
+-- >>> reduce (7 %! 2)
 -- 7 :%: 2
 --
--- >>> reduce (18 :%: 10)
+-- >>> reduce (18 %! 10)
 -- 9 :%: 5
 --
--- >>> reduce (-5 :%: -5)
+-- >>> reduce (-5 %! -5)
 -- 1 :%: 1
 --
 -- @since 0.1
@@ -463,7 +490,7 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 --
 -- >>> :set -XOverloadedLabels
 -- >>> import Optics.Core (view, set)
--- >>> let x = unsafeFraction 2 7
+-- >>> let x = 2 %! 7
 -- >>> view #numerator x
 -- 2
 --
@@ -478,7 +505,7 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 -- ==== __Examples__
 --
 -- >>> import Optics.Core ((^.))
--- >>> f = $$(mkFractionTH 2 8)
+-- >>> f = $$(2 %% 8)
 -- >>> f ^. _MkFraction
 -- (1,4)
 --
