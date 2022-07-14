@@ -101,4 +101,4 @@ haddock:
 
 .PHONY: haddockc
 haddockc:
-	nix run github:tbidne/nix-hs-tools/0.6#haddock-cov
+	nix run github:tbidne/nix-hs-tools/0.6#haddock-cov -- -t 90
