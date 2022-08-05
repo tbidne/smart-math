@@ -54,10 +54,10 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
-import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (NonZero (..), rmatching)
+import Numeric.Literal.Integer (FromInteger (..))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
@@ -213,9 +213,9 @@ instance KnownNat p => Field (ModP p Integer)
 instance KnownNat p => Field (ModP p Natural)
 
 -- | @since 0.1
-instance (KnownNat p, UpperBoundless a) => NumLiteral (ModP p a) where
-  fromLit = unsafeModP . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (KnownNat p, UpperBoundless a) => FromInteger (ModP p a) where
+  afromInteger = unsafeModP . fromInteger
+  {-# INLINEABLE afromInteger #-}
 
 -- | Constructor for 'ModP'. Fails if @p@ is not prime. This uses the
 -- Miller-Rabin primality test, which has complexity \(O(k \log^3 p)\), and we

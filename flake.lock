@@ -2,15 +2,16 @@
   "nodes": {
     "algebra-simple-src": {
       "inputs": {
+        "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1657772524,
-        "narHash": "sha256-TOdQFtNCz7FiHn9yWKJC3NRP7mG/4vTskI2G9NwEJGg=",
+        "lastModified": 1659663839,
+        "narHash": "sha256-nDBqSL4ZcegVQQebKTIm1bwIdsPGy/0Qfv6hSj4I7sA=",
         "owner": "tbidne",
         "repo": "algebra-simple",
-        "rev": "078953fdac6bb9738aa6adae12bd893cf4debc01",
+        "rev": "0cba3e3797bc6b45a32319735c0ddfef788a6994",
         "type": "github"
       },
       "original": {
@@ -20,6 +21,22 @@
       }
     },
     "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650374568,
+        "narHash": "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "b4a34015c698c7793d592d66adbab377907a2be8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_2": {
       "flake": false,
       "locked": {
         "lastModified": 1650374568,
@@ -100,7 +117,7 @@
     "root": {
       "inputs": {
         "algebra-simple-src": "algebra-simple-src",
-        "flake-compat": "flake-compat",
+        "flake-compat": "flake-compat_2",
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2"
       }

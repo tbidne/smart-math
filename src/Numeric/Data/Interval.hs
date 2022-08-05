@@ -77,8 +77,9 @@ import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
-import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (rmatching)
+import Numeric.Literal.Integer (FromInteger (..))
+import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
@@ -130,9 +131,16 @@ instance Pretty a => Pretty (LRInterval l r a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => NumLiteral (LRInterval l r a) where
-  fromLit = unsafeLRInterval . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => FromInteger (LRInterval l r a) where
+  afromInteger = unsafeLRInterval . fromInteger
+  {-# INLINEABLE afromInteger #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, KnownNat l, KnownNat r, Ord a, Show a) => FromRational (LRInterval l r a) where
+  afromRational = unsafeLRInterval . fromRational
+  {-# INLINEABLE afromRational #-}
 
 -- | Template haskell for creating an 'LRInterval' at compile-time.
 --
@@ -284,9 +292,16 @@ instance Pretty a => Pretty (LInterval l a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (KnownNat l, Num a, Ord a, Show a) => NumLiteral (LInterval l a) where
-  fromLit = unsafeLInterval . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (KnownNat l, Num a, Ord a, Show a) => FromInteger (LInterval l a) where
+  afromInteger = unsafeLInterval . fromInteger
+  {-# INLINEABLE afromInteger #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, KnownNat l, Ord a, Show a) => FromRational (LInterval l a) where
+  afromRational = unsafeLInterval . fromRational
+  {-# INLINEABLE afromRational #-}
 
 -- | Template haskell for creating a 'LInterval' at compile-time.
 --
@@ -433,9 +448,16 @@ instance Pretty a => Pretty (RInterval r a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (KnownNat r, Num a, Ord a, Show a) => NumLiteral (RInterval r a) where
-  fromLit = unsafeRInterval . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (KnownNat r, Num a, Ord a, Show a) => FromInteger (RInterval r a) where
+  afromInteger = unsafeRInterval . fromInteger
+  {-# INLINEABLE afromInteger #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, KnownNat r, Ord a, Show a) => FromRational (RInterval r a) where
+  afromRational = unsafeRInterval . fromRational
+  {-# INLINEABLE afromRational #-}
 
 -- | Template haskell for creating an 'RInterval' at compile-time.
 --

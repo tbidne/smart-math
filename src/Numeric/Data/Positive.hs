@@ -46,8 +46,9 @@ import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Class.Division (Division (..))
-import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero, rmatching)
+import Numeric.Literal.Integer (FromInteger (..))
+import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core
   ( A_Getter,
     LabelOptic (..),
@@ -138,9 +139,16 @@ instance Normed (Positive a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Num a, Ord a, Show a) => NumLiteral (Positive a) where
-  fromLit = unsafePositive . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (Num a, Ord a, Show a) => FromInteger (Positive a) where
+  afromInteger = unsafePositive . fromInteger
+  {-# INLINEABLE afromInteger #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, Ord a, Show a) => FromRational (Positive a) where
+  afromRational = unsafePositive . fromRational
+  {-# INLINEABLE afromRational #-}
 
 -- | Template haskell for creating a 'Positive' at compile-time.
 --

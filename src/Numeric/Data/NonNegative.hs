@@ -47,8 +47,9 @@ import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
-import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), rmatching)
+import Numeric.Literal.Integer (FromInteger (..))
+import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
@@ -138,9 +139,16 @@ instance Normed (NonNegative a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Num a, Ord a, Show a) => NumLiteral (NonNegative a) where
-  fromLit = unsafeNonNegative . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (Num a, Ord a, Show a) => FromInteger (NonNegative a) where
+  afromInteger = unsafeNonNegative . fromInteger
+  {-# INLINEABLE afromInteger #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, Ord a, Show a) => FromRational (NonNegative a) where
+  afromRational = unsafeNonNegative . fromRational
+  {-# INLINEABLE afromRational #-}
 
 -- | @since 0.1
 instance Num a => Semiring (NonNegative a)

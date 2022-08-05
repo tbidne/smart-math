@@ -63,8 +63,9 @@ import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
-import Numeric.Class.Literal (NumLiteral (..))
 import Numeric.Data.NonZero (NonZero (..), rmatching)
+import Numeric.Literal.Integer (FromInteger (..))
+import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core
   ( A_Getter,
     A_Lens,
@@ -360,16 +361,28 @@ instance Semifield (Fraction Integer)
 instance Field (Fraction Integer)
 
 -- | @since 0.1
-instance NumLiteral (Fraction Integer) where
-  fromLit = fromInteger
-  {-# INLINEABLE fromLit #-}
+instance FromInteger (Fraction Integer) where
+  afromInteger = fromInteger
+  {-# INLINEABLE afromInteger #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance NumLiteral (Fraction Natural) where
-  fromLit = fromInteger
-  {-# INLINEABLE fromLit #-}
+instance FromInteger (Fraction Natural) where
+  afromInteger = fromInteger
+  {-# INLINEABLE afromInteger #-}
+
+-- | @since 0.1
+instance FromRational (Fraction Integer) where
+  afromRational = fromRational
+  {-# INLINEABLE afromRational #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance FromRational (Fraction Natural) where
+  afromRational = fromRational
+  {-# INLINEABLE afromRational #-}
 
 -- | Smart constructor for 'Fraction'. Returns 'Nothing' if the second
 -- parameter is 0. Reduces the fraction via 'reduce' if possible.

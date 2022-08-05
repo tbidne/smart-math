@@ -39,7 +39,7 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Boundless (UpperBoundless)
-import Numeric.Class.Literal (NumLiteral (..))
+import Numeric.Literal.Integer (FromInteger (..))
 import Optics.Core (Lens', lens)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
@@ -175,9 +175,9 @@ instance KnownNat n => Ring (ModN n Integer)
 instance KnownNat n => Ring (ModN n Natural)
 
 -- | @since 0.1
-instance (KnownNat n, UpperBoundless a) => NumLiteral (ModN n a) where
-  fromLit = MkModN . fromInteger
-  {-# INLINEABLE fromLit #-}
+instance (KnownNat n, UpperBoundless a) => FromInteger (ModN n a) where
+  afromInteger = MkModN . fromInteger
+  {-# INLINEABLE afromInteger #-}
 
 -- | Constructor for 'ModN'.
 --
