@@ -50,12 +50,9 @@ import Numeric.Data.NonZero (NonZero (..), reallyUnsafeNonZero, rmatching)
 import Numeric.Literal.Integer (FromInteger (..))
 import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core
-  ( A_Getter,
-    LabelOptic (..),
-    ReversedPrism',
+  ( ReversedPrism',
     ReversibleOptic (re),
     prism,
-    to,
   )
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..))
@@ -71,10 +68,7 @@ import Prettyprinter (Pretty (..))
 --
 -- @since 0.1
 type Positive :: Type -> Type
-newtype Positive a = UnsafePositive
-  { -- | @since 0.1
-    unPositive :: a
-  }
+newtype Positive a = UnsafePositive a
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -100,11 +94,6 @@ pattern MkPositive :: a -> Positive a
 pattern MkPositive x <- UnsafePositive x
 
 {-# COMPLETE MkPositive #-}
-
--- | @since 0.1
-instance (k ~ A_Getter, a ~ n) => LabelOptic "unPositive" k (Positive n) (Positive n) a a where
-  labelOptic = to unPositive
-  {-# INLINEABLE labelOptic #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (Positive a) where
@@ -154,7 +143,7 @@ instance (Fractional a, Ord a, Show a) => FromRational (Positive a) where
 --
 -- ==== __Examples__
 -- >>> $$(mkPositiveTH 1)
--- UnsafePositive {unPositive = 1}
+-- UnsafePositive 1
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -173,7 +162,7 @@ mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
 --
 -- ==== __Examples__
 -- >>> mkPositive 7
--- Just (UnsafePositive {unPositive = 7})
+-- Just (UnsafePositive 7)
 --
 -- >>> mkPositive 0
 -- Nothing
@@ -191,7 +180,7 @@ mkPositive x
 --
 -- ==== __Examples__
 -- >>> unsafePositive 7
--- UnsafePositive {unPositive = 7}
+-- UnsafePositive 7
 --
 -- @since 0.1
 unsafePositive :: (HasCallStack, Num a, Ord a, Show a) => a -> Positive a
@@ -217,12 +206,17 @@ reallyUnsafePositive = UnsafePositive
 --
 -- ==== __Examples__
 -- >>> positiveToNonZero $ unsafePositive 3
--- UnsafeNonZero {unNonZero = UnsafePositive {unPositive = 3}}
+-- UnsafeNonZero (UnsafePositive 3)
 --
 -- @since 0.1
 positiveToNonZero :: Positive a -> NonZero (Positive a)
 positiveToNonZero = reallyUnsafeNonZero
 {-# INLINEABLE positiveToNonZero #-}
+
+-- | @since 0.1
+unPositive :: Positive a -> a
+unPositive (UnsafePositive x) = x
+{-# INLINE unPositive #-}
 
 -- | 'ReversedPrism'' that enables total elimination and partial construction.
 --
@@ -234,7 +228,7 @@ positiveToNonZero = reallyUnsafeNonZero
 -- 2
 --
 -- >>> rmatching _MkPositive 3
--- Right (UnsafePositive {unPositive = 3})
+-- Right (UnsafePositive 3)
 --
 -- >>> rmatching _MkPositive 0
 -- Left 0

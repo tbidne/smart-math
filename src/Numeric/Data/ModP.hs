@@ -73,10 +73,7 @@ import Prettyprinter (Pretty (..), (<+>))
 --
 -- @since 0.1
 type ModP :: Nat -> Type -> Type
-newtype ModP p a = UnsafeModP
-  { -- | @since 0.1
-    unModP :: a
-  }
+newtype ModP p a = UnsafeModP a
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -91,6 +88,11 @@ newtype ModP p a = UnsafeModP
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+unModP :: ModP p a -> a
+unModP (UnsafeModP x) = x
+{-# INLINE unModP #-}
 
 -- | @since 0.1
 instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where

@@ -64,10 +64,7 @@ import Prettyprinter (Pretty (..))
 --
 -- @since 0.1
 type NonNegative :: Type -> Type
-newtype NonNegative a = UnsafeNonNegative
-  { -- | @since 0.1
-    unNonNegative :: a
-  }
+newtype NonNegative a = UnsafeNonNegative a
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -160,7 +157,7 @@ instance (Division a, Num a) => Semifield (NonNegative a)
 --
 -- ==== __Examples__
 -- >>> $$(mkNonNegativeTH 1)
--- UnsafeNonNegative {unNonNegative = 1}
+-- UnsafeNonNegative 1
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -179,7 +176,7 @@ mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
 --
 -- ==== __Examples__
 -- >>> mkNonNegative 0
--- Just (UnsafeNonNegative {unNonNegative = 0})
+-- Just (UnsafeNonNegative 0)
 --
 -- >>> mkNonNegative (-2)
 -- Nothing
@@ -197,7 +194,7 @@ mkNonNegative x
 --
 -- ==== __Examples__
 -- >>> unsafeNonNegative 7
--- UnsafeNonNegative {unNonNegative = 7}
+-- UnsafeNonNegative 7
 --
 -- @since 0.1
 unsafeNonNegative :: (HasCallStack, Num a, Ord a, Show a) => a -> NonNegative a
@@ -219,6 +216,11 @@ reallyUnsafeNonNegative :: a -> NonNegative a
 reallyUnsafeNonNegative = UnsafeNonNegative
 {-# INLINEABLE reallyUnsafeNonNegative #-}
 
+-- | @since 0.1
+unNonNegative :: NonNegative a -> a
+unNonNegative (UnsafeNonNegative x) = x
+{-# INLINE unNonNegative #-}
+
 -- | 'ReversedPrism'' that enables total elimination and partial construction.
 --
 -- ==== __Examples__
@@ -229,7 +231,7 @@ reallyUnsafeNonNegative = UnsafeNonNegative
 -- 2
 --
 -- >>> rmatching _MkNonNegative 3
--- Right (UnsafeNonNegative {unNonNegative = 3})
+-- Right (UnsafeNonNegative 3)
 --
 -- >>> rmatching _MkNonNegative (-2)
 -- Left (-2)

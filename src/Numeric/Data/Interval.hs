@@ -93,10 +93,7 @@ import Prettyprinter (Pretty (..))
 --
 -- @since 0.1
 type LRInterval :: Nat -> Nat -> Type -> Type
-newtype LRInterval l r a = UnsafeLRInterval
-  { -- | @since 0.1
-    unLRInterval :: a
-  }
+newtype LRInterval l r a = UnsafeLRInterval a
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -113,6 +110,11 @@ newtype LRInterval l r a = UnsafeLRInterval
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+unLRInterval :: LRInterval l r a -> a
+unLRInterval (UnsafeLRInterval x) = x
+{-# INLINE unLRInterval #-}
 
 -- | Unidirectional pattern synonym for 'LRInterval'. This allows us to pattern
 -- match on an interval term without exposing the unsafe internal details.
@@ -146,7 +148,7 @@ instance (Fractional a, KnownNat l, KnownNat r, Ord a, Show a) => FromRational (
 --
 -- ==== __Examples__
 -- >>> $$(mkLRIntervalTH @0 @100 7)
--- UnsafeLRInterval {unLRInterval = 7}
+-- UnsafeLRInterval 7
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -172,7 +174,7 @@ mkLRIntervalTH x = maybe (error msg) liftTyped $ mkLRInterval x
 --
 -- ==== __Examples__
 -- >>> mkLRInterval @10 @100 50
--- Just (UnsafeLRInterval {unLRInterval = 50})
+-- Just (UnsafeLRInterval 50)
 --
 -- >>> mkLRInterval @10 @100 5
 -- Nothing
@@ -201,7 +203,7 @@ mkLRInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeLRInterval @0 @10 7
--- UnsafeLRInterval {unLRInterval = 7}
+-- UnsafeLRInterval 7
 --
 -- @since 0.1
 unsafeLRInterval ::
@@ -235,7 +237,7 @@ reallyUnsafeLRInterval = UnsafeLRInterval
 -- 2
 --
 -- >>> rmatching (_MkLRInterval @1 @5) 3
--- Right (UnsafeLRInterval {unLRInterval = 3})
+-- Right (UnsafeLRInterval 3)
 --
 -- >>> rmatching (_MkLRInterval @1 @5) 7
 -- Left 7
@@ -254,10 +256,7 @@ _MkLRInterval = re (prism unLRInterval g)
 --
 -- @since 0.1
 type LInterval :: Nat -> Type -> Type
-newtype LInterval l a = UnsafeLInterval
-  { -- | @since 0.1
-    unLInterval :: a
-  }
+newtype LInterval l a = UnsafeLInterval a
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -274,6 +273,11 @@ newtype LInterval l a = UnsafeLInterval
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+unLInterval :: LInterval l a -> a
+unLInterval (UnsafeLInterval x) = x
+{-# INLINE unLInterval #-}
 
 -- | Unidirectional pattern synonym for 'LInterval'. This allows us to pattern
 -- match on an interval term without exposing the unsafe internal details.
@@ -307,7 +311,7 @@ instance (Fractional a, KnownNat l, Ord a, Show a) => FromRational (LInterval l 
 --
 -- ==== __Examples__
 -- >>> $$(mkLIntervalTH @0 7)
--- UnsafeLInterval {unLInterval = 7}
+-- UnsafeLInterval 7
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -333,7 +337,7 @@ mkLIntervalTH x = maybe (error msg) liftTyped $ mkLInterval x
 --
 -- ==== __Examples__
 -- >>> mkLInterval @10 50
--- Just (UnsafeLInterval {unLInterval = 50})
+-- Just (UnsafeLInterval 50)
 --
 -- >>> mkLInterval @10 5
 -- Nothing
@@ -357,7 +361,7 @@ mkLInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeLInterval @0 7
--- UnsafeLInterval {unLInterval = 7}
+-- UnsafeLInterval 7
 --
 -- @since 0.1
 unsafeLInterval ::
@@ -391,7 +395,7 @@ reallyUnsafeLInterval = UnsafeLInterval
 -- 10
 --
 -- >>> rmatching (_MkLInterval @8) 10
--- Right (UnsafeLInterval {unLInterval = 10})
+-- Right (UnsafeLInterval 10)
 --
 -- >>> rmatching (_MkLInterval @8) 5
 -- Left 5
@@ -410,10 +414,7 @@ _MkLInterval = re (prism unLInterval g)
 --
 -- @since 0.1
 type RInterval :: Nat -> Type -> Type
-newtype RInterval r a = UnsafeRInterval
-  { -- | @since 0.1
-    unRInterval :: a
-  }
+newtype RInterval r a = UnsafeRInterval a
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -430,6 +431,11 @@ newtype RInterval r a = UnsafeRInterval
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+unRInterval :: RInterval r a -> a
+unRInterval (UnsafeRInterval x) = x
+{-# INLINE unRInterval #-}
 
 -- | Unidirectional pattern synonym for 'RInterval'. This allows us to pattern
 -- match on an interval term without exposing the unsafe internal details.
@@ -463,7 +469,7 @@ instance (Fractional a, KnownNat r, Ord a, Show a) => FromRational (RInterval r 
 --
 -- ==== __Examples__
 -- >>> $$(mkRIntervalTH @100 7)
--- UnsafeRInterval {unRInterval = 7}
+-- UnsafeRInterval 7
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
@@ -489,7 +495,7 @@ mkRIntervalTH x = maybe (error msg) liftTyped $ mkRInterval x
 --
 -- ==== __Examples__
 -- >>> mkRInterval @100 50
--- Just (UnsafeRInterval {unRInterval = 50})
+-- Just (UnsafeRInterval 50)
 --
 -- >>> mkRInterval @0 5
 -- Nothing
@@ -513,7 +519,7 @@ mkRInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeRInterval @10 7
--- UnsafeRInterval {unRInterval = 7}
+-- UnsafeRInterval 7
 --
 -- @since 0.1
 unsafeRInterval ::
@@ -547,7 +553,7 @@ reallyUnsafeRInterval = UnsafeRInterval
 -- 5
 --
 -- >>> rmatching (_MkRInterval @8) 5
--- Right (UnsafeRInterval {unRInterval = 5})
+-- Right (UnsafeRInterval 5)
 --
 -- >>> rmatching (_MkRInterval @8) 10
 -- Left 10
