@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- | Provides the 'ModP' type for modular arithmetic.
 --
@@ -42,6 +43,7 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
+import Data.Bounds (UpperBoundless)
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
@@ -53,7 +55,6 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
-import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (NonZero (..), rmatching)
@@ -215,7 +216,7 @@ instance KnownNat p => Field (ModP p Integer)
 instance KnownNat p => Field (ModP p Natural)
 
 -- | @since 0.1
-instance (KnownNat p, UpperBoundless a) => FromInteger (ModP p a) where
+instance (Integral a, KnownNat p, UpperBoundless a) => FromInteger (ModP p a) where
   afromInteger = unsafeModP . fromInteger
   {-# INLINEABLE afromInteger #-}
 
@@ -233,7 +234,7 @@ instance (KnownNat p, UpperBoundless a) => FromInteger (ModP p a) where
 -- Nothing
 --
 -- @since 0.1
-mkModP :: forall p a. (KnownNat p, UpperBoundless a) => a -> Maybe (ModP p a)
+mkModP :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => a -> Maybe (ModP p a)
 mkModP x = case ModPI.isPrime p' of
   Composite -> Nothing
   ProbablyPrime -> Just $ UnsafeModP x'
@@ -250,9 +251,9 @@ mkModP x = case ModPI.isPrime p' of
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
-mkModPTH :: forall p a. (KnownNat p, Lift a, UpperBoundless a) => a -> Code Q (ModP p a)
+mkModPTH :: forall p a. (Integral a, KnownNat p, Lift a, UpperBoundless a) => a -> Code Q (ModP p a)
 #else
-mkModPTH :: forall p a. (KnownNat p, Lift a, UpperBoundless a) => a -> Q (TExp (ModP p a))
+mkModPTH :: forall p a. (Integral a, KnownNat p, Lift a, UpperBoundless a) => a -> Q (TExp (ModP p a))
 #endif
 mkModPTH = maybe (error err) liftTyped . mkModP
   where
@@ -271,7 +272,7 @@ mkModPTH = maybe (error err) liftTyped . mkModP
 -- MkModP 5 (mod 7)
 --
 -- @since 0.1
-unsafeModP :: forall p a. (HasCallStack, KnownNat p, UpperBoundless a) => a -> ModP p a
+unsafeModP :: forall p a. (HasCallStack, Integral a, KnownNat p, UpperBoundless a) => a -> ModP p a
 unsafeModP x = case mkModP x of
   Just mp -> mp
   Nothing ->
@@ -288,7 +289,7 @@ unsafeModP x = case mkModP x of
 -- is undesirable for performance reasons. Exercise extreme caution.
 --
 -- @since 0.1
-reallyUnsafeModP :: forall p a. (KnownNat p, UpperBoundless a) => a -> ModP p a
+reallyUnsafeModP :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => a -> ModP p a
 reallyUnsafeModP = UnsafeModP . (`mod` p')
   where
     p' = fromIntegral $ natVal @p Proxy
@@ -309,7 +310,7 @@ reallyUnsafeModP = UnsafeModP . (`mod` p')
 -- MkModP 8 (mod 19)
 --
 -- @since 0.1
-invert :: forall p a. (KnownNat p, UpperBoundless a) => NonZero (ModP p a) -> ModP p a
+invert :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => NonZero (ModP p a) -> ModP p a
 invert (MkNonZero (UnsafeModP d)) = reallyUnsafeModP $ toUpperBoundless $ ModPI.findInverse d' p'
   where
     p' = MkModulus $ fromIntegral $ natVal @p Proxy
@@ -317,7 +318,7 @@ invert (MkNonZero (UnsafeModP d)) = reallyUnsafeModP $ toUpperBoundless $ ModPI.
 {-# INLINEABLE invert #-}
 
 -- Note: obviously this is partial when @a@ is 'Natural'
-toUpperBoundless :: UpperBoundless a => Integer -> a
+toUpperBoundless :: (Integral a, UpperBoundless a) => Integer -> a
 toUpperBoundless = fromIntegral
 {-# INLINEABLE toUpperBoundless #-}
 
@@ -337,7 +338,7 @@ toUpperBoundless = fromIntegral
 -- Left 9
 --
 -- @since 0.1
-_MkModP :: (KnownNat p, UpperBoundless a) => ReversedPrism' (ModP p a) a
+_MkModP :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => ReversedPrism' (ModP p a) a
 _MkModP = re (prism unModP g)
   where
     g x = case mkModP x of

@@ -12,3 +12,5 @@ extra-deps:
 - optics-core-0.4.1@sha256:b163d1a8f392536c645cbd728c3e29d9f35864b25b1e3cef3a29806ee8a21c6b,5545
 - git: https://github.com/tbidne/algebra-simple.git
   commit: 0cba3e3797bc6b45a32319735c0ddfef788a6994
+- git: https://github.com/tbidne/bounds.git
+  commit: e13fef87cbe0f756826fa940a0f515f9df5322bf

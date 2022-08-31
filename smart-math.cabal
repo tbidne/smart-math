@@ -50,7 +50,6 @@ common common-exts
 library
   import:           common-exts
   exposed-modules:
-    Numeric.Class.Boundless
     Numeric.Class.Division
     Numeric.Data.Fraction
     Numeric.Data.Interval
@@ -63,6 +62,7 @@ library
   build-depends:
     , algebra-simple    ^>=0.1
     , base              >=4.14.0.0 && <4.17
+    , bounds            ^>=0.1
     , deepseq           ^>=1.4.4.0
     , optics-core       ^>=0.4
     , prettyprinter     >=1.4.0    && <1.8
@@ -111,6 +111,7 @@ test-suite props
   build-depends:
     , algebra-simple
     , base
+    , bounds
     , hedgehog        >=1.0.2   && <1.2
     , smart-math
     , tagged          ^>=0.8.6

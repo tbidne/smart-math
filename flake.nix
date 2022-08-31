@@ -1,6 +1,7 @@
 {
   description = "A package for mathematical smart constructors";
   inputs.algebra-simple-src.url = "github:tbidne/algebra-simple";
+  inputs.bounds-src.url = "github:tbidne/bounds";
   inputs.flake-compat = {
     url = "github:edolstra/flake-compat";
     flake = false;
@@ -9,6 +10,7 @@
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   outputs =
     { algebra-simple-src
+    , bounds-src
     , flake-compat
     , flake-utils
     , nixpkgs
@@ -40,6 +42,8 @@
           overrides = final: prev: with compiler; {
             algebra-simple =
               final.callCabal2nix "algebra-simple" algebra-simple-src { };
+            bounds =
+              final.callCabal2nix "bounds" bounds-src { };
           };
         };
     in

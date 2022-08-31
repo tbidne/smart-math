@@ -2,6 +2,7 @@
 
 module Test.Data.ModP (props) where
 
+import Data.Bounds (UpperBoundless)
 import Data.Functor.Identity (Identity)
 import GHC.Natural (Natural)
 import Gens qualified
@@ -15,7 +16,6 @@ import Numeric.Algebra.Additive.AMonoid (AMonoid)
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), unsafeAMonoidNonZero)
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
-import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
 import Numeric.Data.ModP qualified as ModP
 import Numeric.Data.NonZero (NonZero (..))
@@ -137,6 +137,7 @@ invertNat = T.askOption $ \(MkMaxRuns limit) ->
 addTotal' ::
   forall a.
   ( ASemigroup (ModP 65537 a),
+    Integral a,
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -152,6 +153,7 @@ addTotal' = H.property $ do
 subTotal' ::
   forall a.
   ( AGroup (ModP 65537 a),
+    Integral a,
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -166,7 +168,8 @@ subTotal' = H.property $ do
 
 multTotal' ::
   forall a.
-  ( MSemigroup (ModP 65537 a),
+  ( Integral a,
+    MSemigroup (ModP 65537 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -182,6 +185,7 @@ multTotal' = H.property $ do
 divTotal' ::
   forall a.
   ( AMonoid (ModP 65537 a),
+    Integral a,
     MGroup (ModP 65537 a),
     Show a,
     TestBounds a,
@@ -197,6 +201,7 @@ divTotal' = H.property $ do
 invert' ::
   forall a.
   ( AMonoid (ModP 65537 a),
+    Integral a,
     MGroup (ModP 65537 a),
     Show a,
     TestBounds a,
@@ -208,11 +213,11 @@ invert' = H.property $ do
   let nInv = ModP.invert nz
   reallyUnsafeModP 1 === n .*. nInv
 
-genNZ :: forall a m. (AMonoid (ModP 65537 a), GenBase m ~ Identity, MonadGen m, TestBounds a, UpperBoundless a) => m (NonZero (ModP 65537 a))
+genNZ :: forall a m. (AMonoid (ModP 65537 a), GenBase m ~ Identity, Integral a, MonadGen m, TestBounds a, UpperBoundless a) => m (NonZero (ModP 65537 a))
 genNZ = do
   x <- HG.filter (\x' -> x' `mod` 65537 /= 0) $ HG.integral $ HR.exponential 2 maxVal
   let y = unsafeAMonoidNonZero $ reallyUnsafeModP @65537 x
   pure y
 
-anyNat :: forall a m. (MonadGen m, TestBounds a, UpperBoundless a) => m (ModP 65537 a)
+anyNat :: forall a m. (Integral a, MonadGen m, TestBounds a, UpperBoundless a) => m (ModP 65537 a)
 anyNat = reallyUnsafeModP <$> HG.integral (HR.exponentialFrom 0 0 maxVal)

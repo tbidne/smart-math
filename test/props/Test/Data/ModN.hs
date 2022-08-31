@@ -2,6 +2,7 @@
 
 module Test.Data.ModN (props) where
 
+import Data.Bounds (UpperBoundless)
 import GHC.Natural (Natural)
 import Hedgehog (MonadGen, Property, (===))
 import Hedgehog qualified as H
@@ -11,7 +12,6 @@ import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
-import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Data.ModN (ModN (..))
 import Numeric.Data.ModN qualified as ModN
 import Test.Tasty (TestTree)
@@ -95,7 +95,7 @@ multTotalNat = T.askOption $ \(MkMaxRuns limit) ->
     H.withTests limit $
       multTotal' @Natural
 
-mkModN' :: forall a. (Show a, TestBounds a, UpperBoundless a) => Property
+mkModN' :: forall a. (Integral a, Show a, TestBounds a, UpperBoundless a) => Property
 mkModN' = H.property $ do
   x <- H.forAll (nonneg @a)
   let MkModN x' = ModN.mkModN @12 x
@@ -104,6 +104,7 @@ mkModN' = H.property $ do
 addTotal' ::
   forall a.
   ( ASemigroup (ModN 65536 a),
+    Integral a,
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -119,6 +120,7 @@ addTotal' = H.property $ do
 subTotal' ::
   forall a.
   ( AGroup (ModN 65536 a),
+    Integral a,
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -133,7 +135,8 @@ subTotal' = H.property $ do
 
 multTotal' ::
   forall a.
-  ( MSemigroup (ModN 65536 a),
+  ( Integral a,
+    MSemigroup (ModN 65536 a),
     Show a,
     TestBounds a,
     UpperBoundless a
@@ -149,5 +152,5 @@ multTotal' = H.property $ do
 nonneg :: forall a m. (Integral a, MonadGen m, TestBounds a) => m a
 nonneg = HG.integral $ HR.exponentialFrom 20 20 maxVal
 
-anyNat :: forall a m. (MonadGen m, TestBounds a, UpperBoundless a) => m (ModN 65536 a)
+anyNat :: forall a m. (Integral a, MonadGen m, TestBounds a, UpperBoundless a) => m (ModN 65536 a)
 anyNat = ModN.mkModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)

@@ -27,6 +27,7 @@ import Data.Proxy (Proxy (..))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
 import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
 #endif
+import Data.Bounds (UpperBoundless)
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.TypeNats (KnownNat, Nat, natVal)
@@ -38,7 +39,6 @@ import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
-import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Literal.Integer (FromInteger (..))
 import Optics.Core (Lens', lens)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
@@ -76,7 +76,7 @@ unModN (UnsafeModN x) = x
 {-# INLINE unModN #-}
 
 -- | @since 0.1
-instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
+instance (Integral a, KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
   -- manual so we include the mod string
   showsPrec i (MkModN x) =
     showParen
@@ -91,7 +91,7 @@ instance (KnownNat n, Show a, UpperBoundless a) => Show (ModN n a) where
 -- modular reduction to the parameter.
 --
 -- @since 0.1
-pattern MkModN :: forall n a. (KnownNat n, UpperBoundless a) => a -> ModN n a
+pattern MkModN :: forall n a. (Integral a, KnownNat n, UpperBoundless a) => a -> ModN n a
 pattern MkModN x <-
   UnsafeModN x
   where
@@ -177,7 +177,7 @@ instance KnownNat n => Ring (ModN n Integer)
 instance KnownNat n => Ring (ModN n Natural)
 
 -- | @since 0.1
-instance (KnownNat n, UpperBoundless a) => FromInteger (ModN n a) where
+instance (Integral a, KnownNat n, UpperBoundless a) => FromInteger (ModN n a) where
   afromInteger = MkModN . fromInteger
   {-# INLINEABLE afromInteger #-}
 
@@ -191,7 +191,7 @@ instance (KnownNat n, UpperBoundless a) => FromInteger (ModN n a) where
 -- MkModN 7 (mod 10)
 --
 -- @since 0.1
-mkModN :: forall n a. (KnownNat n, UpperBoundless a) => a -> ModN n a
+mkModN :: forall n a. (Integral a, KnownNat n, UpperBoundless a) => a -> ModN n a
 mkModN x = UnsafeModN x'
   where
     n' = fromIntegral $ natVal @n Proxy
@@ -213,6 +213,6 @@ mkModN x = UnsafeModN x'
 -- MkModN 2 (mod 7)
 --
 -- @since 0.1
-_MkModN :: (KnownNat n, Num a, Ord a, UpperBoundless a) => Lens' (ModN n a) a
+_MkModN :: forall n a. (Integral a, KnownNat n, Ord a, UpperBoundless a) => Lens' (ModN n a) a
 _MkModN = lens unModN (\_ x -> mkModN x)
 {-# INLINEABLE _MkModN #-}

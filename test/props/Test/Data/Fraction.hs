@@ -4,7 +4,6 @@ import Gens qualified
 import Hedgehog ((===))
 import Hedgehog qualified as H
 import MaxRuns (MaxRuns (..))
-import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Data.Fraction (Fraction (..), (%!))
 import Numeric.Data.Fraction qualified as Frac
 import Test.Tasty (TestTree)
@@ -178,11 +177,11 @@ denominatorProp = T.askOption $ \(MkMaxRuns limit) ->
         x@(_ :%: d) <- H.forAll Gens.fraction
         d === Frac.denominator x
 
-isReduced :: UpperBoundless a => Fraction a -> Bool
+isReduced :: Integral a => Fraction a -> Bool
 isReduced (0 :%: d) = d == 1
 isReduced x@(_ :%: d)
   | d < 0 = False
   | otherwise = fracGcd x == 1
 
-fracGcd :: UpperBoundless a => Fraction a -> a
+fracGcd :: Integral a => Fraction a -> a
 fracGcd (n :%: d) = gcd n d

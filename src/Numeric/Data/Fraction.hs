@@ -49,6 +49,7 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
+import Data.Bounds (UpperBoundless)
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
@@ -61,7 +62,6 @@ import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
-import Numeric.Class.Boundless (UpperBoundless)
 import Numeric.Class.Division (Division (..))
 import Numeric.Data.NonZero (NonZero (..), rmatching)
 import Numeric.Literal.Integer (FromInteger (..))
@@ -184,7 +184,7 @@ instance Pretty a => Pretty (Fraction a) where
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance (Eq a, UpperBoundless a) => Eq (Fraction a) where
+instance (Eq a, Integral a, UpperBoundless a) => Eq (Fraction a) where
   0 :%: _ == 0 :%: _ = True
   x == y = n1 == n2 && d1 == d2
     where
@@ -193,7 +193,7 @@ instance (Eq a, UpperBoundless a) => Eq (Fraction a) where
   {-# INLINEABLE (==) #-}
 
 -- | @since 0.1
-instance UpperBoundless a => Ord (Fraction a) where
+instance (Integral a, UpperBoundless a) => Ord (Fraction a) where
   x@(n1 :%: d1) <= y@(n2 :%: d2)
     | x == y = True
     | otherwise = n1 * d2 `comp` n2 * d1
@@ -206,14 +206,14 @@ instance UpperBoundless a => Ord (Fraction a) where
   {-# INLINEABLE (<=) #-}
 
 -- | @since 0.1
-instance UpperBoundless a => Enum (Fraction a) where
+instance (Integral a, UpperBoundless a) => Enum (Fraction a) where
   toEnum n = UnsafeFraction (fromIntegral n) 1
   {-# INLINEABLE toEnum #-}
   fromEnum = fromInteger . truncate
   {-# INLINEABLE fromEnum #-}
 
 -- | @since 0.1
-instance UpperBoundless a => Fractional (Fraction a) where
+instance (Integral a, UpperBoundless a) => Fractional (Fraction a) where
   (n1 :%: d1) / (n2 :%: d2) = unsafeFraction (n1 * d2) (n2 * d1)
   {-# INLINEABLE (/) #-}
   recip (0 :%: _) = R.ratioZeroDenominatorError
@@ -223,7 +223,7 @@ instance UpperBoundless a => Fractional (Fraction a) where
   {-# INLINEABLE fromRational #-}
 
 -- | @since 0.1
-instance UpperBoundless a => Num (Fraction a) where
+instance (Integral a, UpperBoundless a) => Num (Fraction a) where
   (n1 :%: d1) + (n2 :%: d2) = unsafeFraction (n1 * d2 + n2 * d1) (d1 * d2)
   {-# INLINEABLE (+) #-}
   (n1 :%: d1) - (n2 :%: d2) = unsafeFraction (n1 * d2 - n2 * d1) (d1 * d2)
@@ -240,12 +240,12 @@ instance UpperBoundless a => Num (Fraction a) where
   {-# INLINEABLE fromInteger #-}
 
 -- | @since 0.1
-instance UpperBoundless a => Real (Fraction a) where
+instance (Integral a, UpperBoundless a) => Real (Fraction a) where
   toRational (n :%: d) = R.reduce (fromIntegral n) (fromIntegral d)
   {-# INLINEABLE toRational #-}
 
 -- | @since 0.1
-instance UpperBoundless a => RealFrac (Fraction a) where
+instance (Integral a, UpperBoundless a) => RealFrac (Fraction a) where
   properFraction (n :%: d) =
     (fromInteger (toInteger q), UnsafeFraction r d)
     where
@@ -395,7 +395,7 @@ instance FromRational (Fraction Natural) where
 -- Nothing
 --
 -- @since 0.1
-mkFraction :: UpperBoundless a => a -> a -> Maybe (Fraction a)
+mkFraction :: (Integral a, UpperBoundless a) => a -> a -> Maybe (Fraction a)
 mkFraction _ 0 = Nothing
 mkFraction n d = Just $ reduce (UnsafeFraction n d)
 {-# INLINEABLE mkFraction #-}
@@ -408,9 +408,9 @@ mkFraction n d = Just $ reduce (UnsafeFraction n d)
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
-mkFractionTH :: (Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
+mkFractionTH :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
 #else
-mkFractionTH :: (Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
+mkFractionTH :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
 #endif
 mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 {-# INLINEABLE mkFractionTH #-}
@@ -424,9 +424,9 @@ mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 --
 -- @since 0.1
 #if MIN_VERSION_template_haskell(2,17,0)
-(%%) :: (Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
+(%%) :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
 #else
-(%%) :: (Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
+(%%) :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
 #endif
 n %% d = mkFractionTH n d
 {-# INLINE (%%) #-}
@@ -446,7 +446,7 @@ infixl 7 %%
 -- *** Exception: Ratio has zero denominator
 --
 -- @since 0.1
-unsafeFraction :: (HasCallStack, UpperBoundless a) => a -> a -> Fraction a
+unsafeFraction :: (HasCallStack, Integral a, UpperBoundless a) => a -> a -> Fraction a
 unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
 {-# INLINEABLE unsafeFraction #-}
 
@@ -463,7 +463,7 @@ unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
 -- *** Exception: Ratio has zero denominator
 --
 -- @since 0.1
-(%!) :: UpperBoundless a => a -> a -> Fraction a
+(%!) :: (Integral a, UpperBoundless a) => a -> a -> Fraction a
 n %! d = unsafeFraction n d
 {-# INLINE (%!) #-}
 
@@ -486,7 +486,7 @@ infixl 7 %!
 -- 1 :%: 1
 --
 -- @since 0.1
-reduce :: UpperBoundless a => Fraction a -> Fraction a
+reduce :: (Integral a, UpperBoundless a) => Fraction a -> Fraction a
 reduce (UnsafeFraction 0 _) = UnsafeFraction 0 1
 reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
   where
@@ -529,7 +529,7 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 -- Left (1,0)
 --
 -- @since 0.1
-_MkFraction :: (Num a, Ord a, UpperBoundless a) => ReversedPrism' (Fraction a) (a, a)
+_MkFraction :: (Integral a, Ord a, UpperBoundless a) => ReversedPrism' (Fraction a) (a, a)
 _MkFraction = re (prism (\(UnsafeFraction n d) -> (n, d)) g)
   where
     g x = case uncurry mkFraction x of
