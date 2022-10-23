@@ -26,6 +26,11 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (..))
+import Data.Bounds
+  ( LowerBounded (lowerBound),
+    UpperBounded (upperBound),
+    UpperBoundless,
+  )
 import Data.Kind (Type)
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
 import Data.Text.Prettyprint.Doc (Pretty (..))
@@ -80,7 +85,9 @@ newtype NonNegative a = UnsafeNonNegative a
     )
   deriving anyclass
     ( -- | @since 0.1
-      NFData
+      NFData,
+      -- | @since 0.1
+      UpperBoundless
     )
 
 -- | Unidirectional pattern synonym for 'NonNegative'. This allows us to pattern
@@ -91,6 +98,23 @@ pattern MkNonNegative :: a -> NonNegative a
 pattern MkNonNegative x <- UnsafeNonNegative x
 
 {-# COMPLETE MkNonNegative #-}
+
+-- | @since 0.1
+instance (Bounded a, Num a) => Bounded (NonNegative a) where
+  minBound = UnsafeNonNegative 0
+  maxBound = UnsafeNonNegative maxBound
+  {-# INLINEABLE minBound #-}
+  {-# INLINEABLE maxBound #-}
+
+-- | @since 0.1
+instance Num a => LowerBounded (NonNegative a) where
+  lowerBound = UnsafeNonNegative 0
+  {-# INLINEABLE lowerBound #-}
+
+-- | @since 0.1
+instance UpperBounded a => UpperBounded (NonNegative a) where
+  upperBound = UnsafeNonNegative upperBound
+  {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (NonNegative a) where

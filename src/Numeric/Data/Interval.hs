@@ -2,6 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- | Provides types for enforcing minimum and maximum bounds.
 --
@@ -62,6 +63,12 @@ module Numeric.Data.Interval
 where
 
 import Control.DeepSeq (NFData)
+import Data.Bounds
+  ( LowerBounded (lowerBound),
+    LowerBoundless,
+    UpperBounded (upperBound),
+    UpperBoundless,
+  )
 import Data.Kind (Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (..))
@@ -108,7 +115,11 @@ newtype LRInterval l r a = UnsafeLRInterval a
     )
   deriving anyclass
     ( -- | @since 0.1
-      NFData
+      LowerBounded,
+      -- | @since 0.1
+      NFData,
+      -- | @since 0.1
+      UpperBounded
     )
 
 -- | @since 0.1
@@ -124,6 +135,13 @@ pattern MkLRInterval :: a -> LRInterval l r a
 pattern MkLRInterval x <- UnsafeLRInterval x
 
 {-# COMPLETE MkLRInterval #-}
+
+-- | @since 0.1
+instance (KnownNat l, KnownNat r, Num a) => Bounded (LRInterval l r a) where
+  minBound = UnsafeLRInterval $ fromIntegral $ natVal @l Proxy
+  maxBound = UnsafeLRInterval $ fromIntegral $ natVal @r Proxy
+  {-# INLINEABLE minBound #-}
+  {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
 instance Pretty a => Pretty (LRInterval l r a) where
@@ -289,6 +307,14 @@ pattern MkLInterval x <- UnsafeLInterval x
 {-# COMPLETE MkLInterval #-}
 
 -- | @since 0.1
+instance (KnownNat l, Num a) => LowerBounded (LInterval l a) where
+  lowerBound = UnsafeLInterval $ fromIntegral $ natVal @l Proxy
+  {-# INLINEABLE lowerBound #-}
+
+-- | @since 0.1
+instance UpperBoundless a => UpperBoundless (LInterval l a)
+
+-- | @since 0.1
 instance Pretty a => Pretty (LInterval l a) where
   pretty (UnsafeLInterval x) = pretty x
   {-# INLINEABLE pretty #-}
@@ -436,6 +462,14 @@ newtype RInterval r a = UnsafeRInterval a
 unRInterval :: RInterval r a -> a
 unRInterval (UnsafeRInterval x) = x
 {-# INLINE unRInterval #-}
+
+-- | @since 0.1
+instance (KnownNat r, Num a) => UpperBounded (RInterval r a) where
+  upperBound = UnsafeRInterval $ fromIntegral $ natVal @r Proxy
+  {-# INLINEABLE upperBound #-}
+
+-- | @since 0.1
+instance LowerBoundless a => LowerBoundless (RInterval r a)
 
 -- | Unidirectional pattern synonym for 'RInterval'. This allows us to pattern
 -- match on an interval term without exposing the unsafe internal details.

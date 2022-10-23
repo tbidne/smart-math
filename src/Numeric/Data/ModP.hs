@@ -29,6 +29,7 @@ module Numeric.Data.ModP
 where
 
 import Control.DeepSeq (NFData)
+import Data.Bounds (LowerBounded, UpperBounded, UpperBoundless)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
@@ -43,7 +44,6 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Data.Bounds (UpperBoundless)
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
@@ -87,7 +87,11 @@ newtype ModP p a = UnsafeModP a
     )
   deriving anyclass
     ( -- | @since 0.1
-      NFData
+      LowerBounded,
+      -- | @since 0.1
+      NFData,
+      -- | @since 0.1
+      UpperBounded
     )
 
 -- | @since 0.1
@@ -115,6 +119,13 @@ pattern MkModP :: a -> ModP p a
 pattern MkModP x <- UnsafeModP x
 
 {-# COMPLETE MkModP #-}
+
+-- | @since 0.1
+instance (KnownNat p, Num a) => Bounded (ModP p a) where
+  minBound = UnsafeModP 0
+  maxBound = UnsafeModP $ fromIntegral $ (natVal @p Proxy - 1)
+  {-# INLINEABLE minBound #-}
+  {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
 instance (KnownNat p, Pretty a) => Pretty (ModP p a) where

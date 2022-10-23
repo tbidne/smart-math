@@ -45,8 +45,8 @@ common common-exts
     StandaloneDeriving
     StandaloneKindSignatures
     TypeApplications
-    TypeOperators
     TypeFamilies
+    TypeOperators
 
 library
   import:           common-exts

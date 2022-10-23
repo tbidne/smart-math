@@ -32,6 +32,12 @@ module Numeric.Data.Fraction
 where
 
 import Control.DeepSeq (NFData)
+import Data.Bounds
+  ( LowerBounded,
+    LowerBoundless,
+    UpperBounded,
+    UpperBoundless,
+  )
 import Data.Kind (Type)
 import Data.Maybe qualified as May
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
@@ -49,7 +55,6 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Data.Bounds (UpperBoundless)
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
@@ -146,7 +151,11 @@ data Fraction a = UnsafeFraction
     )
   deriving anyclass
     ( -- | @since 0.1
-      NFData
+      LowerBounded,
+      -- | @since 0.1
+      NFData,
+      -- | @since 0.1
+      UpperBounded
     )
 
 -- | @since 0.1
@@ -177,6 +186,19 @@ instance (Integral a, Show a) => Show (Fraction a) where
       (i >= 11)
       (showsPrec 11 n . showString " :%: " . showsPrec 11 d)
   {-# INLINEABLE showsPrec #-}
+
+-- | @since 0.1
+instance (Bounded a, Num a) => Bounded (Fraction a) where
+  minBound = UnsafeFraction minBound 1
+  maxBound = UnsafeFraction maxBound 1
+  {-# INLINEABLE minBound #-}
+  {-# INLINEABLE maxBound #-}
+
+-- | @since 0.1
+instance LowerBoundless a => LowerBoundless (Fraction a)
+
+-- | @since 0.1
+instance UpperBoundless a => UpperBoundless (Fraction a)
 
 -- | @since 0.1
 instance Pretty a => Pretty (Fraction a) where

@@ -22,12 +22,12 @@ module Numeric.Data.ModN
 where
 
 import Control.DeepSeq (NFData)
+import Data.Bounds (LowerBounded, UpperBounded, UpperBoundless)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
 import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
 #endif
-import Data.Bounds (UpperBoundless)
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.TypeNats (KnownNat, Nat, natVal)
@@ -67,7 +67,11 @@ newtype ModN n a = UnsafeModN a
     )
   deriving anyclass
     ( -- | @since 0.1
-      NFData
+      LowerBounded,
+      -- | @since 0.1
+      NFData,
+      -- | @since 0.1
+      UpperBounded
     )
 
 -- | @since 0.1
@@ -98,6 +102,13 @@ pattern MkModN x <-
     MkModN x = mkModN x
 
 {-# COMPLETE MkModN #-}
+
+-- | @since 0.1
+instance (KnownNat n, Num a) => Bounded (ModN n a) where
+  minBound = UnsafeModN 0
+  maxBound = UnsafeModN $ fromIntegral $ (natVal @n Proxy - 1)
+  {-# INLINEABLE minBound #-}
+  {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
 instance (KnownNat n, Pretty a) => Pretty (ModN n a) where
