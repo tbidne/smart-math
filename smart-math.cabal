@@ -45,6 +45,7 @@ common common-exts
     StandaloneDeriving
     StandaloneKindSignatures
     TypeApplications
+    TypeOperators
     TypeFamilies
 
 library
