@@ -106,7 +106,7 @@ pattern MkModN x <-
 -- | @since 0.1
 instance (KnownNat n, Num a) => Bounded (ModN n a) where
   minBound = UnsafeModN 0
-  maxBound = UnsafeModN $ fromIntegral $ (natVal @n Proxy - 1)
+  maxBound = UnsafeModN $ fromIntegral (natVal @n Proxy - 1)
   {-# INLINEABLE minBound #-}
   {-# INLINEABLE maxBound #-}
 
