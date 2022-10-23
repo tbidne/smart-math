@@ -22,6 +22,7 @@ module Numeric.Data.ModP.Internal
     Rand (..),
 
     -- ** Helper Functions
+    trial,
     isWitness,
     sqProgression,
     factor2,
