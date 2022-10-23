@@ -40,7 +40,8 @@ import Language.Haskell.TH (Q, TExp)
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), MGroupIntegral (..))
+import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (..))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Algebra.Normed (Normed (..))
@@ -122,7 +123,7 @@ instance (Division a, Num a) => MGroup (NonNegative a) where
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance (Division a, Integral a) => MGroupIntegral (NonNegative a) where
+instance (Division a, Integral a) => MEuclidean (NonNegative a) where
   type ModResult (NonNegative a) = NonNegative a
   UnsafeNonNegative x `mdivMod` MkNonZero (UnsafeNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d

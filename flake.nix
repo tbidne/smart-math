@@ -1,16 +1,31 @@
 {
   description = "A package for mathematical smart constructors";
-  inputs.algebra-simple-src.url = "github:tbidne/algebra-simple";
-  inputs.bounds-src.url = "github:tbidne/bounds";
-  inputs.flake-compat = {
-    url = "github:edolstra/flake-compat";
-    flake = false;
+  inputs = {
+    # nix
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
+    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # haskell
+    algebra-simple = {
+      url = "github:tbidne/algebra-simple";
+      inputs.flake-compat.follows = "flake-compat";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    bounds = {
+      url = "github:tbidne/bounds";
+      inputs.flake-compat.follows = "flake-compat";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   outputs =
-    { algebra-simple-src
-    , bounds-src
+    { algebra-simple
+    , bounds
     , flake-compat
     , flake-utils
     , nixpkgs
@@ -41,15 +56,14 @@
                 (if withDevTools then devTools compiler else [ ]));
           overrides = final: prev: with compiler; {
             algebra-simple =
-              final.callCabal2nix "algebra-simple" algebra-simple-src { };
+              final.callCabal2nix "algebra-simple" algebra-simple { };
             bounds =
-              final.callCabal2nix "bounds" bounds-src { };
+              final.callCabal2nix "bounds" bounds { };
           };
         };
     in
     {
       packages.default = mkPkg false false;
-
       devShells.default = mkPkg true true;
       devShells.ci = mkPkg true false;
     });

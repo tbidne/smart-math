@@ -10,11 +10,11 @@ package smart-math
 source-repository-package
     type: git
     location: https://github.com/tbidne/algebra-simple.git
-    tag: 0cba3e3797bc6b45a32319735c0ddfef788a6994
+    tag: c8aaa4495964ecea9bb898c4fcb8b1c718ecc813
 
 source-repository-package
     type: git
     location: https://github.com/tbidne/bounds.git
-    tag: e13fef87cbe0f756826fa940a0f515f9df5322bf
+    tag: 7a8832ef4a55d565e72fab553a4d485329235bf7
 
 test-show-details: direct

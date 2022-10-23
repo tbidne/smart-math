@@ -28,6 +28,7 @@ module Numeric.Data.Positive
 where
 
 import Control.DeepSeq (NFData)
+import Data.Bifunctor (Bifunctor (..))
 import Data.Kind (Type)
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
 import Data.Text.Prettyprint.Doc (Pretty (..))
@@ -41,6 +42,7 @@ import Language.Haskell.TH (Q, TExp)
 #endif
 import Language.Haskell.TH.Syntax (Lift (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
+import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
@@ -119,6 +121,13 @@ instance Num a => MMonoid (Positive a) where
 instance (Division a, Num a) => MGroup (Positive a) where
   UnsafePositive x .%. MkNonZero (UnsafePositive d) = UnsafePositive $ x `divide` d
   {-# INLINEABLE (.%.) #-}
+
+-- | @since 0.1
+instance (Division a, Integral a) => MEuclidean (Positive a) where
+  type ModResult (Positive a) = Positive a
+  UnsafePositive x `mdivMod` MkNonZero (UnsafePositive d) =
+    bimap UnsafePositive UnsafePositive $ x `divMod` d
+  {-# INLINEABLE mdivMod #-}
 
 -- | @since 0.1
 instance Normed (Positive a) where
