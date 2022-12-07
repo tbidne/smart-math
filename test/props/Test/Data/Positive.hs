@@ -4,7 +4,6 @@ import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
@@ -27,51 +26,46 @@ props =
     ]
 
 mkPositiveSucceeds :: TestTree
-mkPositiveSucceeds = T.askOption $ \(MkMaxRuns limit) ->
+mkPositiveSucceeds =
   Utils.testPropertyCompat "x > 0 succeeds" "mkPositiveSucceeds" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll pos
-        Just (Pos.reallyUnsafePositive x) === Pos.mkPositive x
+    H.property $ do
+      x <- H.forAll pos
+      Just (Pos.reallyUnsafePositive x) === Pos.mkPositive x
 
 mkPositiveFails :: TestTree
-mkPositiveFails = T.askOption $ \(MkMaxRuns limit) ->
+mkPositiveFails =
   Utils.testPropertyCompat "x < 1 fails" "mkPositiveFails" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll nonpos
-        Nothing === Pos.mkPositive x
+    H.property $ do
+      x <- H.forAll nonpos
+      Nothing === Pos.mkPositive x
 
 addTotal :: TestTree
-addTotal = T.askOption $ \(MkMaxRuns limit) ->
+addTotal =
   Utils.testPropertyCompat "(.+.) is total" "addTotal" $
-    H.withTests limit $
-      H.property $ do
-        px@(MkPositive x) <- H.forAll positive
-        py@(MkPositive y) <- H.forAll positive
-        let MkPositive pz = px .+. py
-        x + y === pz
+    H.property $ do
+      px@(MkPositive x) <- H.forAll positive
+      py@(MkPositive y) <- H.forAll positive
+      let MkPositive pz = px .+. py
+      x + y === pz
 
 multTotal :: TestTree
-multTotal = T.askOption $ \(MkMaxRuns limit) ->
+multTotal =
   Utils.testPropertyCompat "(.*.) is total" "multTotal" $
-    H.withTests limit $
-      H.property $ do
-        px@(MkPositive x) <- H.forAll positive
-        py@(MkPositive y) <- H.forAll positive
-        let MkPositive pz = px .*. py
-        x * y === pz
+    H.property $ do
+      px@(MkPositive x) <- H.forAll positive
+      py@(MkPositive y) <- H.forAll positive
+      let MkPositive pz = px .*. py
+      x * y === pz
 
 divTotal :: TestTree
-divTotal = T.askOption $ \(MkMaxRuns limit) ->
+divTotal =
   Utils.testPropertyCompat "(.%.) is total" "divTotal" $
-    H.withTests limit $
-      H.property $ do
-        px@(MkPositive x) <- H.forAll positive
-        py@(MkPositive y) <- H.forAll positive
-        let py' = Pos.positiveToNonZero py
-            MkPositive pz = px .%. py'
-        x `div` y === pz
+    H.property $ do
+      px@(MkPositive x) <- H.forAll positive
+      py@(MkPositive y) <- H.forAll positive
+      let py' = Pos.positiveToNonZero py
+          MkPositive pz = px .%. py'
+      x `div` y === pz
 
 pos :: MonadGen m => m Int
 pos = HG.integral $ HR.exponentialFrom 1 1 maxVal

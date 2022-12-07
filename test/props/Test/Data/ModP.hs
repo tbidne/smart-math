@@ -10,7 +10,6 @@ import Hedgehog (GenBase, MonadGen, Property, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid)
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
@@ -35,22 +34,20 @@ props =
     ]
 
 mkModPSucceed :: TestTree
-mkModPSucceed = T.askOption $ \(MkMaxRuns limit) ->
+mkModPSucceed =
   Utils.testPropertyCompat "mkModP x succeeds for prime" "mkModPSucceed" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll Gens.natural
-        case ModP.mkModP @65537 x of
-          Nothing -> H.failure
-          Just (MkModP x') -> x `mod` 65537 === x'
+    H.property $ do
+      x <- H.forAll Gens.natural
+      case ModP.mkModP @65537 x of
+        Nothing -> H.failure
+        Just (MkModP x') -> x `mod` 65537 === x'
 
 mkModPFail :: TestTree
-mkModPFail = T.askOption $ \(MkMaxRuns limit) ->
+mkModPFail =
   Utils.testPropertyCompat "mkModP x fails for non-prime" "mkModPFail" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll Gens.natural
-        Nothing === ModP.mkModP @65536 x
+    H.property $ do
+      x <- H.forAll Gens.natural
+      Nothing === ModP.mkModP @65536 x
 
 intProps :: TestTree
 intProps =
@@ -64,34 +61,29 @@ intProps =
     ]
 
 addTotalInt :: TestTree
-addTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+addTotalInt =
   Utils.testPropertyCompat "(.+.) implements modular addition over Integers" "addTotalInt" $
-    H.withTests limit $
-      addTotal' @Integer
+    addTotal' @Integer
 
 subTotalInt :: TestTree
-subTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+subTotalInt =
   Utils.testPropertyCompat "(.-.) implements modular subtraction over Integers" "subTotalInt" $
-    H.withTests limit $
-      subTotal' @Integer
+    subTotal' @Integer
 
 multTotalInt :: TestTree
-multTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+multTotalInt =
   Utils.testPropertyCompat "(.*.) implements modular multiplication over Integers" "multTotalInt" $
-    H.withTests limit $
-      multTotal' @Integer
+    multTotal' @Integer
 
 divTotalInt :: TestTree
-divTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+divTotalInt =
   Utils.testPropertyCompat "(.%.) implements modular division over Integers" "divTotalInt" $
-    H.withTests limit $
-      divTotal' @Integer
+    divTotal' @Integer
 
 invertInt :: TestTree
-invertInt = T.askOption $ \(MkMaxRuns limit) ->
+invertInt =
   Utils.testPropertyCompat "1 == x * invert x over Integers" "invertInt" $
-    H.withTests limit $
-      invert' @Integer
+    invert' @Integer
 
 natProps :: TestTree
 natProps =
@@ -105,34 +97,29 @@ natProps =
     ]
 
 addTotalNat :: TestTree
-addTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+addTotalNat =
   Utils.testPropertyCompat "(.+.) implements modular addition over Naturals" "addTotalNat" $
-    H.withTests limit $
-      addTotal' @Natural
+    addTotal' @Natural
 
 subTotalNat :: TestTree
-subTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+subTotalNat =
   Utils.testPropertyCompat "(.-.) implements modular subtraction over Naturals" "subTotalNat" $
-    H.withTests limit $
-      subTotal' @Natural
+    subTotal' @Natural
 
 multTotalNat :: TestTree
-multTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+multTotalNat =
   Utils.testPropertyCompat "(.*.) implements modular multiplication over Naturals" "multTotalNat" $
-    H.withTests limit $
-      multTotal' @Natural
+    multTotal' @Natural
 
 divTotalNat :: TestTree
-divTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+divTotalNat =
   Utils.testPropertyCompat "(.%.) implements modular division over Naturals" "divTotalNat" $
-    H.withTests limit $
-      divTotal' @Natural
+    divTotal' @Natural
 
 invertNat :: TestTree
-invertNat = T.askOption $ \(MkMaxRuns limit) ->
+invertNat =
   Utils.testPropertyCompat "1 == x * invert x over Naturals" "invertNat" $
-    H.withTests limit $
-      invert' @Natural
+    invert' @Natural
 
 addTotal' ::
   forall a.

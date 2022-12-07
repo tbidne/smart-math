@@ -15,6 +15,7 @@ jobs:
   stack:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         stack_yaml:
           - stack_lts-18.yaml
@@ -35,5 +36,4 @@ jobs:
       - name: Test
         env:
           STACK_YAML: ${{ matrix.stack_yaml }}
-          MAX_RUNS: 100000
         run: stack test --ghc-options -Werror

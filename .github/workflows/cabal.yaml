@@ -15,8 +15,13 @@ jobs:
   cabal:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        ghc: ["8.10.7", "9.0.2", "9.2.4", "9.4.2"]
+        ghc:
+        - 8.10.7
+        - 9.0.2
+        - 9.2.5
+        - 9.4.3
     steps:
       - uses: actions/checkout@v3.0.2
 
@@ -33,6 +38,4 @@ jobs:
           RUN_DOCTEST=1 cabal test doctest
 
       - name: Property Tests
-        env:
-          MAX_RUNS: 100000
-        run: cabal test props
+        run: cabal test props --test-options '--hedgehog-tests 100000'

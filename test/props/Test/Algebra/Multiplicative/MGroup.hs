@@ -4,7 +4,6 @@ import Equality (Equality (..))
 import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
-import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), NonZero (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Test.Tasty (TestName, TestTree)
@@ -44,12 +43,11 @@ fractionDivIdent :: TestTree
 fractionDivIdent = agroupDivIdent Gens.fractionNonZero MkEqExact "Fraction" "fractionDivIdent"
 
 modPDivIdent :: TestTree
-modPDivIdent = T.askOption $ \(MkMaxRuns limit) ->
+modPDivIdent =
   Utils.testPropertyCompat "ModP" "modPDivIdent" $
-    H.withTests limit $
-      H.property $ do
-        nz@(MkNonZero x) <- H.forAll Gens.modPNonZero
-        one === x .%. nz
+    H.property $ do
+      nz@(MkNonZero x) <- H.forAll Gens.modPNonZero
+      one === x .%. nz
 
 nonNegativeDivIdent :: TestTree
 nonNegativeDivIdent = agroupDivIdent Gens.nonNegativeNonZero MkEqExact "NonNegative" "nonNegativeDivIdent"
@@ -69,15 +67,14 @@ mgroupDivEq ::
   TestName ->
   PropertyName ->
   TestTree
-mgroupDivEq expectedFn gen genNZ eqCons desc propName = T.askOption $ \(MkMaxRuns limit) ->
+mgroupDivEq expectedFn gen genNZ eqCons desc propName =
   Utils.testPropertyCompat desc propName $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll gen
-        nz@(MkNonZero d) <- H.forAll genNZ
-        let actual = x .%. nz
-            expected = expectedFn x d
-        eqCons expected === eqCons actual
+    H.property $ do
+      x <- H.forAll gen
+      nz@(MkNonZero d) <- H.forAll genNZ
+      let actual = x .%. nz
+          expected = expectedFn x d
+      eqCons expected === eqCons actual
 
 agroupDivIdent ::
   (MGroup a, Show a) =>
@@ -86,9 +83,8 @@ agroupDivIdent ::
   TestName ->
   PropertyName ->
   TestTree
-agroupDivIdent gen eqCons desc propName = T.askOption $ \(MkMaxRuns limit) ->
+agroupDivIdent gen eqCons desc propName =
   Utils.testPropertyCompat desc propName $
-    H.withTests limit $
-      H.property $ do
-        nz@(MkNonZero x) <- H.forAll gen
-        eqCons one === eqCons (x .%. nz)
+    H.property $ do
+      nz@(MkNonZero x) <- H.forAll gen
+      eqCons one === eqCons (x .%. nz)

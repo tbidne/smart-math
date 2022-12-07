@@ -6,7 +6,6 @@ import Equality (Equality (..))
 import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
-import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Normed (Normed (..))
@@ -77,26 +76,25 @@ amonoidAbs ::
   TestName ->
   PropertyName ->
   TestTree
-amonoidAbs gen eqCons desc propName = T.askOption $ \(MkMaxRuns limit) ->
+amonoidAbs gen eqCons desc propName =
   Utils.testPropertyCompat desc propName $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll gen
-        y <- H.forAll gen
+    H.property $ do
+      x <- H.forAll gen
+      y <- H.forAll gen
 
-        -- idempotence: |x| = ||x||
-        let eqX = eqCons x
-            eqAbs = eqCons (norm x)
-        eqAbs === eqCons (norm (norm x))
+      -- idempotence: |x| = ||x||
+      let eqX = eqCons x
+          eqAbs = eqCons (norm x)
+      eqAbs === eqCons (norm (norm x))
 
-        -- non-negative: |x| >= 0
-        let eqZero = eqCons zero
-        H.diff eqAbs (>=) eqZero
+      -- non-negative: |x| >= 0
+      let eqZero = eqCons zero
+      H.diff eqAbs (>=) eqZero
 
-        -- positive-definite: |x| == 0 <=> x == 0
-        H.diff (eqAbs == eqZero) (<=>) (eqX == eqZero)
+      -- positive-definite: |x| == 0 <=> x == 0
+      H.diff (eqAbs == eqZero) (<=>) (eqX == eqZero)
 
-        -- triangle equality: |x + y| <= |x| + |y|
-        let sumAbs = eqCons $ norm x .+. norm y
-            absSum = eqCons $ norm (x .+. y)
-        H.diff absSum (<=) sumAbs
+      -- triangle equality: |x + y| <= |x| + |y|
+      let sumAbs = eqCons $ norm x .+. norm y
+          absSum = eqCons $ norm (x .+. y)
+      H.diff absSum (<=) sumAbs

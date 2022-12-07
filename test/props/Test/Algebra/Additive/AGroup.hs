@@ -4,7 +4,6 @@ import Equality (Equality (..))
 import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
-import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
 import Test.Tasty (TestName, TestTree)
@@ -68,9 +67,8 @@ agroupSubIdent ::
   TestName ->
   PropertyName ->
   TestTree
-agroupSubIdent gen desc propName = T.askOption $ \(MkMaxRuns limit) ->
+agroupSubIdent gen desc propName =
   Utils.testPropertyCompat desc propName $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll gen
-        zero === x .-. x
+    H.property $ do
+      x <- H.forAll gen
+      zero === x .-. x

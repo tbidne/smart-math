@@ -8,7 +8,6 @@ import Hedgehog (MonadGen, Property, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import MaxRuns (MaxRuns (..))
 import Numeric.Algebra.Additive.AGroup (AGroup (..))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
@@ -38,28 +37,24 @@ intProps =
     ]
 
 mkModNInt :: TestTree
-mkModNInt = T.askOption $ \(MkMaxRuns limit) ->
+mkModNInt =
   Utils.testPropertyCompat "mkModN x" "mkModNInt" $
-    H.withTests limit $
-      mkModN' @Natural
+    mkModN' @Natural
 
 addTotalInt :: TestTree
-addTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+addTotalInt =
   Utils.testPropertyCompat "(.+.) implements modular addition over Integers" "addTotalInt" $
-    H.withTests limit $
-      addTotal' @Natural
+    addTotal' @Natural
 
 subTotalInt :: TestTree
-subTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+subTotalInt =
   Utils.testPropertyCompat "(.-.) implements modular subtraction over Integers" "subTotalInt" $
-    H.withTests limit $
-      subTotal' @Natural
+    subTotal' @Natural
 
 multTotalInt :: TestTree
-multTotalInt = T.askOption $ \(MkMaxRuns limit) ->
+multTotalInt =
   Utils.testPropertyCompat "(.*.) implements modular multiplication over Integers" "multTotalInt" $
-    H.withTests limit $
-      multTotal' @Natural
+    multTotal' @Natural
 
 natProps :: TestTree
 natProps =
@@ -72,28 +67,24 @@ natProps =
     ]
 
 mkModNNat :: TestTree
-mkModNNat = T.askOption $ \(MkMaxRuns limit) ->
+mkModNNat =
   Utils.testPropertyCompat "mkModN x" "mkModNNat" $
-    H.withTests limit $
-      mkModN' @Natural
+    mkModN' @Natural
 
 addTotalNat :: TestTree
-addTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+addTotalNat =
   Utils.testPropertyCompat "(.+.) implements modular addition over Naturals" "addTotalNat" $
-    H.withTests limit $
-      addTotal' @Natural
+    addTotal' @Natural
 
 subTotalNat :: TestTree
-subTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+subTotalNat =
   Utils.testPropertyCompat "(.-.) implements modular subtraction over Naturals" "subTotalNat" $
-    H.withTests limit $
-      subTotal' @Natural
+    subTotal' @Natural
 
 multTotalNat :: TestTree
-multTotalNat = T.askOption $ \(MkMaxRuns limit) ->
+multTotalNat =
   Utils.testPropertyCompat "(.*.) implements modular multiplication over Naturals" "multTotalNat" $
-    H.withTests limit $
-      multTotal' @Natural
+    multTotal' @Natural
 
 mkModN' :: forall a. (Integral a, Show a, TestBounds a, UpperBoundless a) => Property
 mkModN' = H.property $ do

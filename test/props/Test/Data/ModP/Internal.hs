@@ -5,7 +5,6 @@ import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import MaxRuns (MaxRuns (..))
 import Numeric.Data.ModP.Internal
   ( Bezout (..),
     MaybePrime (..),
@@ -31,41 +30,37 @@ props =
     ]
 
 isPrimeFalse :: TestTree
-isPrimeFalse = T.askOption $ \(MkMaxRuns limit) ->
+isPrimeFalse =
   Utils.testPropertyCompat "isPrime returns Composite" "isPrimeFalse" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll composite
-        Composite === ModPI.isPrime x
+    H.property $ do
+      x <- H.forAll composite
+      Composite === ModPI.isPrime x
 
 isPrimeTrue :: TestTree
-isPrimeTrue = T.askOption $ \(MkMaxRuns limit) ->
+isPrimeTrue =
   Utils.testPropertyCompat "isPrime returns ProbablyPrime" "isPrimeTrue" $
-    H.withTests limit $
-      H.property $ do
-        p <- H.forAll prime
-        ProbablyPrime === ModPI.isPrime p
+    H.property $ do
+      p <- H.forAll prime
+      ProbablyPrime === ModPI.isPrime p
 
 findInverse :: TestTree
-findInverse = T.askOption $ \(MkMaxRuns limit) ->
+findInverse =
   Utils.testPropertyCompat "x * findInverse x m == 1 (mod m)" "findInverse" $
-    H.withTests limit $
-      H.property $ do
-        (x, m) <- H.forAll coprime
-        let d = ModPI.findInverse x (MkModulus m)
-        H.annotateShow d
-        x * d `mod` m === 1
+    H.property $ do
+      (x, m) <- H.forAll coprime
+      let d = ModPI.findInverse x (MkModulus m)
+      H.annotateShow d
+      x * d `mod` m === 1
 
 findBezout :: TestTree
-findBezout = T.askOption $ \(MkMaxRuns limit) ->
+findBezout =
   Utils.testPropertyCompat "findBezout satisfies ax + by = (a, b)" "findBezout" $
-    H.withTests limit $
-      H.property $ do
-        x <- H.forAll Gens.integer
-        y <- H.forAll Gens.integer
-        let (MkBezout (R' r) (S' s) (T' t)) = ModPI.findBezout x (MkModulus y)
-        x * t + y * s === r
-        gcd x y === r
+    H.property $ do
+      x <- H.forAll Gens.integer
+      y <- H.forAll Gens.integer
+      let (MkBezout (R' r) (S' s) (T' t)) = ModPI.findBezout x (MkModulus y)
+      x * t + y * s === r
+      gcd x y === r
 
 coprime :: MonadGen m => m (Integer, Integer)
 coprime = do
