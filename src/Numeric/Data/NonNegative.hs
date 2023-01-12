@@ -13,6 +13,7 @@ module Numeric.Data.NonNegative
     mkNonNegativeTH,
     mkNonNegative,
     unsafeNonNegative,
+    (*!),
     reallyUnsafeNonNegative,
 
     -- * Elimination
@@ -63,6 +64,7 @@ import Prettyprinter (Pretty (..))
 
 -- $setup
 -- >>> :set -XTemplateHaskell
+-- >>> :set -XPostfixOperators
 
 -- | Newtype wrapper that attaches a 'NonNegative' invariant to some @a@.
 -- 'NonNegative' is a 'Numeric.Algebra.Semifield.Semifield' i.e. supports
@@ -229,6 +231,22 @@ unsafeNonNegative x
       error $
         "Numeric.Data.NonNegative.unsafeNonNegative: Passed value < 0: " <> show x
 {-# INLINEABLE unsafeNonNegative #-}
+
+-- | Postfix operator for 'unsafeNonNegative'.
+--
+-- __WARNING: Partial__
+--
+-- ==== __Examples__
+--
+-- >>> (7 *!)
+-- UnsafeNonNegative 7
+--
+-- @since 0.1
+(*!) :: (HasCallStack, Num a, Ord a, Show a) => a -> NonNegative a
+(*!) = unsafeNonNegative
+{-# INLINE (*!) #-}
+
+infixl 7 *!
 
 -- | This function is an alias for the unchecked constructor @UnsafeNonNegative@
 -- i.e. it allows us to construct a 'NonNegative' __without__ checking the

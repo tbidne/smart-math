@@ -13,6 +13,7 @@ module Numeric.Data.Positive
     mkPositiveTH,
     mkPositive,
     unsafePositive,
+    (+!),
     reallyUnsafePositive,
 
     -- * Elimination
@@ -63,6 +64,7 @@ import Prettyprinter (Pretty (..))
 
 -- $setup
 -- >>> :set -XTemplateHaskell
+-- >>> :set -XPostfixOperators
 
 -- | Newtype wrapper that attaches a 'Positive' invariant to some @a@.
 -- 'Positive' is an 'Numeric.Algebra.Additive.ASemigroup.ASemigroup' and
@@ -207,6 +209,22 @@ unsafePositive x
       error $
         "Numeric.Data.Positive.unsafePositive: Passed value <= 0: " <> show x
 {-# INLINEABLE unsafePositive #-}
+
+-- | Postfix operator for 'unsafePositive'.
+--
+-- __WARNING: Partial__
+--
+-- ==== __Examples__
+--
+-- >>> (7 +!)
+-- UnsafePositive 7
+--
+-- @since 0.1
+(+!) :: (HasCallStack, Num a, Ord a, Show a) => a -> Positive a
+(+!) = unsafePositive
+{-# INLINE (+!) #-}
+
+infixl 7 +!
 
 -- | This function is an alias for the unchecked constructor @UnsafePositive@
 -- i.e. it allows us to construct a 'Positive' __without__ checking the

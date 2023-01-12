@@ -485,7 +485,7 @@ unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
 -- *** Exception: Ratio has zero denominator
 --
 -- @since 0.1
-(%!) :: (Integral a, UpperBoundless a) => a -> a -> Fraction a
+(%!) :: (HasCallStack, Integral a, UpperBoundless a) => a -> a -> Fraction a
 n %! d = unsafeFraction n d
 {-# INLINE (%!) #-}
 
