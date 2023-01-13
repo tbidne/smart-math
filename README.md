@@ -8,7 +8,6 @@
 
 [![nix](http://img.shields.io/github/actions/workflow/status/tbidne/smart-math/nix.yaml?branch=main&label=nix&logo=nixos&logoColor=85c5e7&labelColor=2f353c)](https://github.com/tbidne/smart-math/actions/workflows/nix.yaml)
 [![cabal](http://img.shields.io/github/actions/workflow/status/tbidne/smart-math/cabal.yaml?branch=main&label=cabal&labelColor=2f353c)](https://github.com/tbidne/smart-math/actions/workflows/cabal.yaml)
-[![stack](http://img.shields.io/github/actions/workflow/status/tbidne/smart-math/stack.yaml?branch=main&label=stack&logoColor=white&labelColor=2f353c)](https://github.com/tbidne/smart-math/actions/workflows/stack.yaml)
 [![style](http://img.shields.io/github/actions/workflow/status/tbidne/smart-math/style.yaml?branch=main&label=style&logoColor=white&labelColor=2f353c)](https://github.com/tbidne/smart-math/actions/workflows/style.yaml)
 
 </div>
