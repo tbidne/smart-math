@@ -109,37 +109,37 @@ instance (Bounded a, Num a) => Bounded (NonNegative a) where
   {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
-instance Num a => LowerBounded (NonNegative a) where
+instance (Num a) => LowerBounded (NonNegative a) where
   lowerBound = UnsafeNonNegative 0
   {-# INLINEABLE lowerBound #-}
 
 -- | @since 0.1
-instance UpperBounded a => UpperBounded (NonNegative a) where
+instance (UpperBounded a) => UpperBounded (NonNegative a) where
   upperBound = UnsafeNonNegative upperBound
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
-instance Pretty a => Pretty (NonNegative a) where
+instance (Pretty a) => Pretty (NonNegative a) where
   pretty (UnsafeNonNegative x) = pretty x
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance Num a => ASemigroup (NonNegative a) where
+instance (Num a) => ASemigroup (NonNegative a) where
   UnsafeNonNegative x .+. UnsafeNonNegative y = UnsafeNonNegative $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance Num a => AMonoid (NonNegative a) where
+instance (Num a) => AMonoid (NonNegative a) where
   zero = UnsafeNonNegative 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance Num a => MSemigroup (NonNegative a) where
+instance (Num a) => MSemigroup (NonNegative a) where
   UnsafeNonNegative x .*. UnsafeNonNegative y = UnsafeNonNegative $ x * y
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance Num a => MMonoid (NonNegative a) where
+instance (Num a) => MMonoid (NonNegative a) where
   one = UnsafeNonNegative 1
   {-# INLINEABLE one #-}
 
@@ -175,7 +175,7 @@ instance (Fractional a, Ord a, Show a) => FromRational (NonNegative a) where
   {-# INLINEABLE afromRational #-}
 
 -- | @since 0.1
-instance Num a => Semiring (NonNegative a)
+instance (Num a) => Semiring (NonNegative a)
 
 -- | @since 0.1
 instance (Division a, Num a) => Semifield (NonNegative a)

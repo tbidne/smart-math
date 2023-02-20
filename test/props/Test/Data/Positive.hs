@@ -67,11 +67,11 @@ divTotal =
           MkPositive pz = px .%. py'
       x `div` y === pz
 
-pos :: MonadGen m => m Int
+pos :: (MonadGen m) => m Int
 pos = HG.integral $ HR.exponentialFrom 1 1 maxVal
 
-nonpos :: MonadGen m => m Int
+nonpos :: (MonadGen m) => m Int
 nonpos = HG.integral $ HR.exponentialFrom minVal 0 0
 
-positive :: MonadGen m => m (Positive Int)
+positive :: (MonadGen m) => m (Positive Int)
 positive = Pos.unsafePositive <$> pos

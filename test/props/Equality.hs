@@ -62,14 +62,14 @@ data EqTy
 type Equality :: EqTy -> Type -> Type
 data Equality eq a where
   -- | Exact quality.
-  MkEqExact :: Eq a => a -> Equality 'EqExact a
+  MkEqExact :: (Eq a) => a -> Equality 'EqExact a
   -- | Equality for ratios.
   MkEqRatio :: (Eq a, Integral a) => Ratio a -> Equality 'EqRatio (Ratio a)
   -- | Equality for floating points. We resolve 'Epsilon' differences via
   -- its semigroup instance.
-  MkEqEpsilon :: RealFloat a => Epsilon a -> a -> Equality 'EqEpsilon a
+  MkEqEpsilon :: (RealFloat a) => Epsilon a -> a -> Equality 'EqEpsilon a
 
-deriving stock instance Show a => Show (Equality eq a)
+deriving stock instance (Show a) => Show (Equality eq a)
 
 unEquality :: Equality eq a -> a
 unEquality (MkEqExact x) = x
@@ -81,20 +81,20 @@ instance Eq (Equality eq a) where
   MkEqRatio x == MkEqRatio y = eqRatio x y
   MkEqEpsilon e1 x == MkEqEpsilon e2 y = eqEpsilon (e1 <> e2) x y
 
-instance Ord a => Ord (Equality eq a) where
+instance (Ord a) => Ord (Equality eq a) where
   x <= y =
     x == y || x' < y'
     where
       x' = unEquality x
       y' = unEquality y
 
-eqRatio :: Integral a => Ratio a -> Ratio a -> Bool
+eqRatio :: (Integral a) => Ratio a -> Ratio a -> Bool
 eqRatio (0 :% _) (0 :% _) = True
 eqRatio x y = reduce' x == reduce' y
   where
     reduce' (n :% d) = Real.reduce n d
 
-eqEpsilon :: RealFloat a => Epsilon a -> a -> a -> Bool
+eqEpsilon :: (RealFloat a) => Epsilon a -> a -> a -> Bool
 eqEpsilon (MkEpsilon e) x y
   | isNaN x = isNaN y
   | isInfinite x = isInfinite y

@@ -62,14 +62,14 @@ findBezout =
       x * t + y * s === r
       gcd x y === r
 
-coprime :: MonadGen m => m (Integer, Integer)
+coprime :: (MonadGen m) => m (Integer, Integer)
 coprime = do
   x <- HG.integral $ HR.exponential 1 maxVal
   mult <- HG.integral $ HR.exponential 1 maxVal
   let m = x * mult + 1
   pure (x, m)
 
-composite :: MonadGen m => m Integer
+composite :: (MonadGen m) => m Integer
 composite = do
   x <- HG.integral $ HR.exponentialFrom 2 2 maxVal
   pure (x + x)
@@ -77,14 +77,14 @@ composite = do
 -- Testing with Int to make sure our we work with bounded integral types.
 -- To make this work, we internally convert to integer and do our modular
 -- arithmetic there.
-prime :: MonadGen m => m Integer
+prime :: (MonadGen m) => m Integer
 prime = do
   x <- HG.integral $ HR.exponentialFrom 0 0 1000
   let p = primeStream !! x
   pure p
 
 -- Infinite stream of primes
-primeStream :: Integral a => [a]
+primeStream :: (Integral a) => [a]
 primeStream = 2 : 3 : 5 : primes'
   where
     isPrime' (p : ps) n = p * p > n || n `rem` p /= 0 && isPrime' ps n

@@ -25,7 +25,7 @@ import Test.Tasty (TestName, TestTree)
 import Test.Tasty.Hedgehog qualified as TH
 
 binaryEq ::
-  Show a =>
+  (Show a) =>
   (a -> a -> a) ->
   (a -> a -> a) ->
   Gen a ->
@@ -61,7 +61,7 @@ associativity f gen desc propName =
       -- but with more granular logging
       lhs === rhs
 
-identity :: Show a => (a -> a -> a) -> a -> Gen a -> (a -> Equality eq a) -> TestName -> PropertyName -> TestTree
+identity :: (Show a) => (a -> a -> a) -> a -> Gen a -> (a -> Equality eq a) -> TestName -> PropertyName -> TestTree
 identity f ident gen eqCons desc propName =
   testPropertyCompat desc propName $
     H.property $ do

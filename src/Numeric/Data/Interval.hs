@@ -144,7 +144,7 @@ instance (KnownNat l, KnownNat r, Num a) => Bounded (LRInterval l r a) where
   {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
-instance Pretty a => Pretty (LRInterval l r a) where
+instance (Pretty a) => Pretty (LRInterval l r a) where
   pretty (UnsafeLRInterval x) = pretty x
   {-# INLINEABLE pretty #-}
 
@@ -312,10 +312,10 @@ instance (KnownNat l, Num a) => LowerBounded (LInterval l a) where
   {-# INLINEABLE lowerBound #-}
 
 -- | @since 0.1
-instance UpperBoundless a => UpperBoundless (LInterval l a)
+instance (UpperBoundless a) => UpperBoundless (LInterval l a)
 
 -- | @since 0.1
-instance Pretty a => Pretty (LInterval l a) where
+instance (Pretty a) => Pretty (LInterval l a) where
   pretty (UnsafeLInterval x) = pretty x
   {-# INLINEABLE pretty #-}
 
@@ -469,7 +469,7 @@ instance (KnownNat r, Num a) => UpperBounded (RInterval r a) where
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
-instance LowerBoundless a => LowerBoundless (RInterval r a)
+instance (LowerBoundless a) => LowerBoundless (RInterval r a)
 
 -- | Unidirectional pattern synonym for 'RInterval'. This allows us to pattern
 -- match on an interval term without exposing the unsafe internal details.
@@ -481,7 +481,7 @@ pattern MkRInterval x <- UnsafeRInterval x
 {-# COMPLETE MkRInterval #-}
 
 -- | @since 0.1
-instance Pretty a => Pretty (RInterval r a) where
+instance (Pretty a) => Pretty (RInterval r a) where
   pretty (UnsafeRInterval x) = pretty x
   {-# INLINEABLE pretty #-}
 

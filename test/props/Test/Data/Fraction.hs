@@ -163,11 +163,11 @@ denominatorProp =
       x@(_ :%: d) <- H.forAll Gens.fraction
       d === Frac.denominator x
 
-isReduced :: Integral a => Fraction a -> Bool
+isReduced :: (Integral a) => Fraction a -> Bool
 isReduced (0 :%: d) = d == 1
 isReduced x@(_ :%: d)
   | d < 0 = False
   | otherwise = fracGcd x == 1
 
-fracGcd :: Integral a => Fraction a -> a
+fracGcd :: (Integral a) => Fraction a -> a
 fracGcd (n :%: d) = gcd n d

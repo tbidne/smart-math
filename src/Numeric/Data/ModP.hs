@@ -139,32 +139,32 @@ instance (KnownNat p, Pretty a) => Pretty (ModP p a) where
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance KnownNat p => ASemigroup (ModP p Integer) where
+instance (KnownNat p) => ASemigroup (ModP p Integer) where
   MkModP x .+. MkModP y = unsafeModP $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance KnownNat p => ASemigroup (ModP p Natural) where
+instance (KnownNat p) => ASemigroup (ModP p Natural) where
   MkModP x .+. MkModP y = unsafeModP $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance KnownNat p => AMonoid (ModP p Integer) where
+instance (KnownNat p) => AMonoid (ModP p Integer) where
   zero = unsafeModP 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance KnownNat p => AMonoid (ModP p Natural) where
+instance (KnownNat p) => AMonoid (ModP p Natural) where
   zero = unsafeModP 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance KnownNat p => AGroup (ModP p Integer) where
+instance (KnownNat p) => AGroup (ModP p Integer) where
   MkModP x .-. MkModP y = unsafeModP (x - y)
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance KnownNat p => AGroup (ModP p Natural) where
+instance (KnownNat p) => AGroup (ModP p Natural) where
   MkModP x .-. MkModP y
     | x >= y = unsafeModP (x - y)
     | otherwise = unsafeModP (p' - y + x)
@@ -173,58 +173,58 @@ instance KnownNat p => AGroup (ModP p Natural) where
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance KnownNat p => MSemigroup (ModP p Integer) where
+instance (KnownNat p) => MSemigroup (ModP p Integer) where
   MkModP x .*. MkModP y = unsafeModP (x * y)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance KnownNat p => MSemigroup (ModP p Natural) where
+instance (KnownNat p) => MSemigroup (ModP p Natural) where
   MkModP x .*. MkModP y = unsafeModP (x * y)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance KnownNat p => MMonoid (ModP p Integer) where
+instance (KnownNat p) => MMonoid (ModP p Integer) where
   one = unsafeModP 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance KnownNat p => MMonoid (ModP p Natural) where
+instance (KnownNat p) => MMonoid (ModP p Natural) where
   one = unsafeModP 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance KnownNat p => MGroup (ModP p Integer) where
+instance (KnownNat p) => MGroup (ModP p Integer) where
   x .%. d = x .*. invert d
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance KnownNat p => MGroup (ModP p Natural) where
+instance (KnownNat p) => MGroup (ModP p Natural) where
   x .%. d = x .*. invert d
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance KnownNat p => Semiring (ModP p Integer)
+instance (KnownNat p) => Semiring (ModP p Integer)
 
 -- | @since 0.1
-instance KnownNat p => Semiring (ModP p Natural)
+instance (KnownNat p) => Semiring (ModP p Natural)
 
 -- | @since 0.1
-instance KnownNat p => Ring (ModP p Integer)
+instance (KnownNat p) => Ring (ModP p Integer)
 
 -- | @since 0.1
-instance KnownNat p => Ring (ModP p Natural)
+instance (KnownNat p) => Ring (ModP p Natural)
 
 -- | @since 0.1
-instance KnownNat p => Semifield (ModP p Integer)
+instance (KnownNat p) => Semifield (ModP p Integer)
 
 -- | @since 0.1
-instance KnownNat p => Semifield (ModP p Natural)
+instance (KnownNat p) => Semifield (ModP p Natural)
 
 -- | @since 0.1
-instance KnownNat p => Field (ModP p Integer)
+instance (KnownNat p) => Field (ModP p Integer)
 
 -- | @since 0.1
-instance KnownNat p => Field (ModP p Natural)
+instance (KnownNat p) => Field (ModP p Natural)
 
 -- | @since 0.1
 instance (Integral a, KnownNat p, UpperBoundless a) => FromInteger (ModP p a) where

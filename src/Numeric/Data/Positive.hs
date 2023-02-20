@@ -103,27 +103,27 @@ pattern MkPositive x <- UnsafePositive x
 {-# COMPLETE MkPositive #-}
 
 -- | @since 0.1
-instance Bounded a => UpperBounded (Positive a) where
+instance (Bounded a) => UpperBounded (Positive a) where
   upperBound = UnsafePositive maxBound
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
-instance Pretty a => Pretty (Positive a) where
+instance (Pretty a) => Pretty (Positive a) where
   pretty (UnsafePositive x) = pretty x
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance Num a => ASemigroup (Positive a) where
+instance (Num a) => ASemigroup (Positive a) where
   UnsafePositive x .+. UnsafePositive y = UnsafePositive $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance Num a => MSemigroup (Positive a) where
+instance (Num a) => MSemigroup (Positive a) where
   UnsafePositive x .*. UnsafePositive y = UnsafePositive $ x * y
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance Num a => MMonoid (Positive a) where
+instance (Num a) => MMonoid (Positive a) where
   one = UnsafePositive 1
   {-# INLINEABLE one #-}
 

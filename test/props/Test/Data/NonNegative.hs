@@ -66,14 +66,14 @@ divTotal =
       let MkNonNegative pz = px .%. unsafeAMonoidNonZero py
       x `div` y === pz
 
-nonneg :: MonadGen m => m Int
+nonneg :: (MonadGen m) => m Int
 nonneg = HG.integral $ HR.exponentialFrom 0 0 maxVal
 
-neg :: MonadGen m => m Int
+neg :: (MonadGen m) => m Int
 neg = HG.integral $ HR.exponentialFrom minVal -1 -1
 
-nonnegative :: MonadGen m => m (NonNegative Int)
+nonnegative :: (MonadGen m) => m (NonNegative Int)
 nonnegative = NonNeg.unsafeNonNegative <$> nonneg
 
-nonnegativeNZ :: MonadGen m => m (NonNegative Int)
+nonnegativeNZ :: (MonadGen m) => m (NonNegative Int)
 nonnegativeNZ = NonNeg.unsafeNonNegative <$> HG.integral (HR.exponentialFrom 1 1 maxVal)

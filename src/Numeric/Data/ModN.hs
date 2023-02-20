@@ -122,32 +122,32 @@ instance (KnownNat n, Pretty a) => Pretty (ModN n a) where
   {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
-instance KnownNat n => ASemigroup (ModN n Integer) where
+instance (KnownNat n) => ASemigroup (ModN n Integer) where
   MkModN x .+. MkModN y = MkModN $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance KnownNat n => ASemigroup (ModN n Natural) where
+instance (KnownNat n) => ASemigroup (ModN n Natural) where
   MkModN x .+. MkModN y = MkModN $ x + y
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance KnownNat n => AMonoid (ModN n Integer) where
+instance (KnownNat n) => AMonoid (ModN n Integer) where
   zero = MkModN 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance KnownNat n => AMonoid (ModN n Natural) where
+instance (KnownNat n) => AMonoid (ModN n Natural) where
   zero = MkModN 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance KnownNat n => AGroup (ModN n Integer) where
+instance (KnownNat n) => AGroup (ModN n Integer) where
   MkModN x .-. MkModN y = MkModN (x - y)
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance KnownNat n => AGroup (ModN n Natural) where
+instance (KnownNat n) => AGroup (ModN n Natural) where
   MkModN x .-. MkModN y
     | x >= y = MkModN (x - y)
     | otherwise = MkModN (n' - y + x)
@@ -156,36 +156,36 @@ instance KnownNat n => AGroup (ModN n Natural) where
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance KnownNat n => MSemigroup (ModN n Integer) where
+instance (KnownNat n) => MSemigroup (ModN n Integer) where
   MkModN x .*. MkModN y = MkModN (x * y)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance KnownNat n => MSemigroup (ModN n Natural) where
+instance (KnownNat n) => MSemigroup (ModN n Natural) where
   MkModN x .*. MkModN y = MkModN (x * y)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance KnownNat n => MMonoid (ModN n Integer) where
+instance (KnownNat n) => MMonoid (ModN n Integer) where
   one = MkModN 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance KnownNat n => MMonoid (ModN n Natural) where
+instance (KnownNat n) => MMonoid (ModN n Natural) where
   one = MkModN 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance KnownNat n => Semiring (ModN n Integer)
+instance (KnownNat n) => Semiring (ModN n Integer)
 
 -- | @since 0.1
-instance KnownNat n => Semiring (ModN n Natural)
+instance (KnownNat n) => Semiring (ModN n Natural)
 
 -- | @since 0.1
-instance KnownNat n => Ring (ModN n Integer)
+instance (KnownNat n) => Ring (ModN n Integer)
 
 -- | @since 0.1
-instance KnownNat n => Ring (ModN n Natural)
+instance (KnownNat n) => Ring (ModN n Natural)
 
 -- | @since 0.1
 instance (Integral a, KnownNat n, UpperBoundless a) => FromInteger (ModN n a) where

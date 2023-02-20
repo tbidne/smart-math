@@ -71,11 +71,11 @@ mkRIntervalFails =
       x <- H.forAll gt1000
       Nothing === Interval.mkRInterval @1_000 x
 
-gt1000 :: MonadGen m => m Int
+gt1000 :: (MonadGen m) => m Int
 gt1000 = HG.integral $ HR.linearFrom 1_001 1_001 2_000
 
-lt500 :: MonadGen m => m Int
+lt500 :: (MonadGen m) => m Int
 lt500 = HG.integral $ HR.linearFrom 0 0 (500 - 1)
 
-inRange :: MonadGen m => m Int
+inRange :: (MonadGen m) => m Int
 inRange = HG.integral $ HR.exponentialFrom 500 500 1_000

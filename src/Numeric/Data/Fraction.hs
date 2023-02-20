@@ -195,13 +195,13 @@ instance (Bounded a, Num a) => Bounded (Fraction a) where
   {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
-instance LowerBoundless a => LowerBoundless (Fraction a)
+instance (LowerBoundless a) => LowerBoundless (Fraction a)
 
 -- | @since 0.1
-instance UpperBoundless a => UpperBoundless (Fraction a)
+instance (UpperBoundless a) => UpperBoundless (Fraction a)
 
 -- | @since 0.1
-instance Pretty a => Pretty (Fraction a) where
+instance (Pretty a) => Pretty (Fraction a) where
   pretty (UnsafeFraction n d) = pretty n <+> pretty @String ":%:" <+> pretty d
   {-# INLINEABLE pretty #-}
 
