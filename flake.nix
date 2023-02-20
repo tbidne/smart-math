@@ -24,14 +24,14 @@
     };
   };
   outputs =
-    { algebra-simple
+    inputs@{ algebra-simple
     , bounds
     , flake-compat
     , flake-parts
     , nixpkgs
     , self
     }:
-    flake-parts.lib.mkFlake { inherit self; } {
+    flake-parts.lib.mkFlake { inherit inputs; } {
       perSystem = { pkgs, ... }:
         let
           buildTools = c: with c; [
@@ -40,10 +40,10 @@
             pkgs.zlib
           ];
           devTools = c: with c; [
-            ghcid
+            (pkgs.haskell.lib.dontCheck ghcid)
             haskell-language-server
           ];
-          ghc-version = "ghc924";
+          ghc-version = "ghc944";
           compiler = pkgs.haskell.packages."${ghc-version}";
           mkPkg = returnShellEnv: withDevTools:
             compiler.developPackage {
