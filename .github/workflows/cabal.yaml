@@ -34,8 +34,10 @@ jobs:
 
       - name: Doc Tests
         run : |
-          cabal build --write-ghc-environment-files=always
-          RUN_DOCTEST=1 cabal test doctest
+          cabal configure \
+            --enable-tests true \
+            --write-ghc-environment-files always
+          cabal build
 
       - name: Property Tests
         run: cabal test props --test-options '--hedgehog-tests 100000'
