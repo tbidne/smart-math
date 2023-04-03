@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
@@ -54,7 +53,7 @@ import Numeric.Algebra.Normed (Normed (..))
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
-import Numeric.Data.NonZero (NonZero (..), rmatching)
+import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (..))
 import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
@@ -145,13 +144,12 @@ instance (Num a) => MMonoid (NonNegative a) where
 
 -- | @since 0.1
 instance (Division a, Num a) => MGroup (NonNegative a) where
-  UnsafeNonNegative x .%. MkNonZero (UnsafeNonNegative d) = UnsafeNonNegative $ x `divide` d
+  UnsafeNonNegative x .%. (UnsafeNonNegative d) = UnsafeNonNegative $ x `divide` d
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance (Division a, Integral a) => MEuclidean (NonNegative a) where
-  type ModResult (NonNegative a) = NonNegative a
-  UnsafeNonNegative x `mdivMod` MkNonZero (UnsafeNonNegative d) =
+  UnsafeNonNegative x `mdivMod` (UnsafeNonNegative d) =
     bimap UnsafeNonNegative UnsafeNonNegative $ x `divMod` d
   {-# INLINEABLE mdivMod #-}
 

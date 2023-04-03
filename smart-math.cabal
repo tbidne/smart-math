@@ -25,6 +25,7 @@ common common-exts
     NoStarIsType
     BangPatterns
     DataKinds
+    DeriveAnyClass
     DeriveGeneric
     DeriveLift
     DerivingStrategies
@@ -58,6 +59,7 @@ library
     Numeric.Data.ModP
     Numeric.Data.ModP.Internal
     Numeric.Data.NonNegative
+    Numeric.Data.NonZero
     Numeric.Data.Positive
 
   build-depends:
@@ -104,6 +106,7 @@ test-suite props
     Test.Data.ModP
     Test.Data.ModP.Internal
     Test.Data.NonNegative
+    Test.Data.NonZero
     Test.Data.Positive
     Test.TestBounds
     Utils

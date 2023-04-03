@@ -31,14 +31,12 @@ import Hedgehog (MonadGen (..))
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
-import Numeric.Algebra.Multiplicative.MGroup qualified as MGroup
 import Numeric.Data.Fraction (Fraction (..), unsafeFraction)
 import Numeric.Data.ModN (ModN (..), mkModN)
 import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
 import Numeric.Data.NonNegative (NonNegative (..), unsafeNonNegative)
 import Numeric.Data.NonZero (NonZero (..), unsafeNonZero)
 import Numeric.Data.Positive (Positive (..), unsafePositive)
-import Numeric.Data.Positive qualified as Pos
 import Test.TestBounds (TestBounds (..))
 
 integer :: (MonadGen m) => m Integer
@@ -73,19 +71,19 @@ integerNZ = nzBounds HG.integral minVal maxVal
 naturalNZ :: (MonadGen m) => m Natural
 naturalNZ = HG.integral $ HR.exponential 1 maxVal
 
-fractionNonZero :: (MonadGen m) => m (NonZero (Fraction Integer))
-fractionNonZero = fmap MGroup.unsafeAMonoidNonZero $ unsafeFraction <$> integerNZ <*> integerNZ
+fractionNonZero :: (MonadGen m) => m (Fraction Integer)
+fractionNonZero = unsafeFraction <$> integerNZ <*> integerNZ
 
-modPNonZero :: (GenBase m ~ Identity, MonadGen m) => m (NonZero (ModP 17 Natural))
-modPNonZero = MGroup.unsafeAMonoidNonZero . reallyUnsafeModP <$> pos
+modPNonZero :: (GenBase m ~ Identity, MonadGen m) => m (ModP 17 Natural)
+modPNonZero = reallyUnsafeModP <$> pos
   where
     pos = HG.filter (\x -> x `mod` 17 /= 0) $ HG.integral $ HR.exponential 1 maxVal
 
-nonNegativeNonZero :: (MonadGen m) => m (NonZero (NonNegative Natural))
-nonNegativeNonZero = MGroup.unsafeAMonoidNonZero . unsafeNonNegative <$> naturalNZ
+nonNegativeNonZero :: (MonadGen m) => m (NonNegative Natural)
+nonNegativeNonZero = unsafeNonNegative <$> naturalNZ
 
-positiveNonZero :: (MonadGen m) => m (NonZero (Positive Natural))
-positiveNonZero = Pos.positiveToNonZero . unsafePositive <$> naturalNZ
+positiveNonZero :: (MonadGen m) => m (Positive Natural)
+positiveNonZero = unsafePositive <$> naturalNZ
 
 nzBounds :: (Integral a, MonadGen m) => (Range a -> m a) -> a -> a -> m a
 nzBounds gen lower upper =

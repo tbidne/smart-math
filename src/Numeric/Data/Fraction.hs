@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -68,7 +67,7 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (..))
-import Numeric.Data.NonZero (NonZero (..), rmatching)
+import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (..))
 import Numeric.Literal.Rational (FromRational (..))
 import Optics.Core
@@ -346,12 +345,12 @@ instance MMonoid (Fraction Natural) where
 
 -- | @since 0.1
 instance MGroup (Fraction Integer) where
-  x .%. MkNonZero (n :%: d) = x .*. UnsafeFraction d n
+  x .%. (n :%: d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance MGroup (Fraction Natural) where
-  x .%. MkNonZero (n :%: d) = x .*. UnsafeFraction d n
+  x .%. (n :%: d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1

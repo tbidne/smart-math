@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'Positive' type for enforcing a positive invariant.
@@ -129,13 +128,12 @@ instance (Num a) => MMonoid (Positive a) where
 
 -- | @since 0.1
 instance (Division a, Num a) => MGroup (Positive a) where
-  UnsafePositive x .%. MkNonZero (UnsafePositive d) = UnsafePositive $ x `divide` d
+  UnsafePositive x .%. (UnsafePositive d) = UnsafePositive $ x `divide` d
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
 instance (Division a, Integral a) => MEuclidean (Positive a) where
-  type ModResult (Positive a) = Positive a
-  UnsafePositive x `mdivMod` MkNonZero (UnsafePositive d) =
+  UnsafePositive x `mdivMod` (UnsafePositive d) =
     bimap UnsafePositive UnsafePositive $ x `divMod` d
   {-# INLINEABLE mdivMod #-}
 

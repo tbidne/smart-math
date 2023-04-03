@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -57,16 +56,12 @@ import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
 import Numeric.Data.ModP.Internal qualified as ModPI
-import Numeric.Data.NonZero (NonZero (..), rmatching)
+import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (..))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
 import Prettyprinter (Pretty (..), (<+>))
 #endif
-
--- $setup
--- >>> :set -XTemplateHaskell
--- >>> import Numeric.Algebra.Multiplicative.MGroup (unsafeAMonoidNonZero)
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/p\mathbb{Z} \) for prime @p@.
 -- 'ModP' is a 'Numeric.Algebra.Field.Field' i.e. supports addition,
@@ -314,15 +309,15 @@ reallyUnsafeModP = UnsafeModP . (`mod` p')
 --
 -- ==== __Examples__
 --
--- >>> invert $ unsafeAMonoidNonZero $ unsafeModP @7 5
+-- >>> invert $ unsafeModP @7 5
 -- MkModP 3 (mod 7)
 --
--- >>> invert $ unsafeAMonoidNonZero $ unsafeModP @19 12
+-- >>> invert $ unsafeModP @19 12
 -- MkModP 8 (mod 19)
 --
 -- @since 0.1
-invert :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => NonZero (ModP p a) -> ModP p a
-invert (MkNonZero (UnsafeModP d)) = reallyUnsafeModP $ toUpperBoundless $ ModPI.findInverse d' p'
+invert :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => ModP p a -> ModP p a
+invert (UnsafeModP d) = reallyUnsafeModP $ toUpperBoundless $ ModPI.findInverse d' p'
   where
     p' = MkModulus $ fromIntegral $ natVal @p Proxy
     d' = toInteger d

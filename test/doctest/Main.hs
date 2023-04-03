@@ -22,6 +22,7 @@ files =
     "src/Numeric/Data/ModP.hs",
     "src/Numeric/Data/ModP/Internal.hs",
     "src/Numeric/Data/NonNegative.hs",
+    "src/Numeric/Data/NonZero.hs",
     "src/Numeric/Data/Positive.hs"
   ]
 
@@ -30,6 +31,7 @@ exts =
   [ "-XNoStarIsType",
     "-XBangPatterns",
     "-XDataKinds",
+    "-XDeriveAnyClass",
     "-XDeriveDataTypeable",
     "-XDeriveGeneric",
     "-XDeriveLift",

@@ -15,6 +15,7 @@ import Test.Data.ModN qualified
 import Test.Data.ModP qualified
 import Test.Data.ModP.Internal qualified
 import Test.Data.NonNegative qualified
+import Test.Data.NonZero qualified
 import Test.Data.Positive qualified
 import Test.Tasty qualified as Tasty
 
@@ -39,5 +40,6 @@ main =
         Test.Data.ModP.props,
         Test.Data.ModP.Internal.props,
         Test.Data.NonNegative.props,
+        Test.Data.NonZero.props,
         Test.Data.Positive.props
       ]

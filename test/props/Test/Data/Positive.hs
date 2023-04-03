@@ -63,8 +63,7 @@ divTotal =
     H.property $ do
       px@(MkPositive x) <- H.forAll positive
       py@(MkPositive y) <- H.forAll positive
-      let py' = Pos.positiveToNonZero py
-          MkPositive pz = px .%. py'
+      let MkPositive pz = px .%. py
       x `div` y === pz
 
 pos :: (MonadGen m) => m Int

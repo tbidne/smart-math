@@ -1,4 +1,4 @@
-.PHONY: build clean repl watch ;\
+.PHONY: doctest repl watch ;\
 	cic ci formatc format lint lintc ;\
 	haddock hackage
 
@@ -6,15 +6,10 @@
 
 T = ""
 
-build:
-	if [ -z "$(T)" ]; then \
-		cabal build; \
-	else \
-		cabal build $(T); \
-	fi
-
-clean:
-	cabal clean
+doctest:
+	cabal build --write-ghc-environment-files=always; \
+	RUN_DOCTEST=1 cabal test doctest; \
+	rm .ghc.environment.*
 
 repl:
 	if [ -z "$(T)" ]; then \

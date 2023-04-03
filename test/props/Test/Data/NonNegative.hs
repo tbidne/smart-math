@@ -5,7 +5,7 @@ import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), unsafeAMonoidNonZero)
+import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
 import Numeric.Data.NonNegative (NonNegative (..))
 import Numeric.Data.NonNegative qualified as NonNeg
@@ -63,7 +63,7 @@ divTotal =
     H.property $ do
       px@(MkNonNegative x) <- H.forAll nonnegative
       py@(MkNonNegative y) <- H.forAll nonnegativeNZ
-      let MkNonNegative pz = px .%. unsafeAMonoidNonZero py
+      let MkNonNegative pz = px .%. py
       x `div` y === pz
 
 nonneg :: (MonadGen m) => m Int

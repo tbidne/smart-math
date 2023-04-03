@@ -4,7 +4,7 @@ import Equality (Equality (..))
 import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..), NonZero (..))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
 import Test.Tasty (TestName, TestTree)
 import Test.Tasty qualified as T
@@ -46,8 +46,8 @@ modPDivIdent :: TestTree
 modPDivIdent =
   Utils.testPropertyCompat "ModP" "modPDivIdent" $
     H.property $ do
-      nz@(MkNonZero x) <- H.forAll Gens.modPNonZero
-      one === x .%. nz
+      x <- H.forAll Gens.modPNonZero
+      one === x .%. x
 
 nonNegativeDivIdent :: TestTree
 nonNegativeDivIdent = agroupDivIdent Gens.nonNegativeNonZero MkEqExact "NonNegative" "nonNegativeDivIdent"
@@ -62,7 +62,7 @@ mgroupDivEq ::
   (MGroup a, Show a) =>
   (a -> a -> a) ->
   Gen a ->
-  Gen (NonZero a) ->
+  Gen a ->
   (a -> Equality eq a) ->
   TestName ->
   PropertyName ->
@@ -71,14 +71,14 @@ mgroupDivEq expectedFn gen genNZ eqCons desc propName =
   Utils.testPropertyCompat desc propName $
     H.property $ do
       x <- H.forAll gen
-      nz@(MkNonZero d) <- H.forAll genNZ
-      let actual = x .%. nz
+      d <- H.forAll genNZ
+      let actual = x .%. d
           expected = expectedFn x d
       eqCons expected === eqCons actual
 
 agroupDivIdent ::
   (MGroup a, Show a) =>
-  Gen (NonZero a) ->
+  Gen a ->
   (a -> Equality eq a) ->
   TestName ->
   PropertyName ->
@@ -86,5 +86,5 @@ agroupDivIdent ::
 agroupDivIdent gen eqCons desc propName =
   Utils.testPropertyCompat desc propName $
     H.property $ do
-      nz@(MkNonZero x) <- H.forAll gen
-      eqCons one === eqCons (x .%. nz)
+      x <- H.forAll gen
+      eqCons one === eqCons (x .%. x)
