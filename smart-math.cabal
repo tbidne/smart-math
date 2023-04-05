@@ -3,7 +3,9 @@ name:               smart-math
 version:            0.1
 license:            MIT
 license-file:       LICENSE
-tested-with:        GHC ==8.10.7 || ==9.0.2 || ==9.2.7 || ==9.4.4
+tested-with:
+  GHC ==8.10.7 || ==9.0.2 || ==9.2.7 || ==9.4.4 || ==9.6.1
+
 copyright:          2022-2023 Thomas Bidne
 author:             Thomas Bidne
 maintainer:         tbidne@protonmail.com
@@ -20,7 +22,7 @@ source-repository head
   type:     git
   location: https://github.com/tbidne/smart-math
 
-common common-exts
+common common-lang
   default-extensions:
     NoStarIsType
     BangPatterns
@@ -50,7 +52,7 @@ common common-exts
     TypeOperators
 
 library
-  import:           common-exts
+  import:           common-lang
   exposed-modules:
     Numeric.Class.Division
     Numeric.Data.Fraction
@@ -64,19 +66,19 @@ library
 
   build-depends:
     , algebra-simple    ^>=0.1
-    , base              >=4.14.0.0 && <4.18
+    , base              >=4.14.0.0 && <4.19
     , bounds            ^>=0.1
     , deepseq           ^>=1.4.4.0
     , optics-core       ^>=0.4
     , prettyprinter     >=1.4.0    && <1.8
     , random            ^>=1.2.0
-    , template-haskell  >=2.16.0.0 && <2.20.0.0
+    , template-haskell  >=2.16.0.0 && <2.21
 
   hs-source-dirs:   src
   default-language: Haskell2010
 
 test-suite doctest
-  import:           common-exts
+  import:           common-lang
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   build-depends:
@@ -88,7 +90,7 @@ test-suite doctest
   default-language: Haskell2010
 
 test-suite props
-  import:           common-exts
+  import:           common-lang
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   other-modules:
