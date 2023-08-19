@@ -138,9 +138,9 @@ signumProp =
     H.property $ do
       x <- H.forAll Gens.fraction
       if
-          | x > 0 -> 1 === signum x
-          | x == 0 -> 0 === signum x
-          | otherwise -> -1 === signum x
+        | x > 0 -> 1 === signum x
+        | x == 0 -> 0 === signum x
+        | otherwise -> -1 === signum x
 
 showRoundTrip :: TestTree
 showRoundTrip =

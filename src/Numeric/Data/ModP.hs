@@ -128,7 +128,7 @@ instance (KnownNat p, Pretty a) => Pretty (ModP p a) where
     pretty x
       <+> pretty @String "(mod"
       <+> pretty p'
-        <> pretty @String ")"
+      <> pretty @String ")"
     where
       p' = natVal @p Proxy
   {-# INLINEABLE pretty #-}
