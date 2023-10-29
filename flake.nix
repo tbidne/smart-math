@@ -47,7 +47,6 @@
               name = "smart-math";
               root = ./.;
             };
-          hsDirs = "src test";
         in
         {
           packages.default = mkPkg false;
@@ -55,13 +54,13 @@
 
           apps = {
             format = nix-hs-utils.format {
-              inherit compiler hsDirs pkgs;
+              inherit compiler pkgs;
             };
             lint = nix-hs-utils.lint {
-              inherit compiler hsDirs pkgs;
+              inherit compiler pkgs;
             };
             lint-refactor = nix-hs-utils.lint-refactor {
-              inherit compiler hsDirs pkgs;
+              inherit compiler pkgs;
             };
           };
         };
