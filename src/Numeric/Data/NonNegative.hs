@@ -25,7 +25,7 @@ module Numeric.Data.NonNegative
 where
 
 import Control.DeepSeq (NFData)
-import Data.Bifunctor (Bifunctor (..))
+import Data.Bifunctor (Bifunctor (bimap))
 import Data.Bounds
   ( LowerBounded (lowerBound),
     UpperBounded (upperBound),
@@ -33,7 +33,7 @@ import Data.Bounds
   )
 import Data.Kind (Type)
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (..))
+import Data.Text.Prettyprint.Doc (Pretty (pretty))
 #endif
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
@@ -42,23 +42,23 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Language.Haskell.TH.Syntax (Lift (..))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
-import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (..))
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
-import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
-import Numeric.Algebra.Normed (Normed (..))
+import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
+import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
+import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
+import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
+import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
-import Numeric.Class.Division (Division (..))
+import Numeric.Class.Division (Division (divide))
 import Numeric.Data.NonZero (rmatching)
-import Numeric.Literal.Integer (FromInteger (..))
-import Numeric.Literal.Rational (FromRational (..))
+import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..))
+import Prettyprinter (Pretty (pretty))
 #endif
 
 -- $setup

@@ -70,9 +70,9 @@ import Data.Bounds
   )
 import Data.Kind (Type)
 import Data.Maybe qualified as Maybe
-import Data.Proxy (Proxy (..))
+import Data.Proxy (Proxy (Proxy))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (..))
+import Data.Text.Prettyprint.Doc (Pretty (pretty))
 #endif
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
@@ -82,13 +82,13 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Language.Haskell.TH.Syntax (Lift (..))
+import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.NonZero (rmatching)
-import Numeric.Literal.Integer (FromInteger (..))
-import Numeric.Literal.Rational (FromRational (..))
+import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..))
+import Prettyprinter (Pretty (pretty))
 #endif
 
 -- $setup

@@ -7,7 +7,7 @@ import Hedgehog.Range qualified as HR
 import Numeric.Data.NonZero qualified as NonZero
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.TestBounds (TestBounds (..))
+import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
 
 props :: TestTree

@@ -1,9 +1,9 @@
 module Test.Algebra.Multiplicative.MSemigroup (props) where
 
-import Equality (Equality (..))
+import Equality (Equality (MkEqExact))
 import Gens qualified
 import Hedgehog (Gen, PropertyName)
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
+import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Test.Tasty (TestName, TestTree)
 import Test.Tasty qualified as T
 import Utils qualified

@@ -3,7 +3,7 @@ module Test.Data.Fraction (props) where
 import Gens qualified
 import Hedgehog ((===))
 import Hedgehog qualified as H
-import Numeric.Data.Fraction (Fraction (..), (%!))
+import Numeric.Data.Fraction (Fraction ((:%:)), (%!))
 import Numeric.Data.Fraction qualified as Frac
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T

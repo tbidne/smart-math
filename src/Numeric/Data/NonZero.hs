@@ -33,20 +33,26 @@ import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH (Q, TExp)
 #endif
 import Data.Bifunctor (Bifunctor (bimap))
-import Language.Haskell.TH.Syntax (Lift (..))
+import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra.Multiplicative
+  ( MEuclidean (mdivMod),
+    MGroup ((.%.)),
+    MMonoid (one),
+    MSemigroup ((.*.)),
+  )
 import Numeric.Class.Division (Division (divide))
-import Numeric.Literal.Integer (FromInteger (..))
-import Numeric.Literal.Rational (FromRational (..))
+import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core
   ( An_AffineTraversal,
     Is,
     NoIx,
     Optic,
     ReversedPrism',
-    ReversibleOptic (..),
+    ReversibleOptic (ReversedOptic),
     matching,
     prism,
+    re,
   )
 
 -- $setup

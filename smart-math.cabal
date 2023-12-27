@@ -24,7 +24,6 @@ source-repository head
 
 common common-lang
   default-extensions:
-    NoStarIsType
     BangPatterns
     DataKinds
     DeriveAnyClass
@@ -41,6 +40,7 @@ common common-lang
     MultiParamTypeClasses
     MultiWayIf
     NegativeLiterals
+    NoStarIsType
     NumericUnderscores
     OverloadedStrings
     PatternSynonyms

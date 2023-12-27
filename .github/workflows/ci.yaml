@@ -38,12 +38,15 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
 
+      - name: Configure
+        run: cabal configure --enable-tests --ghc-options -Werror
+
       - name: Compile
         run: cabal build
 
       - name: Doc Tests
         run : |
-          cabal configure --enable-tests --write-ghc-environment-files always
+          cabal configure --write-ghc-environment-files always
           cabal build
           ${{ matrix.platform.set-env }} RUN_DOCTEST=1
           cabal test doctest

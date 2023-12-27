@@ -1,14 +1,12 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Test.Algebra.Additive.AMonoid (props) where
 
-import Equality (Equality (..))
+import Equality (Equality (MkEqExact))
 import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
-import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
-import Numeric.Algebra.Normed (Normed (..))
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
+import Numeric.Algebra.Normed (Normed (norm))
 import Test.Tasty (TestName, TestTree)
 import Test.Tasty qualified as T
 import Utils ((<=>))

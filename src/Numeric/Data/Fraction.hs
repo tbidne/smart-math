@@ -44,9 +44,9 @@ import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
 #endif
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
-import GHC.Read (Read (..))
+import GHC.Read (Read (readPrec))
 import GHC.Read qualified as Read
-import GHC.Real (Ratio (..))
+import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as R
 import GHC.Stack (HasCallStack)
 #if MIN_VERSION_template_haskell(2, 17, 0)
@@ -54,26 +54,26 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Language.Haskell.TH.Syntax (Lift (..))
-import Numeric.Algebra.Additive.AGroup (AGroup (..))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
+import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
-import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
-import Numeric.Algebra.Normed (Normed (..))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
+import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
+import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
+import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
-import Numeric.Class.Division (Division (..))
+import Numeric.Class.Division (Division (divide))
 import Numeric.Data.NonZero (rmatching)
-import Numeric.Literal.Integer (FromInteger (..))
-import Numeric.Literal.Rational (FromRational (..))
+import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core
   ( A_Getter,
     A_Lens,
-    LabelOptic (..),
+    LabelOptic (labelOptic),
     ReversedPrism',
     ReversibleOptic (re),
     lens,
@@ -81,7 +81,7 @@ import Optics.Core
     to,
   )
 #if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..), (<+>))
+import Prettyprinter (Pretty (pretty), (<+>))
 #endif
 import Text.ParserCombinators.ReadPrec qualified as ReadP
 import Text.Read.Lex qualified as L

@@ -30,9 +30,9 @@ where
 import Control.DeepSeq (NFData)
 import Data.Bounds (LowerBounded, UpperBounded, UpperBoundless)
 import Data.Kind (Type)
-import Data.Proxy (Proxy (..))
+import Data.Proxy (Proxy (Proxy))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
+import Data.Text.Prettyprint.Doc (Pretty (pretty), (<+>))
 #endif
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
@@ -43,24 +43,27 @@ import Language.Haskell.TH (Code, Q)
 #else
 import Language.Haskell.TH (Q, TExp)
 #endif
-import Language.Haskell.TH.Syntax (Lift (..))
-import Numeric.Algebra.Additive.AGroup (AGroup (..))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
+import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
-import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (..))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
+import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
+import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
-import Numeric.Data.ModP.Internal (MaybePrime (..), Modulus (..))
+import Numeric.Data.ModP.Internal
+  ( MaybePrime (Composite, ProbablyPrime),
+    Modulus (MkModulus),
+  )
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (rmatching)
-import Numeric.Literal.Integer (FromInteger (..))
+import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 #if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (..), (<+>))
+import Prettyprinter (Pretty (pretty), (<+>))
 #endif
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/p\mathbb{Z} \) for prime @p@.

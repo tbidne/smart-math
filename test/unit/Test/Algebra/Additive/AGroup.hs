@@ -1,11 +1,11 @@
 module Test.Algebra.Additive.AGroup (props) where
 
-import Equality (Equality (..))
+import Equality (Equality (MkEqExact))
 import Gens qualified
 import Hedgehog (Gen, PropertyName, (===))
 import Hedgehog qualified as H
-import Numeric.Algebra.Additive.AGroup (AGroup (..))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (..))
+import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Test.Tasty (TestName, TestTree)
 import Test.Tasty qualified as T
 import Utils qualified

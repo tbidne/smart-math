@@ -7,7 +7,7 @@ module Equality
 where
 
 import Data.Kind (Type)
-import GHC.Real (Ratio (..))
+import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as Real
 
 -- | Epsilon used for comparing floating points.

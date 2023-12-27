@@ -4,14 +4,14 @@ import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
-import Numeric.Data.NonNegative (NonNegative (..))
+import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
+import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
+import Numeric.Data.NonNegative (NonNegative (MkNonNegative))
 import Numeric.Data.NonNegative qualified as NonNeg
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.TestBounds (TestBounds (..))
+import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
 
 props :: TestTree

@@ -25,67 +25,66 @@ module Gens
   )
 where
 
-import Data.Functor.Identity (Identity)
 import GHC.Natural (Natural)
-import Hedgehog (MonadGen (..))
+import Hedgehog (Gen)
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
-import Numeric.Data.Fraction (Fraction (..), unsafeFraction)
-import Numeric.Data.ModN (ModN (..), mkModN)
-import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
-import Numeric.Data.NonNegative (NonNegative (..), unsafeNonNegative)
-import Numeric.Data.NonZero (NonZero (..), unsafeNonZero)
-import Numeric.Data.Positive (Positive (..), unsafePositive)
-import Test.TestBounds (TestBounds (..))
+import Numeric.Data.Fraction (Fraction, unsafeFraction)
+import Numeric.Data.ModN (ModN, mkModN)
+import Numeric.Data.ModP (ModP, reallyUnsafeModP)
+import Numeric.Data.NonNegative (NonNegative, unsafeNonNegative)
+import Numeric.Data.NonZero (NonZero, unsafeNonZero)
+import Numeric.Data.Positive (Positive, unsafePositive)
+import Test.TestBounds (TestBounds (maxVal, minVal))
 
-integer :: (MonadGen m) => m Integer
+integer :: Gen Integer
 integer = HG.integral $ HR.exponentialFrom minVal 0 maxVal
 
-natural :: (MonadGen m) => m Natural
+natural :: Gen Natural
 natural = HG.integral $ HR.exponential minVal maxVal
 
-fraction :: (MonadGen m) => m (Fraction Integer)
+fraction :: Gen (Fraction Integer)
 fraction = unsafeFraction <$> integer <*> integerNZ
 
-modN :: (MonadGen m) => m (ModN 10 Natural)
+modN :: Gen (ModN 10 Natural)
 modN = mkModN <$> natural
 
-modP :: (MonadGen m) => m (ModP 17 Natural)
+modP :: Gen (ModP 17 Natural)
 modP = reallyUnsafeModP <$> natural
 
-nonNegative :: (MonadGen m) => m (NonNegative Natural)
+nonNegative :: Gen (NonNegative Natural)
 nonNegative = unsafeNonNegative <$> natural
 
-nonZero :: (MonadGen m) => m (NonZero Integer)
+nonZero :: Gen (NonZero Integer)
 nonZero = unsafeNonZero <$> integerNZ
 
-positive :: (MonadGen m) => m (Positive Integer)
+positive :: Gen (Positive Integer)
 positive = unsafePositive <$> pos
   where
     pos = HG.integral $ HR.exponential 1 maxVal
 
-integerNZ :: (MonadGen m) => m Integer
+integerNZ :: Gen Integer
 integerNZ = nzBounds HG.integral minVal maxVal
 
-naturalNZ :: (MonadGen m) => m Natural
+naturalNZ :: Gen Natural
 naturalNZ = HG.integral $ HR.exponential 1 maxVal
 
-fractionNonZero :: (MonadGen m) => m (Fraction Integer)
+fractionNonZero :: Gen (Fraction Integer)
 fractionNonZero = unsafeFraction <$> integerNZ <*> integerNZ
 
-modPNonZero :: (GenBase m ~ Identity, MonadGen m) => m (ModP 17 Natural)
+modPNonZero :: Gen (ModP 17 Natural)
 modPNonZero = reallyUnsafeModP <$> pos
   where
     pos = HG.filter (\x -> x `mod` 17 /= 0) $ HG.integral $ HR.exponential 1 maxVal
 
-nonNegativeNonZero :: (MonadGen m) => m (NonNegative Natural)
+nonNegativeNonZero :: Gen (NonNegative Natural)
 nonNegativeNonZero = unsafeNonNegative <$> naturalNZ
 
-positiveNonZero :: (MonadGen m) => m (Positive Natural)
+positiveNonZero :: Gen (Positive Natural)
 positiveNonZero = unsafePositive <$> naturalNZ
 
-nzBounds :: (Integral a, MonadGen m) => (Range a -> m a) -> a -> a -> m a
+nzBounds :: (Integral a) => (Range a -> Gen a) -> a -> a -> Gen a
 nzBounds gen lower upper =
   HG.choice
     [ gen (HR.exponential lower -1),

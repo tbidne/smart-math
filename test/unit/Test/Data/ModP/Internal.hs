@@ -6,17 +6,17 @@ import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Data.ModP.Internal
-  ( Bezout (..),
-    MaybePrime (..),
-    Modulus (..),
-    R (..),
-    S (..),
-    T (..),
+  ( Bezout (MkBezout),
+    MaybePrime (Composite, ProbablyPrime),
+    Modulus (MkModulus),
+    R (R'),
+    S (S'),
+    T (T'),
   )
 import Numeric.Data.ModP.Internal qualified as ModPI
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.TestBounds (TestBounds (..))
+import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
 
 props :: TestTree

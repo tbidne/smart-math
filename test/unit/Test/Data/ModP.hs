@@ -10,15 +10,15 @@ import Hedgehog (GenBase, MonadGen, Property, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Algebra.Additive.AGroup (AGroup (..))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup (..))
-import Numeric.Algebra.Multiplicative.MGroup (MGroup (..))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup (..))
-import Numeric.Data.ModP (ModP (..), reallyUnsafeModP)
+import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
+import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
+import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
+import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
+import Numeric.Data.ModP (ModP (MkModP), reallyUnsafeModP)
 import Numeric.Data.ModP qualified as ModP
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
-import Test.TestBounds (TestBounds (..))
+import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
 
 props :: TestTree
