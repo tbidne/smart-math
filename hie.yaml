@@ -6,5 +6,5 @@ cradle:
     - path: "./test/doctest"
       component: "smart-math:test:doctest"
 
-    - path: "./test/props"
-      component: "smart-math:test:props"
+    - path: "./test/unit"
+      component: "smart-math:test:unit"

@@ -48,8 +48,8 @@ jobs:
           ${{ matrix.platform.set-env }} RUN_DOCTEST=1
           cabal test doctest
 
-      - name: Property Tests
-        run: cabal test props --test-options '--hedgehog-tests 100000'
+      - name: Unit Tests
+        run: cabal test unit --test-options '--hedgehog-tests 100000'
   nix:
     strategy:
       fail-fast: false
