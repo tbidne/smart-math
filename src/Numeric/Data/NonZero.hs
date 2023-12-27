@@ -24,15 +24,11 @@ module Numeric.Data.NonZero
 where
 
 import Control.DeepSeq (NFData)
+import Data.Bifunctor (Bifunctor (bimap))
 import Data.Kind (Type)
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
-#if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
-#else
-import Language.Haskell.TH (Q, TExp)
-#endif
-import Data.Bifunctor (Bifunctor (bimap))
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra.Multiplicative
   ( MEuclidean (mdivMod),
@@ -152,11 +148,7 @@ mkNonZero x
 -- UnsafeNonZero 7
 --
 -- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
 mkNonZeroTH :: (Eq a, Lift a, Num a) => a -> Code Q (NonZero a)
-#else
-mkNonZeroTH :: (Eq a, Lift a, Num a) => a -> Q (TExp (NonZero a))
-#endif
 mkNonZeroTH x
   | x == 0 = error "Numeric.Data.NonZero.mkNonZeroTH: Passed 0"
   | otherwise = liftTyped (UnsafeNonZero x)

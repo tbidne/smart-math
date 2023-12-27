@@ -49,11 +49,7 @@ import GHC.Read qualified as Read
 import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as R
 import GHC.Stack (HasCallStack)
-#if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
-#else
-import Language.Haskell.TH (Q, TExp)
-#endif
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
@@ -428,11 +424,7 @@ mkFraction n d = Just $ reduce (UnsafeFraction n d)
 -- 7 :%: 2
 --
 -- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
 mkFractionTH :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
-#else
-mkFractionTH :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
-#endif
 mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 {-# INLINEABLE mkFractionTH #-}
 
@@ -444,11 +436,7 @@ mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 -- 7 :%: 2
 --
 -- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
 (%%) :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
-#else
-(%%) :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Q (TExp (Fraction a))
-#endif
 n %% d = mkFractionTH n d
 {-# INLINE (%%) #-}
 

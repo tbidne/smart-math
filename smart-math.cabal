@@ -3,9 +3,7 @@ name:               smart-math
 version:            0.1
 license:            MIT
 license-file:       LICENSE
-tested-with:
-  GHC ==8.10.7 || ==9.0.2 || ==9.2.8 || ==9.4.7 || ==9.6.3 || ==9.8.1
-
+tested-with:        GHC ==9.2.8 || ==9.4.7 || ==9.6.3 || ==9.8.1
 copyright:          2022-2023 Thomas Bidne
 author:             Thomas Bidne
 maintainer:         tbidne@protonmail.com
@@ -44,12 +42,26 @@ common common-lang
     NumericUnderscores
     OverloadedStrings
     PatternSynonyms
+    RankNTypes
     ScopedTypeVariables
     StandaloneDeriving
     StandaloneKindSignatures
     TypeApplications
     TypeFamilies
     TypeOperators
+
+-- NOTE: [TypeAbstractions default extensions]
+--
+-- We would like to enable TypeAbstractions globally i.e. the below logic,
+-- however, that runs afoul of our format job because cabal/cabal-fmt does
+-- not recognize the extension yet. We need a greater version of cabal,
+-- presumably.
+--
+-- Until our ci (nix) has a cabal that recognizes TypeAbstractions,
+-- enable it in the module.
+--
+--if impl(ghc >=9.8.1)
+--  default-extensions: TypeAbstractions
 
 library
   import:           common-lang
@@ -66,13 +78,13 @@ library
 
   build-depends:
     , algebra-simple    ^>=0.1
-    , base              >=4.14.0.0 && <4.20
+    , base              >=4.16.0.0 && <4.20
     , bounds            ^>=0.1
     , deepseq           >=1.4.4.0  && <1.6
     , optics-core       ^>=0.4
     , prettyprinter     >=1.4.0    && <1.8
     , random            ^>=1.2.0
-    , template-haskell  >=2.16.0.0 && <2.22
+    , template-haskell  >=2.17.0.0 && <2.22
 
   hs-source-dirs:   src
   default-language: Haskell2010
@@ -121,6 +133,7 @@ test-suite unit
     , smart-math
     , tasty           >=1.1.0.3 && <1.6
     , tasty-hedgehog  >=1.0.0.2 && <1.5
+    , tasty-hunit     >=0.9     && <0.11
 
   hs-source-dirs:   test/unit
   ghc-options:      -threaded -with-rtsopts=-N

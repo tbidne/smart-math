@@ -36,11 +36,7 @@ import Data.Text.Prettyprint.Doc (Pretty (pretty))
 #endif
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
-#if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
-#else
-import Language.Haskell.TH (Q, TExp)
-#endif
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
@@ -163,11 +159,7 @@ instance (Fractional a, Ord a, Show a) => FromRational (Positive a) where
 -- UnsafePositive 1
 --
 -- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
 mkPositiveTH :: (Integral a, Lift a, Show a) => a -> Code Q (Positive a)
-#else
-mkPositiveTH :: (Integral a, Lift a, Show a) => a -> Q (TExp (Positive a))
-#endif
 mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
   where
     err =

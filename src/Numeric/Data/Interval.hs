@@ -3,61 +3,37 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
+-- see NOTE: [TypeAbstractions default extensions]
+
+#if __GLASGOW_HASKELL__ >= 908
+{-# LANGUAGE TypeAbstractions #-}
+#endif
+
 -- | Provides types for enforcing minimum and maximum bounds.
 --
 -- @since 0.1
 module Numeric.Data.Interval
-  ( -- * Left/Right-Interval
+  ( -- * Main types
+    IntervalBound (..),
+    Interval (MkInterval),
 
-    -- ** Type
-    LRInterval (MkLRInterval),
-
-    -- ** Creation
-    mkLRInterval,
-    mkLRIntervalTH,
-    unsafeLRInterval,
-    reallyUnsafeLRInterval,
+    -- ** Creation,
+    mkInterval,
+    mkIntervalTH,
+    unsafeInterval,
+    reallyUnsafeInterval,
 
     -- ** Elimination
-    unLRInterval,
+    unInterval,
 
     -- ** Optics
-    _MkLRInterval,
+    _MkInterval,
     rmatching,
 
-    -- * Left-Interval
-
-    -- ** Type
-    LInterval (MkLInterval),
-
-    -- ** Creation
-    mkLInterval,
-    mkLIntervalTH,
-    unsafeLInterval,
-    reallyUnsafeLInterval,
-
-    -- ** Elimination
-    unLInterval,
-
-    -- ** Optics
-    _MkLInterval,
-
-    -- * Right-Interval
-
-    -- ** Type
-    RInterval (MkRInterval),
-
-    -- ** Creation
-    mkRInterval,
-    mkRIntervalTH,
-    unsafeRInterval,
-    reallyUnsafeRInterval,
-
-    -- ** Elimination
-    unRInterval,
-
-    -- ** Optics
-    _MkRInterval,
+    -- * Singletons
+    SIntervalBound (..),
+    SingIntervalBound (..),
+    withSingIntervalBound,
   )
 where
 
@@ -68,7 +44,7 @@ import Data.Bounds
     UpperBounded (upperBound),
     UpperBoundless,
   )
-import Data.Kind (Type)
+import Data.Kind (Constraint, Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (Proxy))
 #if !MIN_VERSION_prettyprinter(1, 7, 1)
@@ -77,11 +53,7 @@ import Data.Text.Prettyprint.Doc (Pretty (pretty))
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
-#if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
-#else
-import Language.Haskell.TH (Q, TExp)
-#endif
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (afromInteger))
@@ -94,12 +66,18 @@ import Prettyprinter (Pretty (pretty))
 -- $setup
 -- >>> :set -XTemplateHaskell
 
--- | Represents a closed interval that is bounded on both sides i.e.
--- @LRInterval \@l \@r x@ represents \( x \in [l, r] \).
+type IntervalBound :: Type
+
+-- | Interval bound.
 --
 -- @since 0.1
-type LRInterval :: Nat -> Nat -> Type -> Type
-newtype LRInterval l r a = UnsafeLRInterval a
+data IntervalBound
+  = -- | Open bound.
+    Open Nat
+  | -- | Closed bound.
+    Closed Nat
+  | -- | No bound.
+    None
   deriving stock
     ( -- | @since 0.1
       Eq,
@@ -114,527 +92,347 @@ newtype LRInterval l r a = UnsafeLRInterval a
     )
   deriving anyclass
     ( -- | @since 0.1
-      LowerBounded,
+      NFData
+    )
+
+displayIntervalBounds :: IntervalBound -> IntervalBound -> String
+displayIntervalBounds l r =
+  mconcat
+    [ bracketL l,
+      valL l,
+      ", ",
+      valR r,
+      bracketR r
+    ]
+  where
+    valL (Open n) = show n
+    valL (Closed n) = show n
+    valL None = "-\8734"
+
+    valR (Open n) = show n
+    valR (Closed n) = show n
+    valR None = "\8734"
+
+    bracketL (Closed _) = "["
+    bracketL _ = "("
+
+    bracketR (Closed _) = "]"
+    bracketR _ = ")"
+
+type SIntervalBound :: IntervalBound -> Type
+
+-- | Singleton for 'IntervalBound'.
+--
+-- @since 0.1
+data SIntervalBound (i :: IntervalBound) where
+  SOpen :: forall (n :: Nat). (KnownNat n) => SIntervalBound (Open n)
+  SClosed :: forall (n :: Nat). (KnownNat n) => SIntervalBound (Closed n)
+  SNone :: SIntervalBound None
+
+-- | Singleton \"with\"-style convenience function. Allows us to run a
+-- computation @SingIntervalBound i => r@ without explicitly pattern-matching
+-- every time.
+--
+-- @since 0.1
+withSingIntervalBound :: SIntervalBound i -> ((SingIntervalBound i) => r) -> r
+withSingIntervalBound i x = case i of
+  SOpen -> x
+  SClosed -> x
+  SNone -> x
+{-# INLINEABLE withSingIntervalBound #-}
+
+type SingIntervalBound :: IntervalBound -> Constraint
+
+-- | Class for retrieving the singleton witness from the 'IntervalBound'.
+--
+-- @since 0.1
+class SingIntervalBound (s :: IntervalBound) where
+  -- | Retrieves the singleton witness.
+  --
+  -- @since 0.1
+  singIntervalBound :: SIntervalBound s
+
+-- | @since 0.1
+instance (KnownNat k) => SingIntervalBound (Open k) where
+  singIntervalBound = SOpen @k
+
+-- | @since 0.1
+instance (KnownNat k) => SingIntervalBound (Closed k) where
+  singIntervalBound = SClosed @k
+
+-- | @since 0.1
+instance SingIntervalBound None where
+  singIntervalBound = SNone
+
+type Interval :: IntervalBound -> IntervalBound -> Type -> Type
+
+-- | Represents an interval. Can be (open|closed) bounded (left|right).
+--
+-- @since 0.1
+newtype Interval (l :: IntervalBound) (r :: IntervalBound) (a :: Type)
+  = UnsafeInterval a
+  deriving stock
+    ( -- | @since 0.1
+      Eq,
       -- | @since 0.1
-      NFData,
+      Generic,
       -- | @since 0.1
-      UpperBounded
+      Lift,
+      -- | @since 0.1
+      Ord,
+      -- | @since 0.1
+      Show
+    )
+  deriving anyclass
+    ( -- | @since 0.1
+      NFData
     )
 
 -- | @since 0.1
-unLRInterval :: LRInterval l r a -> a
-unLRInterval (UnsafeLRInterval x) = x
-{-# INLINE unLRInterval #-}
-
--- | Unidirectional pattern synonym for 'LRInterval'. This allows us to pattern
--- match on an interval term without exposing the unsafe internal details.
---
--- @since 0.1
-pattern MkLRInterval :: a -> LRInterval l r a
-pattern MkLRInterval x <- UnsafeLRInterval x
-
-{-# COMPLETE MkLRInterval #-}
+instance
+  ( KnownNat l,
+    KnownNat r,
+    Num a
+  ) =>
+  Bounded (Interval (Closed l) (Closed r) a)
+  where
+  minBound = UnsafeInterval $ fromIntegral $ natVal @l Proxy
+  maxBound = UnsafeInterval $ fromIntegral $ natVal @r Proxy
 
 -- | @since 0.1
-instance (KnownNat l, KnownNat r, Num a) => Bounded (LRInterval l r a) where
-  minBound = UnsafeLRInterval $ fromIntegral $ natVal @l Proxy
-  maxBound = UnsafeLRInterval $ fromIntegral $ natVal @r Proxy
-  {-# INLINEABLE minBound #-}
-  {-# INLINEABLE maxBound #-}
+instance (KnownNat l, Num a) => LowerBounded (Interval (Closed l) r a) where
+  lowerBound = UnsafeInterval $ fromIntegral $ natVal @l Proxy
 
 -- | @since 0.1
-instance (Pretty a) => Pretty (LRInterval l r a) where
-  pretty (UnsafeLRInterval x) = pretty x
+instance (LowerBoundless a) => LowerBoundless (Interval None r a)
+
+-- | @since 0.1
+instance (KnownNat r, Num a) => UpperBounded (Interval l (Closed r) a) where
+  upperBound = UnsafeInterval $ fromIntegral $ natVal @r Proxy
+
+-- | @since 0.1
+instance (UpperBoundless a) => UpperBoundless (Interval l None a)
+
+-- | @since 0.1
+instance (Pretty a) => Pretty (Interval l r a) where
+  pretty (UnsafeInterval x) = pretty x
   {-# INLINEABLE pretty #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (KnownNat l, KnownNat r, Num a, Ord a, Show a) => FromInteger (LRInterval l r a) where
-  afromInteger = unsafeLRInterval . fromInteger
+instance
+  ( Num a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r,
+    Show a
+  ) =>
+  FromInteger (Interval l r a)
+  where
+  afromInteger = unsafeInterval . fromInteger
   {-# INLINEABLE afromInteger #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Fractional a, KnownNat l, KnownNat r, Ord a, Show a) => FromRational (LRInterval l r a) where
-  afromRational = unsafeLRInterval . fromRational
+instance
+  ( Fractional a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r,
+    Show a
+  ) =>
+  FromRational (Interval l r a)
+  where
+  afromRational = unsafeInterval . fromRational
   {-# INLINEABLE afromRational #-}
 
--- | Template haskell for creating an 'LRInterval' at compile-time.
+pattern MkInterval :: a -> Interval l r a
+pattern MkInterval x <- UnsafeInterval x
+
+{-# COMPLETE MkInterval #-}
+
+-- | @since 0.1
+unInterval :: Interval l r a -> a
+unInterval (UnsafeInterval x) = x
+
+-- | Template haskell for creating an 'Interval' at compile-time.
 --
 -- ==== __Examples__
--- >>> $$(mkLRIntervalTH @0 @100 7)
--- UnsafeLRInterval 7
+-- >>> $$(mkIntervalTH @None @(Closed 100) 7)
+-- UnsafeInterval 7
 --
 -- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
-mkLRIntervalTH ::
+mkIntervalTH ::
   forall l r a.
-  (Integral a, KnownNat l, KnownNat r, Lift a, Show a) =>
+  ( Lift a,
+    Num a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r,
+    Show a
+  ) =>
   a ->
-  Code Q (LRInterval l r a)
-#else
-mkLRIntervalTH ::
-  forall l r a.
-  (Integral a, KnownNat l, KnownNat r, Lift a, Show a) =>
-  a ->
-  Q (TExp (LRInterval l r a))
-#endif
-mkLRIntervalTH x = maybe (error msg) liftTyped $ mkLRInterval x
+  Code Q (Interval l r a)
+mkIntervalTH x = maybe (error msg) liftTyped $ mkInterval x
   where
-    msg = lrErrMsg @l @r x "mkLRIntervalTH"
-{-# INLINEABLE mkLRIntervalTH #-}
+    msg = errMsg @l @r x "mkIntervalTH"
+{-# INLINEABLE mkIntervalTH #-}
 
--- | Smart constructor for 'LRInterval'. Returns 'Nothing' if the given value
+-- | Smart constructor for 'Interval'. Returns 'Nothing' if the given value
 -- is not within the bounds.
 --
 -- ==== __Examples__
--- >>> mkLRInterval @10 @100 50
--- Just (UnsafeLRInterval 50)
+-- >>> mkInterval @(Open 10) @(Closed 100) 50
+-- Just (UnsafeInterval 50)
 --
--- >>> mkLRInterval @10 @100 5
+-- >>> mkInterval @(Open 10) @(Closed 100) 100
+-- Just (UnsafeInterval 100)
+--
+-- >>> mkInterval @(Open 10) @(Closed 100) 10
 -- Nothing
 --
--- >>> mkLRInterval @10 @100 200
+-- >>> mkInterval @(Open 10) @(Closed 100) 101
 -- Nothing
 --
 -- @since 0.1
-mkLRInterval ::
+mkInterval ::
   forall l r a.
-  (KnownNat l, KnownNat r, Num a, Ord a) =>
+  ( Num a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r
+  ) =>
   a ->
-  Maybe (LRInterval l r a)
-mkLRInterval x
-  | x >= l' && x <= r' = Just (UnsafeLRInterval x)
+  Maybe (Interval l r a)
+mkInterval x
+  | boundedLeft && boundedRight = Just (UnsafeInterval x)
   | otherwise = Nothing
   where
-    l' = fromIntegral $ natVal @l Proxy
-    r' = fromIntegral $ natVal @r Proxy
-{-# INLINEABLE mkLRInterval #-}
+    boundedLeft :: Bool
+    boundedLeft = case singIntervalBound @l of
+      SNone -> True
+      (SOpen @k) ->
+        let l' = natVal @k Proxy
+         in x > fromIntegral l'
+      (SClosed @k) ->
+        let l' = natVal @k Proxy
+         in x >= fromIntegral l'
 
--- | Variant of 'mkLRInterval' that throws an error when given a value out of
--- bounds.
+    boundedRight :: Bool
+    boundedRight = case singIntervalBound @r of
+      SNone -> True
+      (SOpen @k) ->
+        let r' = natVal @k Proxy
+         in x < fromIntegral r'
+      (SClosed @k) ->
+        let r' = natVal @k Proxy
+         in x <= fromIntegral r'
+{-# INLINEABLE mkInterval #-}
+
+-- | Variant of 'mkInterval' that throws an error when given a value out of bounds.
 --
 -- __WARNING: Partial__
 --
 -- ==== __Examples__
--- >>> unsafeLRInterval @0 @10 7
--- UnsafeLRInterval 7
+-- >>> unsafeInterval @(Open 10) @(Closed 100) 50
+-- UnsafeInterval 50
 --
 -- @since 0.1
-unsafeLRInterval ::
+unsafeInterval ::
   forall l r a.
-  (HasCallStack, KnownNat l, KnownNat r, Num a, Ord a, Show a) =>
+  ( HasCallStack,
+    Num a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r,
+    Show a
+  ) =>
   a ->
-  LRInterval l r a
-unsafeLRInterval x = Maybe.fromMaybe (error msg) $ mkLRInterval x
+  Interval l r a
+unsafeInterval x = Maybe.fromMaybe (error msg) $ mkInterval x
   where
-    msg = lrErrMsg @l @r x "unsafeLRInterval"
-{-# INLINEABLE unsafeLRInterval #-}
+    msg = errMsg @l @r x "unsafeInterval"
+{-# INLINEABLE unsafeInterval #-}
 
--- | This function is an alias for the unchecked constructor @UnsafeLRInterval@
--- i.e. it allows us to construct a 'LRInterval' __without__ checking the
--- invariant. This is intended only for when we absolutely know the invariant
--- holds and a branch (i.e. 'unsafeLRInterval') is undesirable for performance
+-- | This function is an alias for the unchecked constructor @UnsafeInterval@
+-- i.e. it allows us to construct a 'Interval' __without__ checking
+-- invariants. This is intended only for when we absolutely know the invariant
+-- holds and a branch (i.e. 'unsafeInterval') is undesirable for performance
 -- reasons. Exercise extreme caution.
 --
 -- @since 0.1
-reallyUnsafeLRInterval :: a -> LRInterval l r a
-reallyUnsafeLRInterval = UnsafeLRInterval
-{-# INLINEABLE reallyUnsafeLRInterval #-}
+reallyUnsafeInterval :: a -> Interval l r a
+reallyUnsafeInterval = UnsafeInterval
+{-# INLINEABLE reallyUnsafeInterval #-}
 
 -- | 'ReversedPrism'' that enables total elimination and partial construction.
 --
 -- ==== __Examples__
 --
 -- >>> import Optics.Core ((^.))
--- >>> x = $$(mkLRIntervalTH @1 @5 2)
--- >>> x ^. _MkLRInterval
+-- >>> x = $$(mkIntervalTH @(Open 1) @(Open 5) 2)
+-- >>> x ^. _MkInterval
 -- 2
 --
--- >>> rmatching (_MkLRInterval @1 @5) 3
--- Right (UnsafeLRInterval 3)
+-- >>> rmatching (_MkInterval @(Open 1) @(Open 5)) 3
+-- Right (UnsafeInterval 3)
 --
--- >>> rmatching (_MkLRInterval @1 @5) 7
+-- >>> rmatching (_MkInterval @(Open 1) @(Open 5)) 7
 -- Left 7
 --
 -- @since 0.1
-_MkLRInterval :: (KnownNat l, KnownNat r, Num a, Ord a) => ReversedPrism' (LRInterval l r a) a
-_MkLRInterval = re (prism unLRInterval g)
+_MkInterval ::
+  forall l r a.
+  ( Num a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r
+  ) =>
+  ReversedPrism' (Interval l r a) a
+_MkInterval = re (prism unInterval g)
   where
-    g x = case mkLRInterval x of
+    g x = case mkInterval x of
       Nothing -> Left x
       Just x' -> Right x'
-{-# INLINEABLE _MkLRInterval #-}
+{-# INLINEABLE _MkInterval #-}
 
--- | Represents a closed interval that is left-bounded i.e.
--- @LInterval \@l x@ represents \( x \in [l, \infty) \).
---
--- @since 0.1
-type LInterval :: Nat -> Type -> Type
-newtype LInterval l a = UnsafeLInterval a
-  deriving stock
-    ( -- | @since 0.1
-      Eq,
-      -- | @since 0.1
-      Generic,
-      -- | @since 0.1
-      Lift,
-      -- | @since 0.1
-      Ord,
-      -- | @since 0.1
-      Show
-    )
-  deriving anyclass
-    ( -- | @since 0.1
-      NFData
-    )
-
--- | @since 0.1
-unLInterval :: LInterval l a -> a
-unLInterval (UnsafeLInterval x) = x
-{-# INLINE unLInterval #-}
-
--- | Unidirectional pattern synonym for 'LInterval'. This allows us to pattern
--- match on an interval term without exposing the unsafe internal details.
---
--- @since 0.1
-pattern MkLInterval :: a -> LInterval l a
-pattern MkLInterval x <- UnsafeLInterval x
-
-{-# COMPLETE MkLInterval #-}
-
--- | @since 0.1
-instance (KnownNat l, Num a) => LowerBounded (LInterval l a) where
-  lowerBound = UnsafeLInterval $ fromIntegral $ natVal @l Proxy
-  {-# INLINEABLE lowerBound #-}
-
--- | @since 0.1
-instance (UpperBoundless a) => UpperBoundless (LInterval l a)
-
--- | @since 0.1
-instance (Pretty a) => Pretty (LInterval l a) where
-  pretty (UnsafeLInterval x) = pretty x
-  {-# INLINEABLE pretty #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (KnownNat l, Num a, Ord a, Show a) => FromInteger (LInterval l a) where
-  afromInteger = unsafeLInterval . fromInteger
-  {-# INLINEABLE afromInteger #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (Fractional a, KnownNat l, Ord a, Show a) => FromRational (LInterval l a) where
-  afromRational = unsafeLInterval . fromRational
-  {-# INLINEABLE afromRational #-}
-
--- | Template haskell for creating a 'LInterval' at compile-time.
---
--- ==== __Examples__
--- >>> $$(mkLIntervalTH @0 7)
--- UnsafeLInterval 7
---
--- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
-mkLIntervalTH ::
-  forall l a.
-  (Integral a, KnownNat l, Lift a, Show a) =>
+errMsg ::
+  forall l r a.
+  ( Show a,
+    SingIntervalBound l,
+    SingIntervalBound r
+  ) =>
   a ->
-  Code Q (LInterval l a)
-#else
-mkLIntervalTH ::
-  forall l a.
-  (Integral a, KnownNat l, Lift a, Show a) =>
-  a ->
-  Q (TExp (LInterval l a))
-#endif
-mkLIntervalTH x = maybe (error msg) liftTyped $ mkLInterval x
+  String ->
+  String
+errMsg x fnName = msg
   where
-    msg = lErrMsg @l x "mkLIntervalTH"
-{-# INLINEABLE mkLIntervalTH #-}
-
--- | Smart constructor for 'LInterval'. Returns 'Nothing' if the given value
--- is not >= the bound.
---
--- ==== __Examples__
--- >>> mkLInterval @10 50
--- Just (UnsafeLInterval 50)
---
--- >>> mkLInterval @10 5
--- Nothing
---
--- @since 0.1
-mkLInterval ::
-  forall l a.
-  (KnownNat l, Num a, Ord a) =>
-  a ->
-  Maybe (LInterval l a)
-mkLInterval x
-  | x >= l' = Just (UnsafeLInterval x)
-  | otherwise = Nothing
-  where
-    l' = fromIntegral $ natVal @l Proxy
-{-# INLINEABLE mkLInterval #-}
-
--- | Variant of 'mkLInterval' that throws an error when given a value out of bounds.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> unsafeLInterval @0 7
--- UnsafeLInterval 7
---
--- @since 0.1
-unsafeLInterval ::
-  forall l a.
-  (HasCallStack, KnownNat l, Num a, Ord a, Show a) =>
-  a ->
-  LInterval l a
-unsafeLInterval x = Maybe.fromMaybe (error msg) $ mkLInterval x
-  where
-    msg = lErrMsg @l x "unsafeLInterval"
-{-# INLINEABLE unsafeLInterval #-}
-
--- | This function is an alias for the unchecked constructor @UnsafeLInterval@
--- i.e. it allows us to construct a 'LInterval' __without__ checking the
--- invariant. This is intended only for when we absolutely know the invariant
--- holds and a branch (i.e. 'unsafeLInterval') is undesirable for performance
--- reasons. Exercise extreme caution.
---
--- @since 0.1
-reallyUnsafeLInterval :: a -> LInterval l a
-reallyUnsafeLInterval = UnsafeLInterval
-{-# INLINEABLE reallyUnsafeLInterval #-}
-
--- | 'ReversedPrism'' that enables total elimination and partial construction.
---
--- ==== __Examples__
---
--- >>> import Optics.Core ((^.))
--- >>> x = $$(mkLIntervalTH @8 10)
--- >>> x ^. _MkLInterval
--- 10
---
--- >>> rmatching (_MkLInterval @8) 10
--- Right (UnsafeLInterval 10)
---
--- >>> rmatching (_MkLInterval @8) 5
--- Left 5
---
--- @since 0.1
-_MkLInterval :: (KnownNat l, Num a, Ord a) => ReversedPrism' (LInterval l a) a
-_MkLInterval = re (prism unLInterval g)
-  where
-    g x = case mkLInterval x of
-      Nothing -> Left x
-      Just x' -> Right x'
-{-# INLINEABLE _MkLInterval #-}
-
--- | Represents a closed interval that is right-bounded i.e.
--- @RInterval \@r x@ represents \( x \in (-\infty, r] \).
---
--- @since 0.1
-type RInterval :: Nat -> Type -> Type
-newtype RInterval r a = UnsafeRInterval a
-  deriving stock
-    ( -- | @since 0.1
-      Eq,
-      -- | @since 0.1
-      Generic,
-      -- | @since 0.1
-      Lift,
-      -- | @since 0.1
-      Ord,
-      -- | @since 0.1
-      Show
-    )
-  deriving anyclass
-    ( -- | @since 0.1
-      NFData
-    )
-
--- | @since 0.1
-unRInterval :: RInterval r a -> a
-unRInterval (UnsafeRInterval x) = x
-{-# INLINE unRInterval #-}
-
--- | @since 0.1
-instance (KnownNat r, Num a) => UpperBounded (RInterval r a) where
-  upperBound = UnsafeRInterval $ fromIntegral $ natVal @r Proxy
-  {-# INLINEABLE upperBound #-}
-
--- | @since 0.1
-instance (LowerBoundless a) => LowerBoundless (RInterval r a)
-
--- | Unidirectional pattern synonym for 'RInterval'. This allows us to pattern
--- match on an interval term without exposing the unsafe internal details.
---
--- @since 0.1
-pattern MkRInterval :: a -> RInterval r a
-pattern MkRInterval x <- UnsafeRInterval x
-
-{-# COMPLETE MkRInterval #-}
-
--- | @since 0.1
-instance (Pretty a) => Pretty (RInterval r a) where
-  pretty (UnsafeRInterval x) = pretty x
-  {-# INLINEABLE pretty #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (KnownNat r, Num a, Ord a, Show a) => FromInteger (RInterval r a) where
-  afromInteger = unsafeRInterval . fromInteger
-  {-# INLINEABLE afromInteger #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (Fractional a, KnownNat r, Ord a, Show a) => FromRational (RInterval r a) where
-  afromRational = unsafeRInterval . fromRational
-  {-# INLINEABLE afromRational #-}
-
--- | Template haskell for creating an 'RInterval' at compile-time.
---
--- ==== __Examples__
--- >>> $$(mkRIntervalTH @100 7)
--- UnsafeRInterval 7
---
--- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
-mkRIntervalTH ::
-  forall r a.
-  (Integral a, KnownNat r, Lift a, Show a) =>
-  a ->
-  Code Q (RInterval r a)
-#else
-mkRIntervalTH ::
-  forall r a.
-  (Integral a, KnownNat r, Lift a, Show a) =>
-  a ->
-  Q (TExp (RInterval r a))
-#endif
-mkRIntervalTH x = maybe (error msg) liftTyped $ mkRInterval x
-  where
-    msg = rErrMsg @r x "mkRIntervalTH"
-{-# INLINEABLE mkRIntervalTH #-}
-
--- | Smart constructor for 'RInterval'. Returns 'Nothing' if the given value
--- is not <= the bound.
---
--- ==== __Examples__
--- >>> mkRInterval @100 50
--- Just (UnsafeRInterval 50)
---
--- >>> mkRInterval @0 5
--- Nothing
---
--- @since 0.1
-mkRInterval ::
-  forall r a.
-  (KnownNat r, Num a, Ord a) =>
-  a ->
-  Maybe (RInterval r a)
-mkRInterval x
-  | x <= r' = Just (UnsafeRInterval x)
-  | otherwise = Nothing
-  where
-    r' = fromIntegral $ natVal @r Proxy
-{-# INLINEABLE mkRInterval #-}
-
--- | Variant of 'mkRInterval' that throws an error when given a value out of bounds.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> unsafeRInterval @10 7
--- UnsafeRInterval 7
---
--- @since 0.1
-unsafeRInterval ::
-  forall r a.
-  (HasCallStack, KnownNat r, Num a, Ord a, Show a) =>
-  a ->
-  RInterval r a
-unsafeRInterval x = Maybe.fromMaybe (error msg) $ mkRInterval x
-  where
-    msg = rErrMsg @r x "unsafeRInterval"
-{-# INLINEABLE unsafeRInterval #-}
-
--- | This function is an alias for the unchecked constructor @UnsafeRInterval@
--- i.e. it allows us to construct a 'RInterval' __without__ checking the
--- invariant. This is intended only for when we absolutely know the invariant
--- holds and a branch (i.e. 'unsafeRInterval') is undesirable for performance
--- reasons. Exercise extreme caution.
---
--- @since 0.1
-reallyUnsafeRInterval :: a -> RInterval r a
-reallyUnsafeRInterval = UnsafeRInterval
-{-# INLINEABLE reallyUnsafeRInterval #-}
-
--- | 'ReversedPrism'' that enables total elimination and partial construction.
---
--- ==== __Examples__
---
--- >>> import Optics.Core ((^.))
--- >>> x = $$(mkRIntervalTH @8 5)
--- >>> x ^. _MkRInterval
--- 5
---
--- >>> rmatching (_MkRInterval @8) 5
--- Right (UnsafeRInterval 5)
---
--- >>> rmatching (_MkRInterval @8) 10
--- Left 10
---
--- @since 0.1
-_MkRInterval :: (KnownNat r, Num a, Ord a) => ReversedPrism' (RInterval r a) a
-_MkRInterval = re (prism unRInterval g)
-  where
-    g x = case mkRInterval x of
-      Nothing -> Left x
-      Just x' -> Right x'
-{-# INLINEABLE _MkRInterval #-}
-
-lrErrMsg :: forall l r a. (KnownNat l, KnownNat r, Show a) => a -> String -> String
-lrErrMsg x fnName = header <> msg
-  where
-    header = "Numeric.Data.Interval." <> fnName
-    l' = natVal @l Proxy
-    r' = natVal @r Proxy
+    intervalStr = displayIntervalBounds left right
+    (left, right) = getInterval @l @r
     msg =
-      ": Wanted value in ["
-        <> show l'
-        <> ", "
-        <> show r'
-        <> "], received: "
-        <> show x
-{-# INLINEABLE lrErrMsg #-}
+      mconcat
+        [ "Numeric.Data.Interval.",
+          fnName,
+          ": Wanted value in ",
+          intervalStr,
+          ", received: ",
+          show x
+        ]
 
-lErrMsg :: forall l a. (KnownNat l, Show a) => a -> String -> String
-lErrMsg x fnName = header <> msg
+getInterval ::
+  forall l r.
+  ( SingIntervalBound l,
+    SingIntervalBound r
+  ) =>
+  (IntervalBound, IntervalBound)
+getInterval = (fromSingleton left, fromSingleton right)
   where
-    header = "Numeric.Data.Interval." <> fnName
-    l' = natVal @l Proxy
-    msg =
-      ": Wanted value in ["
-        <> show l'
-        <> ", \8734), received: "
-        <> show x
-{-# INLINEABLE lErrMsg #-}
+    left = singIntervalBound @l
+    right = singIntervalBound @r
 
-rErrMsg :: forall l a. (KnownNat l, Show a) => a -> String -> String
-rErrMsg x fnName = header <> msg
-  where
-    header = "Numeric.Data.Interval." <> fnName
-    l' = natVal @l Proxy
-    msg =
-      ": Wanted value in (-\8734, "
-        <> show l'
-        <> "], received: "
-        <> show x
-{-# INLINEABLE rErrMsg #-}
+fromSingleton :: SIntervalBound i -> IntervalBound
+fromSingleton SNone = None
+fromSingleton (SOpen @n) = Open (natVal @n Proxy)
+fromSingleton (SClosed @n) = Closed (natVal @n Proxy)

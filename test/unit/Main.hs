@@ -35,7 +35,7 @@ main =
         Test.Algebra.Multiplicative.MMonoid.props,
         Test.Algebra.Multiplicative.MGroup.props,
         Test.Data.Fraction.props,
-        Test.Data.Interval.props,
+        Test.Data.Interval.tests,
         Test.Data.ModN.props,
         Test.Data.ModP.props,
         Test.Data.ModP.Internal.props,

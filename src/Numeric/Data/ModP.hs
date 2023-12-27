@@ -38,11 +38,7 @@ import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
-#if MIN_VERSION_template_haskell(2, 17, 0)
 import Language.Haskell.TH (Code, Q)
-#else
-import Language.Haskell.TH (Q, TExp)
-#endif
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
@@ -259,11 +255,15 @@ mkModP x = case ModPI.isPrime p' of
 -- MkModP 7 (mod 11)
 --
 -- @since 0.1
-#if MIN_VERSION_template_haskell(2,17,0)
-mkModPTH :: forall p a. (Integral a, KnownNat p, Lift a, UpperBoundless a) => a -> Code Q (ModP p a)
-#else
-mkModPTH :: forall p a. (Integral a, KnownNat p, Lift a, UpperBoundless a) => a -> Q (TExp (ModP p a))
-#endif
+mkModPTH ::
+  forall p a.
+  ( Integral a,
+    KnownNat p,
+    Lift a,
+    UpperBoundless a
+  ) =>
+  a ->
+  Code Q (ModP p a)
 mkModPTH = maybe (error err) liftTyped . mkModP
   where
     err =
