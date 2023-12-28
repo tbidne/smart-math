@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -39,13 +38,9 @@ import Data.Bounds
   )
 import Data.Kind (Type)
 import Data.Maybe qualified as May
-#if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (..), (<+>))
-#endif
+import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
-import GHC.Read (Read (readPrec))
-import GHC.Read qualified as Read
 import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as R
 import GHC.Stack (HasCallStack)
@@ -76,11 +71,6 @@ import Optics.Core
     prism,
     to,
   )
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (pretty), (<+>))
-#endif
-import Text.ParserCombinators.ReadPrec qualified as ReadP
-import Text.Read.Lex qualified as L
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -127,22 +117,16 @@ import Text.Read.Lex qualified as L
 -- >>> -1 %! 7 >= 1 %! -2
 -- True
 --
--- >>> read @(Fraction Integer) $ show (123 %! -3461)
--- (-123) :%: 3461
---
 -- @since 0.1
 type Fraction :: Type -> Type
-data Fraction a = UnsafeFraction
-  { -- | @since 0.1
-    numerator :: !a,
-    -- | @since 0.1
-    denominator :: !a
-  }
+data Fraction a = UnsafeFraction !a !a
   deriving stock
     ( -- | @since 0.1
       Generic,
       -- | @since 0.1
-      Lift
+      Lift,
+      -- @since 0.1
+      Show
     )
   deriving anyclass
     ( -- | @since 0.1
@@ -175,14 +159,6 @@ pattern n :%: d <- UnsafeFraction n d
 infixr 5 :%:
 
 -- | @since 0.1
-instance (Integral a, Show a) => Show (Fraction a) where
-  showsPrec i (UnsafeFraction n d) =
-    showParen
-      (i >= 11)
-      (showsPrec 11 n . showString " :%: " . showsPrec 11 d)
-  {-# INLINEABLE showsPrec #-}
-
--- | @since 0.1
 instance (Bounded a, Num a) => Bounded (Fraction a) where
   minBound = UnsafeFraction minBound 1
   maxBound = UnsafeFraction maxBound 1
@@ -196,9 +172,13 @@ instance (LowerBoundless a) => LowerBoundless (Fraction a)
 instance (UpperBoundless a) => UpperBoundless (Fraction a)
 
 -- | @since 0.1
-instance (Pretty a) => Pretty (Fraction a) where
-  pretty (UnsafeFraction n d) = pretty n <+> pretty @String ":%:" <+> pretty d
-  {-# INLINEABLE pretty #-}
+instance (Show a) => Display (Fraction a) where
+  displayBuilder (UnsafeFraction n d) =
+    mconcat
+      [ displayBuilder $ show n,
+        displayBuilder @String " / ",
+        displayBuilder $ show d
+      ]
 
 -- | @since 0.1
 instance (Eq a, Integral a, UpperBoundless a) => Eq (Fraction a) where
@@ -268,21 +248,6 @@ instance (Integral a, UpperBoundless a) => RealFrac (Fraction a) where
     where
       (q, r) = quotRem n d
   {-# INLINEABLE properFraction #-}
-
--- | @since 0.1
-instance (Read a, UpperBoundless a) => Read (Fraction a) where
-  readPrec =
-    Read.parens
-      ( ReadP.prec
-          7
-          ( do
-              x <- ReadP.step readPrec
-              Read.expectP (L.Symbol ":%:")
-              y <- ReadP.step readPrec
-              return (UnsafeFraction x y)
-          )
-      )
-  {-# INLINEABLE readPrec #-}
 
 -- | @since 0.1
 instance Division (Fraction Integer) where
@@ -401,12 +366,20 @@ instance FromRational (Fraction Natural) where
   afromRational = fromRational
   {-# INLINEABLE afromRational #-}
 
+-- | @since 0.1
+numerator :: Fraction a -> a
+numerator (UnsafeFraction n _) = n
+
+-- | @since 0.1
+denominator :: Fraction a -> a
+denominator (UnsafeFraction _ d) = d
+
 -- | Smart constructor for 'Fraction'. Returns 'Nothing' if the second
 -- parameter is 0. Reduces the fraction via 'reduce' if possible.
 --
 -- ==== __Examples__
 -- >>> mkFraction 10 4
--- Just (5 :%: 2)
+-- Just (UnsafeFraction 5 2)
 --
 -- >>> mkFraction 10 0
 -- Nothing
@@ -421,7 +394,7 @@ mkFraction n d = Just $ reduce (UnsafeFraction n d)
 --
 -- ==== __Examples__
 -- >>> $$(mkFractionTH 7 2)
--- 7 :%: 2
+-- UnsafeFraction 7 2
 --
 -- @since 0.1
 mkFractionTH :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
@@ -433,7 +406,7 @@ mkFractionTH n = maybe R.ratioZeroDenominatorError liftTyped . mkFraction n
 -- ==== __Examples__
 --
 -- >>> $$(7 %% 2)
--- 7 :%: 2
+-- UnsafeFraction 7 2
 --
 -- @since 0.1
 (%%) :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
@@ -449,7 +422,7 @@ infixl 7 %%
 --
 -- ==== __Examples__
 -- >>> unsafeFraction 7 2
--- 7 :%: 2
+-- UnsafeFraction 7 2
 --
 -- >>> unsafeFraction 7 0
 -- *** Exception: Ratio has zero denominator
@@ -466,7 +439,7 @@ unsafeFraction n = May.fromMaybe R.ratioZeroDenominatorError . mkFraction n
 -- ==== __Examples__
 --
 -- >>> 7 %! 2
--- 7 :%: 2
+-- UnsafeFraction 7 2
 --
 -- >>> 7 %! 0
 -- *** Exception: Ratio has zero denominator
@@ -486,13 +459,13 @@ infixl 7 %!
 --
 -- ==== __Examples__
 -- >>> reduce (7 %! 2)
--- 7 :%: 2
+-- UnsafeFraction 7 2
 --
 -- >>> reduce (18 %! 10)
--- 9 :%: 5
+-- UnsafeFraction 9 5
 --
 -- >>> reduce (-5 %! -5)
--- 1 :%: 1
+-- UnsafeFraction 1 1
 --
 -- @since 0.1
 reduce :: (Integral a, UpperBoundless a) => Fraction a -> Fraction a
@@ -517,7 +490,7 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 -- 2
 --
 -- >>> set #numerator 5 x
--- 5 :%: 7
+-- UnsafeFraction 5 7
 --
 -- >>> view #denominator x
 -- 7
@@ -532,7 +505,7 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 -- (1,4)
 --
 -- >>> rmatching _MkFraction (0, 4)
--- Right (0 :%: 1)
+-- Right (UnsafeFraction 0 1)
 --
 -- >>> rmatching _MkFraction (1, 0)
 -- Left (1,0)

@@ -45,6 +45,7 @@ exts =
     "-XMultiWayIf",
     "-XNegativeLiterals",
     "-XNumericUnderscores",
+    "-XOverloadedStrings",
     "-XPatternSynonyms",
     "-XScopedTypeVariables",
     "-XStandaloneKindSignatures",

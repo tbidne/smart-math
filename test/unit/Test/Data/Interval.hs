@@ -6,6 +6,7 @@
 
 module Test.Data.Interval (tests) where
 
+import Data.Text.Display qualified as D
 import Hedgehog (Gen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
@@ -165,7 +166,9 @@ specs =
     [ lowerBoundedOpenTests,
       lowerBoundedClosedTests,
       upperBoundedOpenTests,
-      upperBoundedClosedTests
+      upperBoundedClosedTests,
+      showSpecs,
+      displaySpecs
     ]
   where
     lowerBoundedOpenTests =
@@ -250,3 +253,15 @@ genWithOpenUpperBound = HG.integral . HR.exponential 0 . (\x -> x - 1)
 
 genWithClosedUpperBound :: Int -> Gen Int
 genWithClosedUpperBound = HG.integral . HR.exponential 0
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows intervals" $ do
+  "UnsafeInterval None None 2" @=? show (Interval.unsafeInterval @None @None @Integer 2)
+  "UnsafeInterval (Open 1) (Closed 10) 7" @=? show (Interval.unsafeInterval @(Open 1) @(Closed 10) @Integer 7)
+  "UnsafeInterval (Closed 1) (Open 10) 7" @=? show (Interval.unsafeInterval @(Closed 1) @(Open 10) @Integer 7)
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays intervals" $ do
+  "2 \8712 (-\8734, \8734)" @=? D.display (Interval.unsafeInterval @None @None @Integer 2)
+  "7 \8712 (1, 10]" @=? D.display (Interval.unsafeInterval @(Open 1) @(Closed 10) @Integer 7)
+  "7 \8712 [1, 10)" @=? D.display (Interval.unsafeInterval @(Closed 1) @(Open 10) @Integer 7)

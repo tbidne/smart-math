@@ -1,5 +1,6 @@
 module Test.Data.Positive (props) where
 
+import Data.Text.Display qualified as D
 import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
@@ -11,6 +12,8 @@ import Numeric.Data.Positive (Positive (MkPositive))
 import Numeric.Data.Positive qualified as Pos
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
+import Test.Tasty.HUnit ((@=?))
+import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
 
@@ -22,7 +25,9 @@ props =
       mkPositiveFails,
       addTotal,
       multTotal,
-      divTotal
+      divTotal,
+      showSpecs,
+      displaySpecs
     ]
 
 mkPositiveSucceeds :: TestTree
@@ -74,3 +79,11 @@ nonpos = HG.integral $ HR.exponentialFrom minVal 0 0
 
 positive :: (MonadGen m) => m (Positive Int)
 positive = Pos.unsafePositive <$> pos
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows Positive" $ do
+  "UnsafePositive 2" @=? show (Pos.unsafePositive @Int 2)
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays Positive" $ do
+  "2" @=? D.display (Pos.unsafePositive @Int 2)

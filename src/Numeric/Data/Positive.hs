@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'Positive' type for enforcing a positive invariant.
@@ -31,9 +30,7 @@ import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (bimap))
 import Data.Bounds (UpperBounded (upperBound), UpperBoundless)
 import Data.Kind (Type)
-#if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (pretty))
-#endif
+import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
@@ -53,9 +50,6 @@ import Optics.Core
     ReversibleOptic (re),
     prism,
   )
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (pretty))
-#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -103,9 +97,8 @@ instance (Bounded a) => UpperBounded (Positive a) where
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
-instance (Pretty a) => Pretty (Positive a) where
-  pretty (UnsafePositive x) = pretty x
-  {-# INLINEABLE pretty #-}
+instance (Show a) => Display (Positive a) where
+  displayBuilder (UnsafePositive x) = displayBuilder $ show x
 
 -- | @since 0.1
 instance (Num a) => ASemigroup (Positive a) where

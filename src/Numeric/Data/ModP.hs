@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -31,9 +30,7 @@ import Control.DeepSeq (NFData)
 import Data.Bounds (LowerBounded, UpperBounded, UpperBoundless)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
-#if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (pretty), (<+>))
-#endif
+import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.Stack (HasCallStack)
@@ -58,9 +55,6 @@ import Numeric.Data.ModP.Internal qualified as ModPI
 import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (pretty), (<+>))
-#endif
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/p\mathbb{Z} \) for prime @p@.
 -- 'ModP' is a 'Numeric.Algebra.Field.Field' i.e. supports addition,
@@ -122,15 +116,16 @@ instance (KnownNat p, Num a) => Bounded (ModP p a) where
   {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
-instance (KnownNat p, Pretty a) => Pretty (ModP p a) where
-  pretty (UnsafeModP x) =
-    pretty x
-      <+> pretty @String "(mod"
-      <+> pretty p'
-      <> pretty @String ")"
+instance (KnownNat p, Show a) => Display (ModP p a) where
+  displayBuilder (UnsafeModP x) =
+    mconcat
+      [ displayBuilder $ show x,
+        displayBuilder @String " (mod ",
+        displayBuilder $ show p',
+        displayBuilder @String ")"
+      ]
     where
       p' = natVal @p Proxy
-  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance (KnownNat p) => ASemigroup (ModP p Integer) where

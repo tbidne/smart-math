@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
@@ -24,9 +23,7 @@ import Control.DeepSeq (NFData)
 import Data.Bounds (LowerBounded, UpperBounded, UpperBoundless)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
-#if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (pretty), (<+>))
-#endif
+import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.TypeNats (KnownNat, Nat, natVal)
@@ -40,9 +37,6 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Optics.Core (Lens', lens)
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (pretty), (<+>))
-#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -110,15 +104,16 @@ instance (KnownNat n, Num a) => Bounded (ModN n a) where
   {-# INLINEABLE maxBound #-}
 
 -- | @since 0.1
-instance (KnownNat n, Pretty a) => Pretty (ModN n a) where
-  pretty (UnsafeModN x) =
-    pretty x
-      <+> pretty @String "(mod"
-      <+> pretty n'
-      <> pretty @String ")"
+instance (KnownNat n, Show a) => Display (ModN n a) where
+  displayBuilder (UnsafeModN x) =
+    mconcat
+      [ displayBuilder $ show x,
+        displayBuilder @String " (mod ",
+        displayBuilder $ show n',
+        displayBuilder @String ")"
+      ]
     where
       n' = natVal @n Proxy
-  {-# INLINEABLE pretty #-}
 
 -- | @since 0.1
 instance (KnownNat n) => ASemigroup (ModN n Integer) where

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
@@ -32,9 +31,7 @@ import Data.Bounds
     UpperBoundless,
   )
 import Data.Kind (Type)
-#if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (pretty))
-#endif
+import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
@@ -53,9 +50,6 @@ import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (pretty))
-#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -114,9 +108,8 @@ instance (UpperBounded a) => UpperBounded (NonNegative a) where
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
-instance (Pretty a) => Pretty (NonNegative a) where
-  pretty (UnsafeNonNegative x) = pretty x
-  {-# INLINEABLE pretty #-}
+instance (Show a) => Display (NonNegative a) where
+  displayBuilder (UnsafeNonNegative x) = displayBuilder $ show x
 
 -- | @since 0.1
 instance (Num a) => ASemigroup (NonNegative a) where

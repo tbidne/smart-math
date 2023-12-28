@@ -3,6 +3,7 @@
 module Test.Data.ModN (props) where
 
 import Data.Bounds (UpperBoundless)
+import Data.Text.Display qualified as D
 import GHC.Natural (Natural)
 import Hedgehog (MonadGen, Property, (===))
 import Hedgehog qualified as H
@@ -15,6 +16,8 @@ import Numeric.Data.ModN (ModN (MkModN))
 import Numeric.Data.ModN qualified as ModN
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
+import Test.Tasty.HUnit ((@=?))
+import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
 
@@ -23,7 +26,9 @@ props =
   T.testGroup
     "Numeric.Data.ModN"
     [ intProps,
-      natProps
+      natProps,
+      showSpecs,
+      displaySpecs
     ]
 
 intProps :: TestTree
@@ -145,3 +150,13 @@ nonneg = HG.integral $ HR.exponentialFrom 20 20 maxVal
 
 anyNat :: forall a m. (Integral a, MonadGen m, TestBounds a, UpperBoundless a) => m (ModN 65536 a)
 anyNat = ModN.mkModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows ModN" $ do
+  "MkModN 2 (mod 8)" @=? show (ModN.mkModN @8 @Integer 2)
+  "MkModN 10 (mod 12)" @=? show (ModN.mkModN @12 @Integer 22)
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays ModN" $ do
+  "2 (mod 8)" @=? D.display (ModN.mkModN @8 @Integer 2)
+  "10 (mod 12)" @=? D.display (ModN.mkModN @12 @Integer 22)

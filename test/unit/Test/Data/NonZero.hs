@@ -1,5 +1,6 @@
 module Test.Data.NonZero (props) where
 
+import Data.Text.Display qualified as D
 import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
@@ -7,6 +8,8 @@ import Hedgehog.Range qualified as HR
 import Numeric.Data.NonZero qualified as NonZero
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
+import Test.Tasty.HUnit ((@=?))
+import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
 
@@ -15,7 +18,9 @@ props =
   T.testGroup
     "Numeric.Data.NonZero"
     [ mkNonZeroSucceeds,
-      mkNonZeroFails
+      mkNonZeroFails,
+      showSpecs,
+      displaySpecs
     ]
 
 mkNonZeroSucceeds :: TestTree
@@ -41,3 +46,13 @@ nonzero =
 
 zero :: (MonadGen m) => m Integer
 zero = pure 0
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows Positive" $ do
+  "UnsafeNonZero 2" @=? show (NonZero.unsafeNonZero @Int 2)
+  "UnsafeNonZero (-3)" @=? show (NonZero.unsafeNonZero @Int (-3))
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays Positive" $ do
+  "2" @=? D.display (NonZero.unsafeNonZero @Int 2)
+  "-3" @=? D.display (NonZero.unsafeNonZero @Int (-3))

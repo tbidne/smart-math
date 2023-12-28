@@ -1,5 +1,6 @@
 module Test.Data.Fraction (props) where
 
+import Data.Text.Display qualified as D
 import Gens qualified
 import Hedgehog ((===))
 import Hedgehog qualified as H
@@ -7,6 +8,8 @@ import Numeric.Data.Fraction (Fraction ((:%:)), (%!))
 import Numeric.Data.Fraction qualified as Frac
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
+import Test.Tasty.HUnit ((@=?))
+import Test.Tasty.HUnit qualified as HUnit
 import Utils qualified
 
 props :: TestTree
@@ -16,9 +19,10 @@ props =
     [ eqProps,
       reduceProps,
       numProps,
-      showRoundTrip,
       numeratorProp,
-      denominatorProp
+      denominatorProp,
+      showSpecs,
+      displaySpecs
     ]
 
 eqProps :: TestTree
@@ -142,13 +146,6 @@ signumProp =
         | x == 0 -> 0 === signum x
         | otherwise -> -1 === signum x
 
-showRoundTrip :: TestTree
-showRoundTrip =
-  Utils.testPropertyCompat "read . show === id" "showRoundTrip" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      x === read (show x)
-
 numeratorProp :: TestTree
 numeratorProp =
   Utils.testPropertyCompat "numerator x@(n :%: _) === n" "numeratorProp" $
@@ -171,3 +168,15 @@ isReduced x@(_ :%: d)
 
 fracGcd :: (Integral a) => Fraction a -> a
 fracGcd (n :%: d) = gcd n d
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows fractions" $ do
+  "UnsafeFraction 1 5" @=? show (Frac.unsafeFraction @Integer 2 10)
+  "UnsafeFraction (-1) 1" @=? show (Frac.unsafeFraction @Integer 1 (-1))
+  "Just (UnsafeFraction 5 7)" @=? show (Just $ Frac.unsafeFraction @Integer 5 7)
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays fractions" $ do
+  "1 / 5" @=? D.display (Frac.unsafeFraction @Integer 2 10)
+  "-1 / 1" @=? D.display (Frac.unsafeFraction @Integer 1 (-1))
+  "-2340923 / 2095420" @=? D.display (Frac.unsafeFraction @Integer (-2340923) 2095420)

@@ -47,10 +47,13 @@ import Data.Bounds
 import Data.Kind (Constraint, Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (Proxy))
-#if !MIN_VERSION_prettyprinter(1, 7, 1)
-import Data.Text.Prettyprint.Doc (Pretty (pretty))
-#endif
+import Data.Text qualified as T
+import Data.Text.Display (Display (displayBuilder))
+import Data.Text.Lazy qualified as TL
+import Data.Text.Lazy.Builder (Builder)
+import Data.Text.Lazy.Builder qualified as TLB
 import GHC.Generics (Generic)
+import GHC.Show (showSpace)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH (Code, Q)
@@ -59,9 +62,6 @@ import Numeric.Data.NonZero (rmatching)
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
-#if MIN_VERSION_prettyprinter(1, 7, 1)
-import Prettyprinter (Pretty (pretty))
-#endif
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -95,7 +95,7 @@ data IntervalBound
       NFData
     )
 
-displayIntervalBounds :: IntervalBound -> IntervalBound -> String
+displayIntervalBounds :: IntervalBound -> IntervalBound -> Builder
 displayIntervalBounds l r =
   mconcat
     [ bracketL l,
@@ -105,12 +105,12 @@ displayIntervalBounds l r =
       bracketR r
     ]
   where
-    valL (Open n) = show n
-    valL (Closed n) = show n
+    valL (Open n) = displayShow n
+    valL (Closed n) = displayShow n
     valL None = "-\8734"
 
-    valR (Open n) = show n
-    valR (Closed n) = show n
+    valR (Open n) = displayShow n
+    valR (Closed n) = displayShow n
     valR None = "\8734"
 
     bracketL (Closed _) = "["
@@ -118,6 +118,8 @@ displayIntervalBounds l r =
 
     bracketR (Closed _) = "]"
     bracketR _ = ")"
+
+    displayShow = displayBuilder . show
 
 type SIntervalBound :: IntervalBound -> Type
 
@@ -179,14 +181,33 @@ newtype Interval (l :: IntervalBound) (r :: IntervalBound) (a :: Type)
       -- | @since 0.1
       Lift,
       -- | @since 0.1
-      Ord,
-      -- | @since 0.1
-      Show
+      Ord
     )
   deriving anyclass
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+instance
+  ( Show a,
+    SingIntervalBound l,
+    SingIntervalBound r
+  ) =>
+  Show (Interval l r a)
+  where
+  showsPrec i (UnsafeInterval x) =
+    showParen
+      (i >= 11)
+      ( showString "UnsafeInterval "
+          . showsPrec 11 left
+          . showSpace
+          . showsPrec 11 right
+          . showSpace
+          . showsPrec 11 x
+      )
+    where
+      (left, right) = getInterval @l @r
 
 -- | @since 0.1
 instance
@@ -214,9 +235,21 @@ instance (KnownNat r, Num a) => UpperBounded (Interval l (Closed r) a) where
 instance (UpperBoundless a) => UpperBoundless (Interval l None a)
 
 -- | @since 0.1
-instance (Pretty a) => Pretty (Interval l r a) where
-  pretty (UnsafeInterval x) = pretty x
-  {-# INLINEABLE pretty #-}
+instance
+  ( Show a,
+    SingIntervalBound l,
+    SingIntervalBound r
+  ) =>
+  Display (Interval l r a)
+  where
+  displayBuilder (UnsafeInterval x) =
+    mconcat
+      [ displayBuilder $ show x,
+        " ∈ ",
+        displayIntervalBounds left right
+      ]
+    where
+      (left, right) = getInterval @l @r
 
 -- | __WARNING: Partial__
 --
@@ -261,7 +294,7 @@ unInterval (UnsafeInterval x) = x
 --
 -- ==== __Examples__
 -- >>> $$(mkIntervalTH @None @(Closed 100) 7)
--- UnsafeInterval 7
+-- UnsafeInterval None (Closed 100) 7
 --
 -- @since 0.1
 mkIntervalTH ::
@@ -285,10 +318,10 @@ mkIntervalTH x = maybe (error msg) liftTyped $ mkInterval x
 --
 -- ==== __Examples__
 -- >>> mkInterval @(Open 10) @(Closed 100) 50
--- Just (UnsafeInterval 50)
+-- Just (UnsafeInterval (Open 10) (Closed 100) 50)
 --
 -- >>> mkInterval @(Open 10) @(Closed 100) 100
--- Just (UnsafeInterval 100)
+-- Just (UnsafeInterval (Open 10) (Closed 100) 100)
 --
 -- >>> mkInterval @(Open 10) @(Closed 100) 10
 -- Nothing
@@ -337,7 +370,7 @@ mkInterval x
 --
 -- ==== __Examples__
 -- >>> unsafeInterval @(Open 10) @(Closed 100) 50
--- UnsafeInterval 50
+-- UnsafeInterval (Open 10) (Closed 100) 50
 --
 -- @since 0.1
 unsafeInterval ::
@@ -377,7 +410,7 @@ reallyUnsafeInterval = UnsafeInterval
 -- 2
 --
 -- >>> rmatching (_MkInterval @(Open 1) @(Open 5)) 3
--- Right (UnsafeInterval 3)
+-- Right (UnsafeInterval (Open 1) (Open 5) 3)
 --
 -- >>> rmatching (_MkInterval @(Open 1) @(Open 5)) 7
 -- Left 7
@@ -405,9 +438,12 @@ errMsg ::
     SingIntervalBound r
   ) =>
   a ->
-  String ->
+  Builder ->
   String
-errMsg x fnName = msg
+errMsg x fnName =
+  T.unpack $
+    TL.toStrict $
+      TLB.toLazyText msg
   where
     intervalStr = displayIntervalBounds left right
     (left, right) = getInterval @l @r
@@ -418,7 +454,7 @@ errMsg x fnName = msg
           ": Wanted value in ",
           intervalStr,
           ", received: ",
-          show x
+          displayBuilder $ show x
         ]
 
 getInterval ::

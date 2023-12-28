@@ -1,5 +1,6 @@
 module Test.Data.NonNegative (props) where
 
+import Data.Text.Display qualified as D
 import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
@@ -11,6 +12,8 @@ import Numeric.Data.NonNegative (NonNegative (MkNonNegative))
 import Numeric.Data.NonNegative qualified as NonNeg
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
+import Test.Tasty.HUnit ((@=?))
+import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
 
@@ -22,7 +25,9 @@ props =
       mkNonNegativeFails,
       addTotal,
       multTotal,
-      divTotal
+      divTotal,
+      showSpecs,
+      displaySpecs
     ]
 
 mkNonNegativeSucceeds :: TestTree
@@ -77,3 +82,11 @@ nonnegative = NonNeg.unsafeNonNegative <$> nonneg
 
 nonnegativeNZ :: (MonadGen m) => m (NonNegative Int)
 nonnegativeNZ = NonNeg.unsafeNonNegative <$> HG.integral (HR.exponentialFrom 1 1 maxVal)
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows NonNegative" $ do
+  "UnsafeNonNegative 2" @=? show (NonNeg.unsafeNonNegative @Int 2)
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays NonNegative" $ do
+  "2" @=? D.display (NonNeg.unsafeNonNegative @Int 2)

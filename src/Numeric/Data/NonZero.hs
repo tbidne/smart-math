@@ -26,6 +26,7 @@ where
 import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (bimap))
 import Data.Kind (Type)
+import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
@@ -75,6 +76,10 @@ newtype NonZero a = UnsafeNonZero a
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+instance (Show a) => Display (NonZero a) where
+  displayBuilder (UnsafeNonZero x) = displayBuilder $ show x
 
 -- | @since 0.1
 instance (Num a) => MSemigroup (NonZero a) where

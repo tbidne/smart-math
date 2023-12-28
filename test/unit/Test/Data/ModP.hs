@@ -4,6 +4,7 @@ module Test.Data.ModP (props) where
 
 import Data.Bounds (UpperBoundless)
 import Data.Functor.Identity (Identity)
+import Data.Text.Display qualified as D
 import GHC.Natural (Natural)
 import Gens qualified
 import Hedgehog (GenBase, MonadGen, Property, (===))
@@ -18,6 +19,8 @@ import Numeric.Data.ModP (ModP (MkModP), reallyUnsafeModP)
 import Numeric.Data.ModP qualified as ModP
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
+import Test.Tasty.HUnit ((@=?))
+import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
 
@@ -28,7 +31,9 @@ props =
     [ mkModPSucceed,
       mkModPFail,
       intProps,
-      natProps
+      natProps,
+      showSpecs,
+      displaySpecs
     ]
 
 mkModPSucceed :: TestTree
@@ -212,3 +217,13 @@ genNZ = do
 
 anyNat :: forall a m. (Integral a, MonadGen m, TestBounds a, UpperBoundless a) => m (ModP 65537 a)
 anyNat = reallyUnsafeModP <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
+
+showSpecs :: TestTree
+showSpecs = HUnit.testCase "Shows ModP" $ do
+  "MkModP 2 (mod 7)" @=? show (ModP.unsafeModP @7 @Integer 2)
+  "MkModP 9 (mod 13)" @=? show (ModP.unsafeModP @13 @Integer 22)
+
+displaySpecs :: TestTree
+displaySpecs = HUnit.testCase "Displays ModP" $ do
+  "2 (mod 7)" @=? D.display (ModP.unsafeModP @7 @Integer 2)
+  "9 (mod 13)" @=? D.display (ModP.unsafeModP @13 @Integer 22)
