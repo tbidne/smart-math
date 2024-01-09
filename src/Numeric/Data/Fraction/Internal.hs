@@ -87,7 +87,7 @@ import Optics.Core
 --        * 'signum' is positive if /both/ are negative.
 --
 -- 3. @'Show' x@ does __not__ reduce @x@ first. This is to make debugging
--- easier. Furthermore, @read . show@ is a roundtrip.
+-- easier.
 --
 -- @'Fraction' 'Integer'@ is a 'Numeric.Algebra.Field.Field', and @'Fraction'
 -- 'GHC.Natural.Natural'@ is a 'Numeric.Algebra.Semiring.Semiring'.
