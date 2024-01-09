@@ -15,8 +15,8 @@ import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Data.ModP (ModP (MkModP), reallyUnsafeModP)
 import Numeric.Data.ModP qualified as ModP
+import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP), reallyUnsafeModP)
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Test.Tasty.HUnit ((@=?))
@@ -30,6 +30,7 @@ props =
     "Numeric.Data.ModP"
     [ mkModPSucceed,
       mkModPFail,
+      testUnsafe,
       intProps,
       natProps,
       showSpecs,
@@ -51,6 +52,14 @@ mkModPFail =
     H.property $ do
       x <- H.forAll Gens.natural
       Nothing === ModP.mkModP @65536 x
+
+testUnsafe :: TestTree
+testUnsafe = HUnit.testCase "Test unsafeModP" $ do
+  UnsafeModP 5 @=? ModP.unsafeModP @7 @Integer 5
+
+  Utils.assertPureErrorCall expectedEx (ModP.unsafeModP @8 @Integer 5)
+  where
+    expectedEx = "Numeric.Data.ModP.unsafeModP: Received non-prime: 8"
 
 intProps :: TestTree
 intProps =

@@ -8,8 +8,8 @@ import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Data.Positive (Positive (MkPositive))
 import Numeric.Data.Positive qualified as Pos
+import Numeric.Data.Positive.Internal (Positive (MkPositive, UnsafePositive))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Test.Tasty.HUnit ((@=?))
@@ -23,6 +23,7 @@ props =
     "Numeric.Data.Positive"
     [ mkPositiveSucceeds,
       mkPositiveFails,
+      testUnsafe,
       addTotal,
       multTotal,
       divTotal,
@@ -43,6 +44,14 @@ mkPositiveFails =
     H.property $ do
       x <- H.forAll nonpos
       Nothing === Pos.mkPositive x
+
+testUnsafe :: TestTree
+testUnsafe = HUnit.testCase "Test unsafePositive" $ do
+  UnsafePositive 5 @=? Pos.unsafePositive @Integer 5
+
+  Utils.assertPureErrorCall expectedEx (Pos.unsafePositive @Integer 0)
+  where
+    expectedEx = "Numeric.Data.Positive.unsafePositive: Received value <= zero: 0"
 
 addTotal :: TestTree
 addTotal =

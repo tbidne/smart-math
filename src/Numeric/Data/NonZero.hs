@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE UndecidableInstances #-}
-
 -- | Provides the 'NonZero' type for enforcing a non-zero invariant.
 --
 -- @since 0.1
@@ -11,7 +8,7 @@ module Numeric.Data.NonZero
     -- * Creation
     mkNonZero,
     mkNonZeroTH,
-    unsafeNonZero,
+    Internal.unsafeNonZero,
     reallyUnsafeNonZero,
 
     -- * Elimination
@@ -23,23 +20,10 @@ module Numeric.Data.NonZero
   )
 where
 
-import Control.DeepSeq (NFData)
-import Data.Bifunctor (Bifunctor (bimap))
-import Data.Kind (Type)
-import Data.Text.Display (Display (displayBuilder))
-import GHC.Generics (Generic)
-import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Algebra.Multiplicative
-  ( MEuclidean (mdivMod),
-    MGroup ((.%.)),
-    MMonoid (one),
-    MSemigroup ((.*.)),
-  )
-import Numeric.Class.Division (Division (divide))
-import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Literal.Rational (FromRational (afromRational))
+import Numeric.Data.NonZero.Internal (NonZero (MkNonZero, UnsafeNonZero))
+import Numeric.Data.NonZero.Internal qualified as Internal
 import Optics.Core
   ( An_AffineTraversal,
     Is,
@@ -54,76 +38,6 @@ import Optics.Core
 
 -- $setup
 -- >>> :set -XTemplateHaskell
-
--- | Smart-constructor for creating a \"non-zero\" @a@.
---
--- @since 0.1
-type NonZero :: Type -> Type
-newtype NonZero a = UnsafeNonZero a
-  deriving stock
-    ( -- | @since 0.1
-      Eq,
-      -- | @since 0.1
-      Generic,
-      -- | @since 0.1
-      Lift,
-      -- | @since 0.1
-      Ord,
-      -- | @since 0.1
-      Show
-    )
-  deriving anyclass
-    ( -- | @since 0.1
-      NFData
-    )
-
--- | @since 0.1
-instance (Show a) => Display (NonZero a) where
-  displayBuilder (UnsafeNonZero x) = displayBuilder $ show x
-
--- | @since 0.1
-instance (Num a) => MSemigroup (NonZero a) where
-  UnsafeNonZero x .*. UnsafeNonZero y = UnsafeNonZero $ x * y
-  {-# INLINE (.*.) #-}
-
--- | @since 0.1
-instance (Num a) => MMonoid (NonZero a) where
-  one = UnsafeNonZero 1
-  {-# INLINE one #-}
-
--- | @since 0.1
-instance (Division a, Num a) => MGroup (NonZero a) where
-  UnsafeNonZero x .%. UnsafeNonZero d = UnsafeNonZero (x `divide` d)
-  {-# INLINE (.%.) #-}
-
--- | @since 0.1
-instance (Division a, Integral a) => MEuclidean (NonZero a) where
-  UnsafeNonZero x `mdivMod` UnsafeNonZero d =
-    bimap UnsafeNonZero UnsafeNonZero $ x `divMod` d
-  {-# INLINE mdivMod #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (FromInteger a, Num a, Ord a) => FromInteger (NonZero a) where
-  afromInteger = unsafeNonZero . afromInteger
-  {-# INLINE afromInteger #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (FromRational a, Num a, Ord a) => FromRational (NonZero a) where
-  afromRational = unsafeNonZero . afromRational
-  {-# INLINE afromRational #-}
-
--- | Unidirectional pattern synonym for 'NonZero'. This allows us to pattern
--- match on a nonzero term without exposing the unsafe internal details.
---
--- @since 0.1
-pattern MkNonZero :: a -> NonZero a
-pattern MkNonZero x <- UnsafeNonZero x
-
-{-# COMPLETE MkNonZero #-}
 
 -- | @since 0.1
 unNonZero :: NonZero a -> a
@@ -155,30 +69,15 @@ mkNonZero x
 -- @since 0.1
 mkNonZeroTH :: (Eq a, Lift a, Num a) => a -> Code Q (NonZero a)
 mkNonZeroTH x
-  | x == 0 = error "Numeric.Data.NonZero.mkNonZeroTH: Passed 0"
+  | x == 0 = error $ Internal.errMsg "mkNonZeroTH"
   | otherwise = liftTyped (UnsafeNonZero x)
 {-# INLINEABLE mkNonZeroTH #-}
-
--- | Variant of 'mkNonZero' that throws an error when given 0.
---
--- __WARNING: Partial__
---
--- ==== __Examples__
--- >>> unsafeNonZero 7
--- UnsafeNonZero 7
---
--- @since 0.1
-unsafeNonZero :: (Eq a, HasCallStack, Num a) => a -> NonZero a
-unsafeNonZero x
-  | x == 0 = error "Numeric.Data.NonZero.unsafeNonZero: Passed 0"
-  | otherwise = UnsafeNonZero x
-{-# INLINEABLE unsafeNonZero #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeNonZero@
 -- i.e. it allows us to construct a 'NonZero' __without__ checking the
 -- invariant. This is intended only for when we absolutely know the invariant
--- holds and a branch (i.e. 'unsafeNonZero') is undesirable for performance
--- reasons. Exercise extreme caution.
+-- holds and a branch (i.e. 'Internal.unsafeNonZero') is undesirable for
+-- performance reasons. Exercise extreme caution.
 --
 -- @since 0.1
 reallyUnsafeNonZero :: a -> NonZero a

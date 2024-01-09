@@ -11,8 +11,11 @@ import Hedgehog (Gen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Data.Interval (Interval, IntervalBound (Closed, None, Open))
 import Numeric.Data.Interval qualified as Interval
+import Numeric.Data.Interval.Internal
+  ( Interval (UnsafeInterval),
+    IntervalBound (Closed, None, Open),
+  )
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Test.Tasty.HUnit ((@=?))
@@ -167,6 +170,7 @@ specs =
       lowerBoundedClosedTests,
       upperBoundedOpenTests,
       upperBoundedClosedTests,
+      testUnsafe,
       showSpecs,
       displaySpecs
     ]
@@ -253,6 +257,14 @@ genWithOpenUpperBound = HG.integral . HR.exponential 0 . (\x -> x - 1)
 
 genWithClosedUpperBound :: Int -> Gen Int
 genWithClosedUpperBound = HG.integral . HR.exponential 0
+
+testUnsafe :: TestTree
+testUnsafe = HUnit.testCase "Test unsafeInterval" $ do
+  UnsafeInterval 5 @=? Interval.unsafeInterval @(Open 1) @None @Integer 5
+
+  Utils.assertPureErrorCall expectedEx (Interval.unsafeInterval @(Open 1) @None @Integer 1)
+  where
+    expectedEx = "Numeric.Data.Interval.unsafeInterval: Wanted value in (1, ∞), received: 1"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows intervals" $ do

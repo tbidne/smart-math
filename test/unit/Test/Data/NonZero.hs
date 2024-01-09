@@ -6,6 +6,7 @@ import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Data.NonZero qualified as NonZero
+import Numeric.Data.NonZero.Internal (NonZero (UnsafeNonZero))
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Test.Tasty.HUnit ((@=?))
@@ -19,6 +20,7 @@ props =
     "Numeric.Data.NonZero"
     [ mkNonZeroSucceeds,
       mkNonZeroFails,
+      testUnsafe,
       showSpecs,
       displaySpecs
     ]
@@ -36,6 +38,14 @@ mkNonZeroFails =
     H.property $ do
       x <- H.forAll zero
       Nothing === NonZero.mkNonZero x
+
+testUnsafe :: TestTree
+testUnsafe = HUnit.testCase "Test unsafeNonZero" $ do
+  UnsafeNonZero 5 @=? NonZero.unsafeNonZero @Integer 5
+
+  Utils.assertPureErrorCall expectedEx (NonZero.unsafeNonZero @Integer 0)
+  where
+    expectedEx = "Numeric.Data.NonZero.unsafeNonZero: Received zero"
 
 nonzero :: (MonadGen m) => m Int
 nonzero =

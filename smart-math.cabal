@@ -68,13 +68,19 @@ library
   exposed-modules:
     Numeric.Class.Division
     Numeric.Data.Fraction
+    Numeric.Data.Fraction.Internal
     Numeric.Data.Interval
+    Numeric.Data.Interval.Internal
     Numeric.Data.ModN
+    Numeric.Data.ModN.Internal
     Numeric.Data.ModP
     Numeric.Data.ModP.Internal
     Numeric.Data.NonNegative
+    Numeric.Data.NonNegative.Internal
     Numeric.Data.NonZero
+    Numeric.Data.NonZero.Internal
     Numeric.Data.Positive
+    Numeric.Data.Positive.Internal
 
   build-depends:
     , algebra-simple    ^>=0.1
@@ -130,6 +136,7 @@ test-suite unit
     , algebra-simple
     , base
     , bounds
+    , deepseq
     , hedgehog        >=1.0.2   && <1.5
     , smart-math
     , tasty           >=1.1.0.3 && <1.6

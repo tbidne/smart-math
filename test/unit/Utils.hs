@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -14,14 +15,24 @@ module Utils
     (<=>),
 
     -- * Misc
+    assertPureErrorCall,
     testPropertyCompat,
   )
 where
 
+import Control.DeepSeq (NFData, force)
+import Control.Exception
+  ( ErrorCall,
+    Exception (displayException),
+    evaluate,
+    try,
+  )
+import Data.List qualified as L
 import Equality (Equality)
 import Hedgehog (Gen, Property, PropertyName, (===))
 import Hedgehog qualified as H
 import Test.Tasty (TestName, TestTree)
+import Test.Tasty.HUnit qualified as HUnit
 import Test.Tasty.Hedgehog qualified as TH
 
 binaryEq ::
@@ -80,6 +91,33 @@ False <=> False = True
 _ <=> _ = False
 
 infixr 1 <=>
+
+assertPureErrorCall :: (NFData a, Show a) => String -> a -> IO ()
+assertPureErrorCall = assertPureException @ErrorCall
+
+assertPureException ::
+  forall e a.
+  ( Exception e,
+    NFData a,
+    Show a
+  ) =>
+  String ->
+  a ->
+  IO ()
+assertPureException expected x = do
+  eResult <- try @e $ evaluate $ force x
+  case eResult of
+    Left ex -> do
+      let msg =
+            mconcat
+              [ "Expected\n\n'",
+                expected,
+                "'\n\nto be a prefix of\n\n'",
+                displayException ex,
+                "'."
+              ]
+      HUnit.assertBool msg $ expected `L.isPrefixOf` displayException ex
+    Right r -> HUnit.assertFailure $ "Expected exception, received: " ++ show r
 
 testPropertyCompat :: TestName -> PropertyName -> Property -> TestTree
 #if MIN_VERSION_tasty_hedgehog(1, 2, 0)

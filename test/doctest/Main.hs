@@ -17,13 +17,19 @@ files :: [String]
 files =
   [ "-isrc",
     "src/Numeric/Data/Fraction.hs",
+    "src/Numeric/Data/Fraction/Internal.hs",
     "src/Numeric/Data/Interval.hs",
+    "src/Numeric/Data/Interval/Internal.hs",
     "src/Numeric/Data/ModN.hs",
+    "src/Numeric/Data/ModN/Internal.hs",
     "src/Numeric/Data/ModP.hs",
     "src/Numeric/Data/ModP/Internal.hs",
     "src/Numeric/Data/NonNegative.hs",
+    "src/Numeric/Data/NonNegative/Internal.hs",
     "src/Numeric/Data/NonZero.hs",
-    "src/Numeric/Data/Positive.hs"
+    "src/Numeric/Data/NonZero/Internal.hs",
+    "src/Numeric/Data/Positive.hs",
+    "src/Numeric/Data/Positive/Internal.hs"
   ]
 
 exts :: [String]

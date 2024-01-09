@@ -21,6 +21,8 @@ props =
       numProps,
       numeratorProp,
       denominatorProp,
+      testUnsafe,
+      testRecip,
       showSpecs,
       displaySpecs
     ]
@@ -168,6 +170,22 @@ isReduced x@(_ :%: d)
 
 fracGcd :: (Integral a) => Fraction a -> a
 fracGcd (n :%: d) = gcd n d
+
+testUnsafe :: TestTree
+testUnsafe = HUnit.testCase "Test unsafeFraction" $ do
+  1 %! 2 @=? Frac.unsafeFraction @Integer 5 10
+
+  Utils.assertPureErrorCall expectedEx (Frac.unsafeFraction @Integer 5 0)
+  where
+    expectedEx = "Numeric.Data.Fraction.unsafeFraction: Fraction has zero denominator"
+
+testRecip :: TestTree
+testRecip = HUnit.testCase "Test recip" $ do
+  1 %! 2 @=? recip (2 %! (1 :: Integer))
+
+  Utils.assertPureErrorCall expectedEx (recip $ 0 %! (2 :: Integer))
+  where
+    expectedEx = "Numeric.Data.Fraction.recip: Fraction has zero numerator"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows fractions" $ do
