@@ -9,23 +9,31 @@ module Numeric.Data.ModN
 
     -- * Creation
     Internal.mkModN,
+    mkModNTH,
+    Internal.unsafeModN,
+    Internal.reallyUnsafeModN,
 
     -- * Elimination
     unModN,
 
     -- * Optics
     _MkModN,
+    rmatching,
   )
 where
 
-import Data.Bounds (UpperBoundless)
+import Data.Bounds (AnyUpperBounded)
+import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
+import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
 import Numeric.Data.ModN.Internal (ModN (MkModN, UnsafeModN))
 import Numeric.Data.ModN.Internal qualified as Internal
-import Optics.Core (Lens', lens)
+import Numeric.Data.NonZero (rmatching)
+import Optics.Core (ReversedPrism', prism, re)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
+-- >>> import Data.Int (Int8)
 -- >>> import Numeric.Data.ModN.Internal (mkModN)
 
 -- | @since 0.1
@@ -33,28 +41,56 @@ unModN :: ModN n a -> a
 unModN (UnsafeModN x) = x
 {-# INLINE unModN #-}
 
--- | 'Lens'' for 'ModN'. Despite being a 'Lens'', we use prism/iso syntax for
--- consistency with other optics in this package and to witness that
--- 'ModN' is _nearly_ an Iso.
+-- | Template haskell for creating a 'ModN' at compile-time.
+--
+-- ==== __Examples__
+-- >>> $$(mkModNTH @11 7)
+-- MkModN 7 (mod 11)
+--
+-- @since 0.1
+mkModNTH ::
+  forall n a.
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat n,
+    Lift a,
+    Typeable a
+  ) =>
+  a ->
+  Code Q (ModN n a)
+mkModNTH x = case Internal.mkModN x of
+  Right y -> liftTyped y
+  Left err -> error $ Internal.errMsg "mkModNTH" err
+{-# INLINEABLE mkModNTH #-}
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.), (.~))
--- >>> n = mkModN @7 9
+-- >>> import Optics.Core ((^.))
+-- >>> n = $$(mkModNTH @7 9)
 -- >>> n ^. _MkModN
 -- 2
 --
--- >>> (_MkModN .~ 2) n
--- MkModN 2 (mod 7)
+-- >>> rmatching (_MkModN @7) 9
+-- Right (MkModN 2 (mod 7))
+--
+-- >>> rmatching (_MkModN @128) (9 :: Int8)
+-- Left 9
 --
 -- @since 0.1
 _MkModN ::
   forall n a.
-  ( Integral a,
+  ( AnyUpperBounded a,
+    Integral a,
     KnownNat n,
     Ord a,
-    UpperBoundless a
+    Typeable a
   ) =>
-  Lens' (ModN n a) a
-_MkModN = lens unModN (\_ x -> Internal.mkModN x)
+  ReversedPrism' (ModN n a) a
+_MkModN = re (prism unModN g)
+  where
+    g x = case Internal.mkModN x of
+      Left _ -> Left x
+      Right x' -> Right x'
 {-# INLINEABLE _MkModN #-}

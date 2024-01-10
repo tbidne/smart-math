@@ -31,7 +31,7 @@ import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
 import Numeric.Data.Fraction (Fraction, unsafeFraction)
-import Numeric.Data.ModN (ModN, mkModN)
+import Numeric.Data.ModN (ModN, unsafeModN)
 import Numeric.Data.ModP (ModP, reallyUnsafeModP)
 import Numeric.Data.NonNegative (NonNegative, unsafeNonNegative)
 import Numeric.Data.NonZero (NonZero, unsafeNonZero)
@@ -48,7 +48,7 @@ fraction :: Gen (Fraction Integer)
 fraction = unsafeFraction <$> integer <*> integerNZ
 
 modN :: Gen (ModN 10 Natural)
-modN = mkModN <$> natural
+modN = unsafeModN <$> natural
 
 modP :: Gen (ModP 17 Natural)
 modP = reallyUnsafeModP <$> natural

@@ -69,6 +69,7 @@ library
     Numeric.Class.Division
     Numeric.Data.Fraction
     Numeric.Data.Fraction.Internal
+    Numeric.Data.Internal.Utils
     Numeric.Data.Interval
     Numeric.Data.Interval.Internal
     Numeric.Data.ModN

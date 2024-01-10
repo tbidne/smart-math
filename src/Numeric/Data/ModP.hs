@@ -23,9 +23,9 @@ module Numeric.Data.ModP
   )
 where
 
-import Data.Bounds (UpperBoundless)
-import Data.Proxy (Proxy (Proxy))
-import GHC.TypeNats (KnownNat, natVal)
+import Data.Bounds (AnyUpperBounded)
+import Data.Typeable (Typeable)
+import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP))
@@ -47,17 +47,17 @@ unModP (UnsafeModP x) = x
 -- @since 0.1
 mkModPTH ::
   forall p a.
-  ( Integral a,
+  ( AnyUpperBounded a,
+    Integral a,
     KnownNat p,
     Lift a,
-    UpperBoundless a
+    Typeable a
   ) =>
   a ->
   Code Q (ModP p a)
-mkModPTH = maybe (error err) liftTyped . Internal.mkModP
-  where
-    err = Internal.errMsg "mkModPTH" p'
-    p' = natVal @p Proxy
+mkModPTH x = case Internal.mkModP x of
+  Right y -> liftTyped y
+  Left err -> error $ Internal.errMsg "mkModPTH" err
 {-# INLINEABLE mkModPTH #-}
 
 -- | 'ReversedPrism'' that enables total elimination and partial construction.
@@ -76,10 +76,17 @@ mkModPTH = maybe (error err) liftTyped . Internal.mkModP
 -- Left 9
 --
 -- @since 0.1
-_MkModP :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => ReversedPrism' (ModP p a) a
+_MkModP ::
+  forall p a.
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  ReversedPrism' (ModP p a) a
 _MkModP = re (prism unModP g)
   where
     g x = case Internal.mkModP x of
-      Nothing -> Left x
-      Just x' -> Right x'
+      Left _ -> Left x
+      Right x' -> Right x'
 {-# INLINEABLE _MkModP #-}

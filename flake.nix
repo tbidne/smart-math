@@ -14,7 +14,7 @@
       inputs.nix-hs-utils.follows = "nix-hs-utils";
     };
     bounds = {
-      url = "github:tbidne/bounds/";
+      url = "github:tbidne/bounds";
       inputs.flake-parts.follows = "flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nix-hs-utils.follows = "nix-hs-utils";

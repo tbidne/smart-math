@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -Wno-identities #-}
-{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- See the note on Modulus for why this warning is disabled
 
@@ -51,10 +50,11 @@ module Numeric.Data.ModP.Internal
 where
 
 import Control.DeepSeq (NFData)
-import Data.Bounds (LowerBounded, UpperBounded, UpperBoundless)
+import Data.Bounds (AnyLowerBounded, AnyUpperBounded, LowerBounded, UpperBounded)
 import Data.Data (Proxy (Proxy))
 import Data.Kind (Type)
 import Data.Text.Display (Display (displayBuilder))
+import Data.Typeable (Typeable)
 import Data.Word (Word16)
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
@@ -70,15 +70,23 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Natural (Natural)
 import System.Random (UniformRange)
 import System.Random qualified as Rand
 import System.Random.Stateful qualified as RandState
 
+-- $setup
+-- >>> import Data.Int (Int8)
+
+-- see NOTE: [Safe finite modular rounding]
+
 -- | Newtype wrapper that represents \( \mathbb{Z}/p\mathbb{Z} \) for prime @p@.
 -- 'ModP' is a 'Numeric.Algebra.Field.Field' i.e. supports addition,
 -- subtraction, multiplication, and division.
+--
+-- When constructing a @'ModP' p a@ we must verify that @p@ is prime and the
+-- type @a@ is large enough to accommodate @p@, hence the possible failure.
 --
 -- ==== __Examples__
 --
@@ -118,7 +126,7 @@ pattern MkModP x <- UnsafeModP x
 {-# COMPLETE MkModP #-}
 
 -- | @since 0.1
-instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
+instance (KnownNat p, Show a) => Show (ModP p a) where
   -- manual so we show "MkModP" instead of "UnsafeModP"
   showsPrec i (UnsafeModP x) =
     showParen
@@ -129,10 +137,19 @@ instance (KnownNat p, Show a, UpperBoundless a) => Show (ModP p a) where
       p' = natVal @p Proxy
   {-# INLINEABLE showsPrec #-}
 
--- | @since 0.1
-instance (KnownNat p, Num a) => Bounded (ModP p a) where
-  minBound = UnsafeModP 0
-  maxBound = UnsafeModP $ fromIntegral (natVal @p Proxy - 1)
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  Bounded (ModP p a)
+  where
+  minBound = unsafeModP 0
+  maxBound = unsafeModP $ fromIntegral (natVal @p Proxy - 1)
   {-# INLINEABLE minBound #-}
   {-# INLINEABLE maxBound #-}
 
@@ -149,95 +166,138 @@ instance (KnownNat p, Show a) => Display (ModP p a) where
       p' = natVal @p Proxy
 
 -- | @since 0.1
-instance (KnownNat p) => ASemigroup (ModP p Integer) where
-  UnsafeModP x .+. UnsafeModP y = unsafeModP $ x + y
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p
+  ) =>
+  ASemigroup (ModP p a)
+  where
+  UnsafeModP x .+. UnsafeModP y =
+    UnsafeModP $ Utils.modSafeAdd x y (fromIntegral p')
+    where
+      p' = natVal @p Proxy
   {-# INLINEABLE (.+.) #-}
 
--- | @since 0.1
-instance (KnownNat p) => ASemigroup (ModP p Natural) where
-  UnsafeModP x .+. UnsafeModP y = unsafeModP $ x + y
-  {-# INLINEABLE (.+.) #-}
-
--- | @since 0.1
-instance (KnownNat p) => AMonoid (ModP p Integer) where
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  AMonoid (ModP p a)
+  where
   zero = unsafeModP 0
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance (KnownNat p) => AMonoid (ModP p Natural) where
-  zero = unsafeModP 0
-  {-# INLINEABLE zero #-}
-
--- | @since 0.1
-instance (KnownNat p) => AGroup (ModP p Integer) where
-  UnsafeModP x .-. UnsafeModP y = unsafeModP (x - y)
-  {-# INLINEABLE (.-.) #-}
-
--- | @since 0.1
-instance (KnownNat p) => AGroup (ModP p Natural) where
-  UnsafeModP x .-. UnsafeModP y
-    | x >= y = unsafeModP (x - y)
-    | otherwise = unsafeModP (p' - y + x)
+instance
+  ( AnyLowerBounded a,
+    AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  AGroup (ModP p a)
+  where
+  UnsafeModP x .-. UnsafeModP y =
+    UnsafeModP $ Utils.modSafeSub x y (fromIntegral p')
     where
       p' = natVal @p Proxy
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance (KnownNat p) => MSemigroup (ModP p Integer) where
-  UnsafeModP x .*. UnsafeModP y = unsafeModP (x * y)
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p
+  ) =>
+  MSemigroup (ModP p a)
+  where
+  UnsafeModP x .*. UnsafeModP y =
+    UnsafeModP $ Utils.modSafeMult x y (fromIntegral p')
+    where
+      p' = natVal @p Proxy
   {-# INLINEABLE (.*.) #-}
 
--- | @since 0.1
-instance (KnownNat p) => MSemigroup (ModP p Natural) where
-  UnsafeModP x .*. UnsafeModP y = unsafeModP (x * y)
-  {-# INLINEABLE (.*.) #-}
-
--- | @since 0.1
-instance (KnownNat p) => MMonoid (ModP p Integer) where
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  MMonoid (ModP p a)
+  where
   one = unsafeModP 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance (KnownNat p) => MMonoid (ModP p Natural) where
-  one = unsafeModP 1
-  {-# INLINEABLE one #-}
-
--- | @since 0.1
-instance (KnownNat p) => MGroup (ModP p Integer) where
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  MGroup (ModP p a)
+  where
   x .%. d = x .*. invert d
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance (KnownNat p) => MGroup (ModP p Natural) where
-  x .%. d = x .*. invert d
-  {-# INLINEABLE (.%.) #-}
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  Semiring (ModP p a)
 
 -- | @since 0.1
-instance (KnownNat p) => Semiring (ModP p Integer)
+instance
+  ( AnyLowerBounded a,
+    AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  Ring (ModP p a)
 
 -- | @since 0.1
-instance (KnownNat p) => Semiring (ModP p Natural)
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  Semifield (ModP p a)
 
 -- | @since 0.1
-instance (KnownNat p) => Ring (ModP p Integer)
+instance
+  ( AnyLowerBounded a,
+    AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  Field (ModP p a)
 
--- | @since 0.1
-instance (KnownNat p) => Ring (ModP p Natural)
-
--- | @since 0.1
-instance (KnownNat p) => Semifield (ModP p Integer)
-
--- | @since 0.1
-instance (KnownNat p) => Semifield (ModP p Natural)
-
--- | @since 0.1
-instance (KnownNat p) => Field (ModP p Integer)
-
--- | @since 0.1
-instance (KnownNat p) => Field (ModP p Natural)
-
--- | @since 0.1
-instance (Integral a, KnownNat p, UpperBoundless a) => FromInteger (ModP p a) where
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  FromInteger (ModP p a)
+  where
   afromInteger = unsafeModP . fromInteger
   {-# INLINEABLE afromInteger #-}
 
@@ -249,19 +309,32 @@ instance (Integral a, KnownNat p, UpperBoundless a) => FromInteger (ModP p a) wh
 --
 -- ==== __Examples__
 -- >>> mkModP @5 7
--- Just (MkModP 2 (mod 5))
+-- Right (MkModP 2 (mod 5))
 --
 -- >>> mkModP @10 7
--- Nothing
+-- Left "Received non-prime: 10"
+--
+-- >>> mkModP @128 (9 :: Int8)
+-- Left "Type 'Int8' has a maximum size of 127. This is not large enough to safely implement mod 128."
 --
 -- @since 0.1
-mkModP :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => a -> Maybe (ModP p a)
-mkModP x = case isPrime p' of
-  Composite -> Nothing
-  ProbablyPrime -> Just $ UnsafeModP x'
+mkModP ::
+  forall p a.
+  ( AnyUpperBounded a,
+    Integral a,
+    KnownNat p,
+    Typeable a
+  ) =>
+  a ->
+  Either String (ModP p a)
+mkModP x = maybe modP Left (Utils.checkModBound x p')
   where
+    modP = case isPrime p' of
+      Composite -> Left $ "Received non-prime: " <> show p'
+      ProbablyPrime -> Right $ UnsafeModP x'
+
     p' = toInteger $ natVal @p Proxy
-    x' = x `mod` toUpperBoundless p'
+    x' = x `mod` fromIntegral p'
 {-# INLINEABLE mkModP #-}
 
 -- | Variant of 'mkModP' that throws an error when given a non-prime.
@@ -275,30 +348,27 @@ mkModP x = case isPrime p' of
 -- @since 0.1
 unsafeModP ::
   forall p a.
-  ( HasCallStack,
+  ( AnyUpperBounded a,
+    HasCallStack,
     Integral a,
     KnownNat p,
-    UpperBoundless a
+    Typeable a
   ) =>
   a ->
   ModP p a
 unsafeModP x = case mkModP x of
-  Just mp -> mp
-  Nothing ->
-    error $
-      errMsg "unsafeModP" p'
-  where
-    p' = natVal @p Proxy
+  Right mp -> mp
+  Left err -> error $ errMsg "unsafeModP" err
 {-# INLINEABLE unsafeModP #-}
 
 -- | @since 0.1
-errMsg :: (Show a) => String -> a -> String
-errMsg fn x =
+errMsg :: String -> String -> String
+errMsg fn msg =
   mconcat
     [ "Numeric.Data.ModP.",
       fn,
-      ": Received non-prime: ",
-      show x
+      ": ",
+      msg
     ]
 
 -- | Given non-zero \(d\), returns the inverse i.e. finds \(e\) s.t.
@@ -316,8 +386,8 @@ errMsg fn x =
 -- MkModP 8 (mod 19)
 --
 -- @since 0.1
-invert :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => ModP p a -> ModP p a
-invert (UnsafeModP d) = reallyUnsafeModP $ toUpperBoundless $ findInverse d' p'
+invert :: forall p a. (Integral a, KnownNat p) => ModP p a -> ModP p a
+invert (UnsafeModP d) = reallyUnsafeModP $ fromIntegral $ findInverse d' p'
   where
     p' = MkModulus $ fromIntegral $ natVal @p Proxy
     d' = toInteger d
@@ -330,7 +400,7 @@ invert (UnsafeModP d) = reallyUnsafeModP $ toUpperBoundless $ findInverse d' p'
 -- is undesirable for performance reasons. Exercise extreme caution.
 --
 -- @since 0.1
-reallyUnsafeModP :: forall p a. (Integral a, KnownNat p, UpperBoundless a) => a -> ModP p a
+reallyUnsafeModP :: forall p a. (Integral a, KnownNat p) => a -> ModP p a
 reallyUnsafeModP = UnsafeModP . (`mod` p')
   where
     p' = fromIntegral $ natVal @p Proxy
@@ -633,8 +703,3 @@ eec a b = go initOldR initR initOldS initS initOldT initT
           t' = oldT - T' q * t
        in go oldR' r' oldS' s' oldT' t'
 {-# INLINEABLE eec #-}
-
--- Note: obviously this is partial when @a@ is 'Natural'
-toUpperBoundless :: (Integral a, UpperBoundless a) => Integer -> a
-toUpperBoundless = fromIntegral
-{-# INLINEABLE toUpperBoundless #-}
