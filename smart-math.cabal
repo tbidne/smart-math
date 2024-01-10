@@ -20,6 +20,11 @@ source-repository head
   type:     git
   location: https://github.com/tbidne/smart-math
 
+flag arithmoi
+  description: Uses the much faster arithmoi for primality testing.
+  default:     False
+  manual:      True
+
 common common-lang
   default-extensions:
     BangPatterns
@@ -76,6 +81,7 @@ library
     Numeric.Data.ModN.Internal
     Numeric.Data.ModP
     Numeric.Data.ModP.Internal
+    Numeric.Data.ModP.Internal.Primality
     Numeric.Data.NonNegative
     Numeric.Data.NonNegative.Internal
     Numeric.Data.NonZero
@@ -93,6 +99,13 @@ library
     , template-haskell  >=2.17.0.0 && <2.22
     , text              >=1.2.4.0  && <2.2
     , text-display      >=0.0.3.0  && <0.6
+
+  if flag(arithmoi)
+    build-depends:
+      , arithmoi  ^>=0.13.0.0
+      , mod       ^>=0.2.0.1
+
+    cpp-options:   -DUSE_ARITHMOI
 
   hs-source-dirs:   src
   default-language: Haskell2010
@@ -158,3 +171,15 @@ test-suite unit
   hs-source-dirs:   test/unit
   ghc-options:      -threaded -with-rtsopts=-N
   default-language: Haskell2010
+
+benchmark benchmarks
+  import:           common-lang
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  build-depends:
+    , base
+    , smart-math
+    , tasty-bench  ^>=0.3
+
+  hs-source-dirs:   benchmarks
+  default-language: GHC2021

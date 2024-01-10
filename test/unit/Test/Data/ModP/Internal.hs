@@ -5,7 +5,7 @@ import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Data.ModP.Internal
+import Numeric.Data.ModP.Internal.Primality
   ( Bezout (MkBezout),
     MaybePrime (Composite, ProbablyPrime),
     Modulus (MkModulus),
@@ -13,7 +13,7 @@ import Numeric.Data.ModP.Internal
     S (S'),
     T (T'),
   )
-import Numeric.Data.ModP.Internal qualified as ModPI
+import Numeric.Data.ModP.Internal.Primality qualified as ModPI
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Test.TestBounds (TestBounds (maxVal))

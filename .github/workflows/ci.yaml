@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - updates
 
   pull_request:
     branches:
@@ -44,13 +45,46 @@ jobs:
 
       - name: Doc Tests
         run : |
-          cabal configure --write-ghc-environment-files always
-          cabal build
+          cabal build --write-ghc-environment-files=always
           ${{ matrix.platform.set-env }} RUN_DOCTEST=1
           cabal test doctest
 
       - name: Unit Tests
         run: cabal test unit --test-options '--hedgehog-tests 100000'
+
+      - name: Configure with arithmoi
+        run: cabal configure --project-file=cabal.project.arithmoi --enable-tests --ghc-options -Werror
+
+      - name: Compile with arithmoi
+        run: cabal build --project-file=cabal.project.arithmoi
+
+      - name: Doc Tests with arithmoi
+        run : |
+          cabal build --project-file=cabal.project.arithmoi --write-ghc-environment-files=always
+          ${{ matrix.platform.set-env }} RUN_DOCTEST=1
+          cabal test doctest --project-file=cabal.project.arithmoi
+
+      - name: Unit Tests with arithmoi
+        run: cabal test unit --project-file=cabal.project.arithmoi --test-options '--hedgehog-tests 100000'
+
+      - name: Benchmarks
+        if: ${{ matrix.platform.os == 'ubuntu-latest' }}
+        id: bench
+        run: |
+          cabal bench --project-file=cabal.project.arithmoi --benchmark-options '
+            --csv benchmarks/${{ matrix.platform.os }}_${{ matrix.ghc }}_ci.csv
+            --svg benchmarks/${{ matrix.platform.os }}_${{ matrix.ghc }}_ci.svg
+            --baseline benchmarks/baseline_${{ matrix.platform.os }}_${{ matrix.ghc }}_ci.csv
+            --fail-if-slower 30
+            --fail-if-faster 30'
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() && steps.bench.conclusion == 'failure' }}
+        with:
+          name: build-artifacts
+          path: |
+            benchmarks/${{ matrix.platform.os }}_${{ matrix.ghc }}_ci.csv
+            benchmarks/${{ matrix.platform.os }}_${{ matrix.ghc }}_ci.svg
   nix:
     strategy:
       fail-fast: false

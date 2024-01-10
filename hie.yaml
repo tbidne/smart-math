@@ -11,3 +11,6 @@ cradle:
 
     - path: "./test/unit"
       component: "smart-math:test:unit"
+
+    - path: "./benchmarks/Main.hs"
+      component: "smart-math:bench:benchmarks"
