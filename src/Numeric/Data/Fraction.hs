@@ -35,7 +35,7 @@ import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.Fraction.Internal (Fraction (UnsafeFraction, (:%:)))
 import Numeric.Data.Fraction.Internal qualified as Internal
-import Numeric.Data.NonZero (rmatching)
+import Numeric.Data.Internal.Utils (rmatching)
 import Optics.Core
   ( ReversedPrism',
     ReversibleOptic (re),

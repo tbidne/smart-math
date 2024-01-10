@@ -22,19 +22,10 @@ where
 
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.NonZero.Internal (NonZero (MkNonZero, UnsafeNonZero))
 import Numeric.Data.NonZero.Internal qualified as Internal
-import Optics.Core
-  ( An_AffineTraversal,
-    Is,
-    NoIx,
-    Optic,
-    ReversedPrism',
-    ReversibleOptic (ReversedOptic),
-    matching,
-    prism,
-    re,
-  )
+import Optics.Core (ReversedPrism', prism, re)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -108,22 +99,3 @@ _MkNonZero = re (prism f g)
       Nothing -> Left x
       Just x' -> Right x'
 {-# INLINEABLE _MkNonZero #-}
-
--- | Reversed 'matching'. Useful with smart-constructor optics.
---
--- ==== __Examples__
---
--- >>> rmatching _MkNonZero 3
--- Right (UnsafeNonZero 3)
---
--- >>> rmatching _MkNonZero 0
--- Left 0
---
--- @since 0.1
-rmatching ::
-  (Is (ReversedOptic k) An_AffineTraversal, ReversibleOptic k) =>
-  Optic k NoIx b a t s ->
-  s ->
-  Either t a
-rmatching = matching . re
-{-# INLINEABLE rmatching #-}

@@ -4,6 +4,9 @@ module Numeric.Data.Internal.Utils
     modSafeAdd,
     modSafeMult,
     modSafeSub,
+
+    -- * Optics
+    rmatching,
   )
 where
 
@@ -13,6 +16,15 @@ import Data.Bounds
   )
 import Data.Typeable (Typeable)
 import Data.Typeable qualified as Typeable
+import Optics.Core
+  ( An_AffineTraversal,
+    Is,
+    NoIx,
+    Optic,
+    ReversibleOptic (ReversedOptic),
+    matching,
+    re,
+  )
 
 -- | Verifies that the type A is large enough to fit the modulus.
 -- Returns 'Nothing' if the check succeeds or a String error message if
@@ -155,3 +167,14 @@ modSafeSub x y modulus = case someLowerBound @a of
 
     integerToA :: Integer -> a
     integerToA = fromInteger
+
+-- | Reversed 'matching'. Useful with smart-constructor optics.
+--
+-- @since 0.1
+rmatching ::
+  (Is (ReversedOptic k) An_AffineTraversal, ReversibleOptic k) =>
+  Optic k NoIx b a t s ->
+  s ->
+  Either t a
+rmatching = matching . re
+{-# INLINEABLE rmatching #-}

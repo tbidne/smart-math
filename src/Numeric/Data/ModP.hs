@@ -28,9 +28,9 @@ import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP))
 import Numeric.Data.ModP.Internal qualified as Internal
-import Numeric.Data.NonZero (rmatching)
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- | @since 0.1

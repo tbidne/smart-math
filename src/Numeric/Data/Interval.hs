@@ -23,13 +23,13 @@ where
 
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.Interval.Internal
   ( Interval (MkInterval, UnsafeInterval),
     IntervalBound (Closed, None, Open),
     SingIntervalBound,
   )
 import Numeric.Data.Interval.Internal qualified as Internal
-import Numeric.Data.NonZero (rmatching)
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- $setup

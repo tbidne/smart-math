@@ -24,6 +24,7 @@ where
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.NonNegative.Internal
   ( NonNegative
       ( MkNonNegative,
@@ -31,7 +32,6 @@ import Numeric.Data.NonNegative.Internal
       ),
   )
 import Numeric.Data.NonNegative.Internal qualified as Internal
-import Numeric.Data.NonZero (rmatching)
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- $setup

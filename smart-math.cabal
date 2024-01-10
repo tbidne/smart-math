@@ -100,7 +100,6 @@ library
 executable prime-prof
   import:           common-lang
   main-is:          Main.hs
-
   build-depends:
     , base
     , smart-math
