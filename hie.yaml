@@ -3,6 +3,9 @@ cradle:
     - path: "./src"
       component: "lib:smart-math"
 
+    - path: "./prime-prof/Main.hs"
+      component: "smart-math:exe:prime-prof"
+
     - path: "./test/doctest"
       component: "smart-math:test:doctest"
 

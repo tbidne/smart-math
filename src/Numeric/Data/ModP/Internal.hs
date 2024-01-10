@@ -423,6 +423,10 @@ instance Semigroup MaybePrime where
 instance Monoid MaybePrime where
   mempty = ProbablyPrime
 
+-- FIXME: Turns out, isPrime is slow. For example, isPrime 1_000_003 takes
+-- quite a long time. Basic profiling (:set +s in ghci) shows that memory
+-- scales with the prime. This is probably much worse than it should be.
+
 -- | Tests primality via the Miller-Rabin algorithm with 100 trials. Returns
 -- 'Composite' if the number is definitely composite, otherwise
 -- 'ProbablyPrime'.
