@@ -2,20 +2,20 @@
 --
 -- @since 0.1
 module Numeric.Data.Interval
-  ( -- * Main types
+  ( -- * Types
     IntervalBound (..),
     Interval (MkInterval),
 
-    -- ** Creation
+    -- * Creation
     Internal.mkInterval,
     mkIntervalTH,
     Internal.unsafeInterval,
     reallyUnsafeInterval,
 
-    -- ** Elimination
+    -- * Elimination
     unInterval,
 
-    -- ** Optics
+    -- * Optics
     _MkInterval,
     rmatching,
   )

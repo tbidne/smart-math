@@ -12,11 +12,11 @@
 --
 -- @since 0.1
 module Numeric.Data.Interval.Internal
-  ( -- * Main types
+  ( -- * Types
     IntervalBound (..),
     Interval (MkInterval, UnsafeInterval),
 
-    -- ** Creation
+    -- * Creation
     mkInterval,
     unsafeInterval,
 
