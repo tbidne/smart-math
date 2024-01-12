@@ -31,12 +31,6 @@ module Numeric.Data.Interval.Internal
 where
 
 import Control.DeepSeq (NFData)
-import Data.Bounds
-  ( LowerBounded (lowerBound),
-    LowerBoundless,
-    UpperBounded (upperBound),
-    UpperBoundless,
-  )
 import Data.Kind (Constraint, Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (Proxy))
@@ -213,31 +207,6 @@ instance
 
 -- | @since 0.1
 instance
-  ( KnownNat l,
-    KnownNat r,
-    Num a
-  ) =>
-  Bounded (Interval (Closed l) (Closed r) a)
-  where
-  minBound = UnsafeInterval $ fromIntegral $ natVal @l Proxy
-  maxBound = UnsafeInterval $ fromIntegral $ natVal @r Proxy
-
--- | @since 0.1
-instance (KnownNat l, Num a) => LowerBounded (Interval (Closed l) r a) where
-  lowerBound = UnsafeInterval $ fromIntegral $ natVal @l Proxy
-
--- | @since 0.1
-instance (LowerBoundless a) => LowerBoundless (Interval None r a)
-
--- | @since 0.1
-instance (KnownNat r, Num a) => UpperBounded (Interval l (Closed r) a) where
-  upperBound = UnsafeInterval $ fromIntegral $ natVal @r Proxy
-
--- | @since 0.1
-instance (UpperBoundless a) => UpperBoundless (Interval l None a)
-
--- | @since 0.1
-instance
   ( Show a,
     SingIntervalBound l,
     SingIntervalBound r
@@ -289,7 +258,8 @@ pattern MkInterval x <- UnsafeInterval x
 {-# COMPLETE MkInterval #-}
 
 -- | Smart constructor for 'Interval'. Returns 'Nothing' if the given value
--- is not within the bounds.
+-- is not within the bounds. Note that we do not check that the bounds fit
+-- within the type itself (e.g. consider @Interval @None @(Closed 200) Int8@).
 --
 -- ==== __Examples__
 -- >>> mkInterval @(Open 10) @(Closed 100) 50
