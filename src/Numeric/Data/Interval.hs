@@ -16,6 +16,7 @@ module Numeric.Data.Interval
     unInterval,
 
     -- * Optics
+    -- $optics
     _MkInterval,
     rmatching,
   )
@@ -73,13 +74,25 @@ reallyUnsafeInterval :: a -> Interval l r a
 reallyUnsafeInterval = UnsafeInterval
 {-# INLINEABLE reallyUnsafeInterval #-}
 
--- | 'ReversedPrism'' that enables total elimination and partial construction.
+-- $optics
+-- We provide a 'ReversedPrism'' '_MkInterval' that allows for total
+-- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- for @#unInterval@.
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.))
+-- >>> :set -XOverloadedLabels
+-- >>> import Optics.Core (view)
+-- >>> let x = $$(mkIntervalTH @(Open 1) @(Open 5) 2)
+-- >>> view #unInterval x
+-- 2
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+-- >>> import Optics.Core (view)
 -- >>> x = $$(mkIntervalTH @(Open 1) @(Open 5) 2)
--- >>> x ^. _MkInterval
+-- >>> view _MkInterval x
 -- 2
 --
 -- >>> rmatching (_MkInterval @(Open 1) @(Open 5)) 3

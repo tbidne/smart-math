@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- see NOTE: [TypeAbstractions default extensions]
@@ -40,12 +41,14 @@ import Data.Text.Lazy qualified as TL
 import Data.Text.Lazy.Builder (Builder)
 import Data.Text.Lazy.Builder qualified as TLB
 import GHC.Generics (Generic)
+import GHC.Records (HasField (getField))
 import GHC.Show (showSpace)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
+import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -183,6 +186,21 @@ newtype Interval (l :: IntervalBound) (r :: IntervalBound) (a :: Type)
     ( -- | @since 0.1
       NFData
     )
+
+-- | @since 0.1
+instance HasField "unInterval" (Interval l r a) a where
+  getField (UnsafeInterval x) = x
+
+-- | @since 0.1
+instance
+  ( k ~ A_Getter,
+    a ~ n,
+    b ~ n
+  ) =>
+  LabelOptic "unInterval" k (Interval l r a) (Interval l r a) a b
+  where
+  labelOptic = to (\(UnsafeInterval x) -> x)
+  {-# INLINE labelOptic #-}
 
 -- | @since 0.1
 instance

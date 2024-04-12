@@ -2,13 +2,12 @@ module Test.Data.Fraction (props) where
 
 import Data.Text.Display qualified as D
 import Gens qualified
-import Hedgehog ((===))
 import Hedgehog qualified as H
-import Numeric.Data.Fraction (Fraction ((:%:)), (%!))
+import Numeric.Data.Fraction (Fraction ((:%:)), (%!), _MkFraction)
 import Numeric.Data.Fraction qualified as Frac
-import Test.Tasty (TestTree)
+import Optics.Core (_1, _2)
+import Test.Prelude
 import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.HUnit qualified as HUnit
 import Utils qualified
 
@@ -154,6 +153,9 @@ numeratorProp =
     H.property $ do
       x@(n :%: _) <- H.forAll Gens.fraction
       n === Frac.numerator x
+      n === x.numerator
+      n === view #numerator x
+      n === view (_MkFraction % _1) x
 
 denominatorProp :: TestTree
 denominatorProp =
@@ -161,6 +163,9 @@ denominatorProp =
     H.property $ do
       x@(_ :%: d) <- H.forAll Gens.fraction
       d === Frac.denominator x
+      d === x.denominator
+      d === view #denominator x
+      d === view (_MkFraction % _2) x
 
 isReduced :: (Integral a) => Fraction a -> Bool
 isReduced (0 :%: d) = d == 1

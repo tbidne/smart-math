@@ -1,15 +1,15 @@
 module Test.Data.NonZero (props) where
 
 import Data.Text.Display qualified as D
-import Hedgehog (MonadGen, (===))
+import Hedgehog (MonadGen)
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
+import Numeric.Data.NonZero (NonZero (MkNonZero))
 import Numeric.Data.NonZero qualified as NonZero
 import Numeric.Data.NonZero.Internal (NonZero (UnsafeNonZero))
-import Test.Tasty (TestTree)
+import Test.Prelude
 import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
@@ -21,6 +21,7 @@ props =
     [ mkNonZeroSucceeds,
       mkNonZeroFails,
       testUnsafe,
+      elimProps,
       showSpecs,
       displaySpecs
     ]
@@ -56,6 +57,22 @@ nonzero =
 
 zero :: (MonadGen m) => m Integer
 zero = pure 0
+
+genNonZero :: Gen (NonZero Int)
+genNonZero = NonZero.unsafeNonZero <$> nonzero
+
+elimProps :: TestTree
+elimProps =
+  Utils.testPropertyCompat desc "elimProps" $
+    H.property $ do
+      nz@(MkNonZero n) <- H.forAll genNonZero
+
+      n === NonZero.unNonZero nz
+      n === nz.unNonZero
+      n === view #unNonZero nz
+      n === view NonZero._MkNonZero nz
+  where
+    desc = "elim (MkNonZero x) === x"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows Positive" $ do

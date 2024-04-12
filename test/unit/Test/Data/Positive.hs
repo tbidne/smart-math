@@ -1,7 +1,6 @@
 module Test.Data.Positive (props) where
 
 import Data.Text.Display qualified as D
-import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -10,9 +9,8 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Data.Positive qualified as Pos
 import Numeric.Data.Positive.Internal (Positive (MkPositive, UnsafePositive))
-import Test.Tasty (TestTree)
+import Test.Prelude
 import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
@@ -27,6 +25,7 @@ props =
       addTotal,
       multTotal,
       divTotal,
+      elimProps,
       showSpecs,
       displaySpecs
     ]
@@ -80,14 +79,27 @@ divTotal =
       let MkPositive pz = px .%. py
       x `div` y === pz
 
-pos :: (MonadGen m) => m Int
+pos :: Gen Int
 pos = HG.integral $ HR.exponentialFrom 1 1 maxVal
 
-nonpos :: (MonadGen m) => m Int
+nonpos :: Gen Int
 nonpos = HG.integral $ HR.exponentialFrom minVal 0 0
 
-positive :: (MonadGen m) => m (Positive Int)
+positive :: Gen (Positive Int)
 positive = Pos.unsafePositive <$> pos
+
+elimProps :: TestTree
+elimProps =
+  Utils.testPropertyCompat desc "elimProps" $
+    H.property $ do
+      nz@(MkPositive n) <- H.forAll positive
+
+      n === Pos.unPositive nz
+      n === nz.unPositive
+      n === view #unPositive nz
+      n === view Pos._MkPositive nz
+  where
+    desc = "elim (MkPositive x) === x"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows Positive" $ do

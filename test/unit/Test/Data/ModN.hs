@@ -19,6 +19,7 @@ import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Data.ModN qualified as ModN
 import Numeric.Data.ModN.Internal (ModN (MkModN))
+import Test.Prelude
 import Test.Tasty (TestTree)
 import Test.Tasty qualified as T
 import Test.Tasty.HUnit ((@=?))
@@ -42,6 +43,7 @@ props =
       word64Props,
       wordProps,
       naturalProps,
+      elimProps,
       showSpecs,
       displaySpecs
     ]
@@ -635,6 +637,19 @@ anyNat ::
   ) =>
   Gen (ModN n a)
 anyNat = ModN.unsafeModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
+
+elimProps :: TestTree
+elimProps =
+  Utils.testPropertyCompat desc "elimProps" $
+    H.property $ do
+      mn@(MkModN n) <- H.forAll (anyNat @350 @Int)
+
+      n === ModN.unModN mn
+      n === mn.unModN
+      n === view #unModN mn
+      n === view ModN._MkModN mn
+  where
+    desc = "elim (MkModN x) === x"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows ModN" $ do

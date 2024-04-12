@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 -- | Provides the 'NonZero' type for enforcing a non-zero invariant.
 --
 -- @since 0.1
@@ -18,6 +20,7 @@ import Data.Bifunctor (Bifunctor (bimap))
 import Data.Kind (Type)
 import Data.Text.Display (Display, ShowInstance (ShowInstance))
 import GHC.Generics (Generic)
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Multiplicative
@@ -29,6 +32,7 @@ import Numeric.Algebra.Multiplicative
 import Numeric.Class.Division (Division (divide))
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
+import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -59,6 +63,21 @@ newtype NonZero a = UnsafeNonZero a
       Display
     )
     via (ShowInstance a)
+
+-- | @since 0.1
+instance HasField "unNonZero" (NonZero a) a where
+  getField (UnsafeNonZero x) = x
+
+-- | @since 0.1
+instance
+  ( k ~ A_Getter,
+    x ~ a,
+    y ~ a
+  ) =>
+  LabelOptic "unNonZero" k (NonZero a) (NonZero a) x y
+  where
+  labelOptic = to (\(UnsafeNonZero x) -> x)
+  {-# INLINE labelOptic #-}
 
 -- | @since 0.1
 instance (Num a) => MSemigroup (NonZero a) where

@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 
 -- See the note on Modulus for why this warning is disabled
@@ -34,6 +35,7 @@ import Data.Kind (Type)
 import Data.Text.Display (Display (displayBuilder))
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
@@ -56,6 +58,7 @@ import Numeric.Data.ModP.Internal.Primality
   )
 import Numeric.Data.ModP.Internal.Primality qualified as Prime
 import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
 -- >>> import Data.Int (Int8)
@@ -117,6 +120,21 @@ instance (KnownNat p, Show a) => Show (ModP p a) where
       modStr = " (mod " <> show p' <> ")"
       p' = natVal @p Proxy
   {-# INLINEABLE showsPrec #-}
+
+-- | @since 0.1
+instance HasField "unModP" (ModP p a) a where
+  getField (UnsafeModP x) = x
+
+-- | @since 0.1
+instance
+  ( k ~ A_Getter,
+    x ~ a,
+    y ~ a
+  ) =>
+  LabelOptic "unModP" k (ModP p a) (ModP p a) x y
+  where
+  labelOptic = to (\(UnsafeModP x) -> x)
+  {-# INLINE labelOptic #-}
 
 -- | __WARNING: Partial__
 --

@@ -18,6 +18,7 @@ module Numeric.Data.ModP
     Internal.invert,
 
     -- * Optics
+    -- $optics
     _MkModP,
     rmatching,
   )
@@ -60,13 +61,25 @@ mkModPTH x = case Internal.mkModP x of
   Left err -> error $ Internal.errMsg "mkModPTH" err
 {-# INLINEABLE mkModPTH #-}
 
--- | 'ReversedPrism'' that enables total elimination and partial construction.
+-- $optics
+-- We provide a 'ReversedPrism'' '_MkModP' that allows for total
+-- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- for @#unModP@.
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.))
+-- >>> :set -XOverloadedLabels
+-- >>> import Optics.Core (view)
+-- >>> let n = $$(mkModPTH @7 9)
+-- >>> view #unModP n
+-- 2
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+-- >>> import Optics.Core (view)
 -- >>> n = $$(mkModPTH @7 9)
--- >>> n ^. _MkModP
+-- >>> view _MkModP n
 -- 2
 --
 -- >>> rmatching (_MkModP @7) 9

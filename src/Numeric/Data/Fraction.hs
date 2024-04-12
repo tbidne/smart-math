@@ -123,13 +123,14 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 {-# INLINEABLE reduce #-}
 
 -- $optics
--- In addition to '_MkFraction', we have 'Optics.Core.LabelOptic' instances for
+-- We provide a 'ReversedPrism'' '_MkFraction' that allows for total
+-- elimination and partial construction, along with 'LabelOptic' instances for
 -- "numerator" and "denominator".
 --
 -- ==== __Examples__
 --
 -- >>> :set -XOverloadedLabels
--- >>> import Optics.Core (view, set)
+-- >>> import Optics.Core (set, view)
 -- >>> let x = 2 %! 7
 -- >>> view #numerator x
 -- 2
@@ -143,10 +144,9 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 -- | 'ReversedPrism'' that enables total elimination and partial construction.
 --
 -- ==== __Examples__
---
--- >>> import Optics.Core ((^.))
+-- >>> import Optics.Core (view)
 -- >>> f = $$(2 %% 8)
--- >>> f ^. _MkFraction
+-- >>> view _MkFraction f
 -- (1,4)
 --
 -- >>> rmatching _MkFraction (0, 4)

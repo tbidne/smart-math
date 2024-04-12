@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 -- | Provides the 'ModN' type for modular arithmetic.
 --
 -- @since 0.1
@@ -27,6 +29,7 @@ import Data.Proxy (Proxy (Proxy))
 import Data.Text.Display (Display (displayBuilder))
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
@@ -39,6 +42,7 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
 -- >>> import Data.Int (Int8)
@@ -106,6 +110,21 @@ instance (KnownNat n, Show a) => Show (ModN n a) where
       modStr = " (mod " <> show n' <> ")"
       n' = natVal @n Proxy
   {-# INLINEABLE showsPrec #-}
+
+-- | @since 0.1
+instance HasField "unModN" (ModN n a) a where
+  getField (UnsafeModN x) = x
+
+-- | @since 0.1
+instance
+  ( k ~ A_Getter,
+    x ~ a,
+    y ~ a
+  ) =>
+  LabelOptic "unModN" k (ModN n a) (ModN n a) x y
+  where
+  labelOptic = to (\(UnsafeModN x) -> x)
+  {-# INLINE labelOptic #-}
 
 -- | Bidirectional pattern synonym for 'ModN'. Construction will apply
 -- modular reduction to the parameter.

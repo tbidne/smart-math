@@ -1,7 +1,6 @@
 module Test.Data.NonNegative (props) where
 
 import Data.Text.Display qualified as D
-import Hedgehog (MonadGen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -15,9 +14,8 @@ import Numeric.Data.NonNegative.Internal
         UnsafeNonNegative
       ),
   )
-import Test.Tasty (TestTree)
+import Test.Prelude
 import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
@@ -32,6 +30,7 @@ props =
       addTotal,
       multTotal,
       divTotal,
+      elimProps,
       showSpecs,
       displaySpecs
     ]
@@ -85,17 +84,30 @@ divTotal =
       let MkNonNegative pz = px .%. py
       x `div` y === pz
 
-nonneg :: (MonadGen m) => m Int
+nonneg :: Gen Int
 nonneg = HG.integral $ HR.exponentialFrom 0 0 maxVal
 
-neg :: (MonadGen m) => m Int
+neg :: Gen Int
 neg = HG.integral $ HR.exponentialFrom minVal -1 -1
 
-nonnegative :: (MonadGen m) => m (NonNegative Int)
+nonnegative :: Gen (NonNegative Int)
 nonnegative = NonNeg.unsafeNonNegative <$> nonneg
 
-nonnegativeNZ :: (MonadGen m) => m (NonNegative Int)
+nonnegativeNZ :: Gen (NonNegative Int)
 nonnegativeNZ = NonNeg.unsafeNonNegative <$> HG.integral (HR.exponentialFrom 1 1 maxVal)
+
+elimProps :: TestTree
+elimProps =
+  Utils.testPropertyCompat desc "elimProps" $
+    H.property $ do
+      mp@(MkNonNegative n) <- H.forAll nonnegative
+
+      n === NonNeg.unNonNegative mp
+      n === mp.unNonNegative
+      n === view #unNonNegative mp
+      n === view NonNeg._MkNonNegative mp
+  where
+    desc = "elim (MkNonNegative x) === x"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows NonNegative" $ do

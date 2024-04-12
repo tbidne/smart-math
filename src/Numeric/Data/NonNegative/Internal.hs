@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
 --
 -- @since 0.1
@@ -23,6 +25,7 @@ import Data.Bounds
 import Data.Kind (Type)
 import Data.Text.Display (Display, ShowInstance (ShowInstance))
 import GHC.Generics (Generic)
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
@@ -37,6 +40,7 @@ import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
+import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -72,6 +76,21 @@ newtype NonNegative a = UnsafeNonNegative a
       Display
     )
     via (ShowInstance a)
+
+-- | @since 0.1
+instance HasField "unNonNegative" (NonNegative a) a where
+  getField (UnsafeNonNegative x) = x
+
+-- | @since 0.1
+instance
+  ( k ~ A_Getter,
+    x ~ a,
+    y ~ a
+  ) =>
+  LabelOptic "unNonNegative" k (NonNegative a) (NonNegative a) x y
+  where
+  labelOptic = to (\(UnsafeNonNegative x) -> x)
+  {-# INLINE labelOptic #-}
 
 -- | Unidirectional pattern synonym for 'NonNegative'. This allows us to pattern
 -- match on a non-negative term without exposing the unsafe internal details.

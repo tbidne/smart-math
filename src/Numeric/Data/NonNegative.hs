@@ -16,6 +16,7 @@ module Numeric.Data.NonNegative
     unNonNegative,
 
     -- * Optics
+    -- $optics
     _MkNonNegative,
     rmatching,
   )
@@ -100,13 +101,25 @@ unNonNegative :: NonNegative a -> a
 unNonNegative (UnsafeNonNegative x) = x
 {-# INLINE unNonNegative #-}
 
--- | 'ReversedPrism'' that enables total elimination and partial construction.
+-- $optics
+-- We provide a 'ReversedPrism'' '_MkNonNegative' that allows for total
+-- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- for @#unNonNegative@.
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.))
+-- >>> :set -XOverloadedLabels
+-- >>> import Optics.Core (view)
+-- >>> let n = $$(mkNonNegativeTH 2)
+-- >>> view #unNonNegative n
+-- 2
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+-- >>> import Optics.Core (view)
 -- >>> nn = $$(mkNonNegativeTH 2)
--- >>> nn ^. _MkNonNegative
+-- >>> view _MkNonNegative nn
 -- 2
 --
 -- >>> rmatching _MkNonNegative 3

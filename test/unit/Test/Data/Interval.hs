@@ -7,7 +7,6 @@
 module Test.Data.Interval (tests) where
 
 import Data.Text.Display qualified as D
-import Hedgehog (Gen, (===))
 import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -16,9 +15,8 @@ import Numeric.Data.Interval.Internal
   ( Interval (UnsafeInterval),
     IntervalBound (Closed, None, Open),
   )
-import Test.Tasty (TestTree)
+import Test.Prelude
 import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.HUnit qualified as HUnit
 import Utils qualified
 
@@ -162,6 +160,19 @@ mkIntervalFailsClosedUpperBounded =
   where
     desc = "x in (50, \8734) fails Interval (-\8734, 50]"
 
+elimProps :: TestTree
+elimProps =
+  Utils.testPropertyCompat desc "elimProps" $
+    H.property $ do
+      b@(UnsafeInterval x) <- H.forAll genUnboundedInterval
+
+      x === Interval.unInterval b
+      x === b.unInterval
+      x === view #unInterval b
+      x === view Interval._MkInterval b
+  where
+    desc = "elim (UnsafeInterval x) === x"
+
 specs :: TestTree
 specs =
   T.testGroup
@@ -242,6 +253,9 @@ specs =
 
     mkUpperBoundedClosed :: Int -> Maybe (Interval None (Closed 50) Int)
     mkUpperBoundedClosed = Interval.mkInterval
+
+genUnboundedInterval :: Gen (Interval None None Int)
+genUnboundedInterval = Interval.unsafeInterval <$> genUnbounded
 
 genUnbounded :: Gen Int
 genUnbounded = HG.integral $ HR.exponentialFrom 0 0 1_000_000_000

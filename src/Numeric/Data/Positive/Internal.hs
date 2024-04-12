@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 -- | Provides the 'Positive' type for enforcing a positive invariant.
 --
 -- @since 0.1
@@ -19,6 +21,7 @@ import Data.Bounds (UpperBounded (upperBound), UpperBoundless)
 import Data.Kind (Type)
 import Data.Text.Display (Display, ShowInstance (ShowInstance))
 import GHC.Generics (Generic)
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
@@ -30,6 +33,7 @@ import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Class.Division (Division (divide))
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
+import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -66,6 +70,21 @@ newtype Positive a = UnsafePositive a
       Display
     )
     via (ShowInstance a)
+
+-- | @since 0.1
+instance HasField "unPositive" (Positive a) a where
+  getField (UnsafePositive x) = x
+
+-- | @since 0.1
+instance
+  ( k ~ A_Getter,
+    x ~ a,
+    y ~ a
+  ) =>
+  LabelOptic "unPositive" k (Positive a) (Positive a) x y
+  where
+  labelOptic = to (\(UnsafePositive x) -> x)
+  {-# INLINE labelOptic #-}
 
 -- | Unidirectional pattern synonym for 'Positive'. This allows us to pattern
 -- match on a positive term without exposing the unsafe internal details.

@@ -15,6 +15,7 @@ module Numeric.Data.NonZero
     unNonZero,
 
     -- * Optics
+    -- $optics
     _MkNonZero,
     rmatching,
   )
@@ -75,13 +76,25 @@ reallyUnsafeNonZero :: a -> NonZero a
 reallyUnsafeNonZero = UnsafeNonZero
 {-# INLINE reallyUnsafeNonZero #-}
 
--- | 'ReversedPrism'' that enables total elimination and partial construction.
+-- $optics
+-- We provide a 'ReversedPrism'' '_MkNonZero' that allows for total
+-- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- for @#unNonZero@.
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.))
+-- >>> :set -XOverloadedLabels
+-- >>> import Optics.Core (view)
+-- >>> let n = $$(mkNonZeroTH 7)
+-- >>> view #unNonZero n
+-- 7
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+-- >>> import Optics.Core (view)
 -- >>> nz = $$(mkNonZeroTH 7)
--- >>> nz ^. _MkNonZero
+-- >>> view _MkNonZero nz
 -- 7
 --
 -- >>> rmatching _MkNonZero 3

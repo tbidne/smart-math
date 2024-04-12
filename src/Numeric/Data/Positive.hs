@@ -19,6 +19,7 @@ module Numeric.Data.Positive
     positiveToNonZero,
 
     -- * Optics
+    -- $optics
     _MkPositive,
     rmatching,
   )
@@ -114,13 +115,25 @@ unPositive :: Positive a -> a
 unPositive (UnsafePositive x) = x
 {-# INLINE unPositive #-}
 
--- | 'ReversedPrism'' that enables total elimination and partial construction.
+-- $optics
+-- We provide a 'ReversedPrism'' '_MkPositive' that allows for total
+-- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- for @#unPositive@.
 --
 -- ==== __Examples__
 --
--- >>> import Optics.Core ((^.))
+-- >>> :set -XOverloadedLabels
+-- >>> import Optics.Core (view)
+-- >>> let n = $$(mkPositiveTH 2)
+-- >>> view #unPositive n
+-- 2
+
+-- | 'ReversedPrism'' that enables total elimination and partial construction.
+--
+-- ==== __Examples__
+-- >>> import Optics.Core (view)
 -- >>> pos = $$(mkPositiveTH 2)
--- >>> pos ^. _MkPositive
+-- >>> view _MkPositive pos
 -- 2
 --
 -- >>> rmatching _MkPositive 3

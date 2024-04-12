@@ -45,6 +45,8 @@ common common-lang
     NegativeLiterals
     NoStarIsType
     NumericUnderscores
+    OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
     RankNTypes
@@ -153,6 +155,7 @@ test-suite unit
     Test.Data.NonNegative
     Test.Data.NonZero
     Test.Data.Positive
+    Test.Prelude
     Test.TestBounds
     Utils
 
@@ -162,6 +165,7 @@ test-suite unit
     , bounds
     , deepseq
     , hedgehog        >=1.0.2   && <1.5
+    , optics-core
     , smart-math
     , tasty           >=1.1.0.3 && <1.6
     , tasty-hedgehog  >=1.0.0.2 && <1.5
@@ -169,7 +173,7 @@ test-suite unit
     , text-display
 
   hs-source-dirs:   test/unit
-  ghc-options:      -threaded -with-rtsopts=-N
+  ghc-options:      -threaded -with-rtsopts=-N -Wno-missing-import-lists
   default-language: Haskell2010
 
 benchmark benchmarks

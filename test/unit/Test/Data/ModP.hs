@@ -20,9 +20,8 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Data.ModP qualified as ModP
 import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP), reallyUnsafeModP)
-import Test.Tasty (TestTree)
+import Test.Prelude
 import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
@@ -44,6 +43,7 @@ props =
       word8Props,
       word16Props,
       naturalProps,
+      elimProps,
       showSpecs,
       displaySpecs
     ]
@@ -572,6 +572,19 @@ anyNat = reallyUnsafeModP <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
 
 nonneg :: forall a. (Integral a, TestBounds a) => Gen a
 nonneg = HG.integral $ HR.exponentialFrom 1 1 maxVal
+
+elimProps :: TestTree
+elimProps =
+  Utils.testPropertyCompat desc "elimProps" $
+    H.property $ do
+      mp@(MkModP n) <- H.forAll (anyNat @350 @Int)
+
+      n === ModP.unModP mp
+      n === mp.unModP
+      n === view #unModP mp
+      n === view ModP._MkModP mp
+  where
+    desc = "elim (MkModP x) === x"
 
 showSpecs :: TestTree
 showSpecs = HUnit.testCase "Shows ModP" $ do

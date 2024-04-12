@@ -37,6 +37,7 @@ import GHC.Generics (Generic)
 import GHC.Natural (Natural)
 import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as R
+import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
@@ -131,12 +132,32 @@ data Fraction a = UnsafeFraction !a !a
     )
 
 -- | @since 0.1
-instance (k ~ A_Lens, a ~ n, b ~ n) => LabelOptic "numerator" k (Fraction n) (Fraction n) a b where
+instance HasField "numerator" (Fraction n) n where
+  getField (UnsafeFraction n _) = n
+
+-- | @since 0.1
+instance HasField "denominator" (Fraction n) n where
+  getField (UnsafeFraction _ d) = d
+
+-- | @since 0.1
+instance
+  ( k ~ A_Lens,
+    a ~ n,
+    b ~ n
+  ) =>
+  LabelOptic "numerator" k (Fraction n) (Fraction n) a b
+  where
   labelOptic = lens numerator (\(UnsafeFraction _ d) n' -> UnsafeFraction n' d)
   {-# INLINE labelOptic #-}
 
 -- | @since 0.1
-instance (k ~ A_Getter, a ~ n, b ~ n) => LabelOptic "denominator" k (Fraction n) (Fraction n) a b where
+instance
+  ( k ~ A_Getter,
+    a ~ n,
+    b ~ n
+  ) =>
+  LabelOptic "denominator" k (Fraction n) (Fraction n) a b
+  where
   labelOptic = to denominator
   {-# INLINE labelOptic #-}
 
