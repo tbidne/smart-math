@@ -16,7 +16,6 @@ module Utils
 
     -- * Misc
     assertPureErrorCall,
-    testPropertyCompat,
   )
 where
 
@@ -29,11 +28,7 @@ import Control.Exception
   )
 import Data.List qualified as L
 import Equality (Equality)
-import Hedgehog (Gen, Property, PropertyName, (===))
-import Hedgehog qualified as H
-import Test.Tasty (TestName, TestTree)
-import Test.Tasty.HUnit qualified as HUnit
-import Test.Tasty.Hedgehog qualified as TH
+import Test.Prelude
 
 binaryEq ::
   (Show a) =>
@@ -46,9 +41,9 @@ binaryEq ::
   TestTree
 binaryEq expectedFn actualFn gen equalityCons desc propName =
   testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
-      y <- H.forAll gen
+    property $ do
+      x <- forAll gen
+      y <- forAll gen
       let actual = actualFn x y
           expected = expectedFn x y
       equalityCons expected === equalityCons actual
@@ -56,18 +51,18 @@ binaryEq expectedFn actualFn gen equalityCons desc propName =
 associativity :: (Eq a, Show a) => (a -> a -> a) -> Gen a -> TestName -> PropertyName -> TestTree
 associativity f gen desc propName =
   testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
-      y <- H.forAll gen
-      z <- H.forAll gen
+    property $ do
+      x <- forAll gen
+      y <- forAll gen
+      z <- forAll gen
       let lhsPreSum = y `f` z
           lhs = x `f` lhsPreSum
           rhsPreSum = x `f` y
           rhs = rhsPreSum `f` z
-      H.annotateShow lhsPreSum
-      H.annotateShow lhs
-      H.annotateShow rhsPreSum
-      H.annotateShow rhs
+      annotateShow lhsPreSum
+      annotateShow lhs
+      annotateShow rhsPreSum
+      annotateShow rhs
       -- x `f` (y `f` z) === (x `f` y) `f` z,
       -- but with more granular logging
       lhs === rhs
@@ -75,8 +70,8 @@ associativity f gen desc propName =
 identity :: (Show a) => (a -> a -> a) -> a -> Gen a -> (a -> Equality eq a) -> TestName -> PropertyName -> TestTree
 identity f ident gen eqCons desc propName =
   testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
+    property $ do
+      x <- forAll gen
       eqCons (f x ident) === eqCons (f ident x)
 
 (==>) :: Bool -> Bool -> Bool
@@ -116,12 +111,5 @@ assertPureException expected x = do
                 displayException ex,
                 "'."
               ]
-      HUnit.assertBool msg $ expected `L.isPrefixOf` displayException ex
-    Right r -> HUnit.assertFailure $ "Expected exception, received: " ++ show r
-
-testPropertyCompat :: TestName -> PropertyName -> Property -> TestTree
-#if MIN_VERSION_tasty_hedgehog(1, 2, 0)
-testPropertyCompat = TH.testPropertyNamed
-#else
-testPropertyCompat tn _ = TH.testProperty tn
-#endif
+      assertBool msg $ expected `L.isPrefixOf` displayException ex
+    Right r -> assertFailure $ "Expected exception, received: " ++ show r

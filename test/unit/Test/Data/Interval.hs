@@ -7,7 +7,6 @@
 module Test.Data.Interval (tests) where
 
 import Data.Text.Display qualified as D
-import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Data.Interval qualified as Interval
@@ -16,13 +15,11 @@ import Numeric.Data.Interval.Internal
     IntervalBound (Closed, None, Open),
   )
 import Test.Prelude
-import Test.Tasty qualified as T
-import Test.Tasty.HUnit qualified as HUnit
 import Utils qualified
 
 tests :: TestTree
 tests =
-  T.testGroup
+  testGroup
     "Numeric.Data.Interval"
     [ props,
       specs
@@ -30,7 +27,7 @@ tests =
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Properties"
     [ mkIntervalSucceedsUnbounded,
       mkIntervalSucceedsOpenLowerBounded,
@@ -45,12 +42,12 @@ props =
 
 mkIntervalSucceedsUnbounded :: TestTree
 mkIntervalSucceedsUnbounded =
-  Utils.testPropertyCompat desc "mkIntervalSucceedsUnbounded" $
-    H.property $ do
-      x <- H.forAll genUnbounded
+  testPropertyCompat desc "mkIntervalSucceedsUnbounded" $
+    property $ do
+      x <- forAll genUnbounded
 
       let i = Interval.mkInterval @None @None x
-      H.annotateShow i
+      annotateShow i
 
       Just x === fmap Interval.unInterval i
   where
@@ -58,12 +55,12 @@ mkIntervalSucceedsUnbounded =
 
 mkIntervalSucceedsOpenLowerBounded :: TestTree
 mkIntervalSucceedsOpenLowerBounded =
-  Utils.testPropertyCompat desc "mkIntervalSucceedsOpenLowerBounded" $
-    H.property $ do
-      x <- H.forAll (genWithOpenLowerBound 5)
+  testPropertyCompat desc "mkIntervalSucceedsOpenLowerBounded" $
+    property $ do
+      x <- forAll (genWithOpenLowerBound 5)
 
       let i = Interval.mkInterval @(Open 5) @None x
-      H.annotateShow i
+      annotateShow i
 
       Just x === fmap Interval.unInterval i
   where
@@ -71,12 +68,12 @@ mkIntervalSucceedsOpenLowerBounded =
 
 mkIntervalFailsOpenLowerBounded :: TestTree
 mkIntervalFailsOpenLowerBounded =
-  Utils.testPropertyCompat desc "mkIntervalFailsOpenLowerBounded" $
-    H.property $ do
-      x <- H.forAll (genWithClosedUpperBound 20)
+  testPropertyCompat desc "mkIntervalFailsOpenLowerBounded" $
+    property $ do
+      x <- forAll (genWithClosedUpperBound 20)
 
       let i = Interval.mkInterval @(Open 20) @None x
-      H.annotateShow i
+      annotateShow i
 
       Nothing === fmap Interval.unInterval i
   where
@@ -84,12 +81,12 @@ mkIntervalFailsOpenLowerBounded =
 
 mkIntervalSucceedsClosedLowerBounded :: TestTree
 mkIntervalSucceedsClosedLowerBounded =
-  Utils.testPropertyCompat desc "mkIntervalSucceedsClosedLowerBounded" $
-    H.property $ do
-      x <- H.forAll (genWithClosedLowerBound 5)
+  testPropertyCompat desc "mkIntervalSucceedsClosedLowerBounded" $
+    property $ do
+      x <- forAll (genWithClosedLowerBound 5)
 
       let i = Interval.mkInterval @(Closed 5) @None x
-      H.annotateShow i
+      annotateShow i
 
       Just x === fmap Interval.unInterval i
   where
@@ -97,12 +94,12 @@ mkIntervalSucceedsClosedLowerBounded =
 
 mkIntervalFailsClosedLowerBounded :: TestTree
 mkIntervalFailsClosedLowerBounded =
-  Utils.testPropertyCompat desc "mkIntervalFailsClosedLowerBounded" $
-    H.property $ do
-      x <- H.forAll (genWithOpenUpperBound 20)
+  testPropertyCompat desc "mkIntervalFailsClosedLowerBounded" $
+    property $ do
+      x <- forAll (genWithOpenUpperBound 20)
 
       let i = Interval.mkInterval @(Closed 20) @None x
-      H.annotateShow i
+      annotateShow i
 
       Nothing === fmap Interval.unInterval i
   where
@@ -110,12 +107,12 @@ mkIntervalFailsClosedLowerBounded =
 
 mkIntervalSucceedsOpenUpperBounded :: TestTree
 mkIntervalSucceedsOpenUpperBounded =
-  Utils.testPropertyCompat desc "mkIntervalSucceedsOpenUpperBounded" $
-    H.property $ do
-      x <- H.forAll (genWithOpenUpperBound 50)
+  testPropertyCompat desc "mkIntervalSucceedsOpenUpperBounded" $
+    property $ do
+      x <- forAll (genWithOpenUpperBound 50)
 
       let i = Interval.mkInterval @None @(Open 50) x
-      H.annotateShow i
+      annotateShow i
 
       Just x === fmap Interval.unInterval i
   where
@@ -123,12 +120,12 @@ mkIntervalSucceedsOpenUpperBounded =
 
 mkIntervalFailsOpenUpperBounded :: TestTree
 mkIntervalFailsOpenUpperBounded =
-  Utils.testPropertyCompat desc "mkIntervalFailsOpenUpperBounded" $
-    H.property $ do
-      x <- H.forAll (genWithClosedLowerBound 50)
+  testPropertyCompat desc "mkIntervalFailsOpenUpperBounded" $
+    property $ do
+      x <- forAll (genWithClosedLowerBound 50)
 
       let i = Interval.mkInterval @None @(Open 50) x
-      H.annotateShow i
+      annotateShow i
 
       Nothing === fmap Interval.unInterval i
   where
@@ -136,12 +133,12 @@ mkIntervalFailsOpenUpperBounded =
 
 mkIntervalSucceedsClosedUpperBounded :: TestTree
 mkIntervalSucceedsClosedUpperBounded =
-  Utils.testPropertyCompat desc "mkIntervalSucceedsClosedUpperBounded" $
-    H.property $ do
-      x <- H.forAll (genWithClosedUpperBound 50)
+  testPropertyCompat desc "mkIntervalSucceedsClosedUpperBounded" $
+    property $ do
+      x <- forAll (genWithClosedUpperBound 50)
 
       let i = Interval.mkInterval @None @(Closed 50) x
-      H.annotateShow i
+      annotateShow i
 
       Just x === fmap Interval.unInterval i
   where
@@ -149,12 +146,12 @@ mkIntervalSucceedsClosedUpperBounded =
 
 mkIntervalFailsClosedUpperBounded :: TestTree
 mkIntervalFailsClosedUpperBounded =
-  Utils.testPropertyCompat desc "mkIntervalFailsClosedUpperBounded" $
-    H.property $ do
-      x <- H.forAll (genWithOpenLowerBound 50)
+  testPropertyCompat desc "mkIntervalFailsClosedUpperBounded" $
+    property $ do
+      x <- forAll (genWithOpenLowerBound 50)
 
       let i = Interval.mkInterval @None @(Closed 50) x
-      H.annotateShow i
+      annotateShow i
 
       Nothing === fmap Interval.unInterval i
   where
@@ -162,9 +159,9 @@ mkIntervalFailsClosedUpperBounded =
 
 elimProps :: TestTree
 elimProps =
-  Utils.testPropertyCompat desc "elimProps" $
-    H.property $ do
-      b@(UnsafeInterval x) <- H.forAll genUnboundedInterval
+  testPropertyCompat desc "elimProps" $
+    property $ do
+      b@(UnsafeInterval x) <- forAll genUnboundedInterval
 
       x === Interval.unInterval b
       x === b.unInterval
@@ -175,7 +172,7 @@ elimProps =
 
 specs :: TestTree
 specs =
-  T.testGroup
+  testGroup
     "Specs"
     [ lowerBoundedOpenTests,
       lowerBoundedClosedTests,
@@ -187,15 +184,15 @@ specs =
     ]
   where
     lowerBoundedOpenTests =
-      T.testGroup
+      testGroup
         "Open lower bound"
-        [ HUnit.testCase "6 passes (5, \8734)" $ do
+        [ testCase "6 passes (5, \8734)" $ do
             let expected :: Interval (Open 5) None Int
                 expected = $$(Interval.mkIntervalTH 6)
             Just expected @=? mkLowerBoundedOpen 6,
-          HUnit.testCase "5 fails (5, \8734)" $ do
+          testCase "5 fails (5, \8734)" $ do
             Nothing @=? mkLowerBoundedOpen 5,
-          HUnit.testCase "4 fails (5, \8734)" $ do
+          testCase "4 fails (5, \8734)" $ do
             Nothing @=? mkLowerBoundedOpen 4
         ]
 
@@ -203,17 +200,17 @@ specs =
     mkLowerBoundedOpen = Interval.mkInterval
 
     lowerBoundedClosedTests =
-      T.testGroup
+      testGroup
         "Closed lower bound"
-        [ HUnit.testCase "6 passes [5, \8734)" $ do
+        [ testCase "6 passes [5, \8734)" $ do
             let expected :: Interval (Closed 5) None Int
                 expected = $$(Interval.mkIntervalTH 6)
             Just expected @=? mkLowerBoundedClosed 6,
-          HUnit.testCase "5 passes [5, \8734)" $ do
+          testCase "5 passes [5, \8734)" $ do
             let expected :: Interval (Closed 5) None Int
                 expected = $$(Interval.mkIntervalTH 5)
             Just expected @=? mkLowerBoundedClosed 5,
-          HUnit.testCase "4 fails [5, \8734)" $ do
+          testCase "4 fails [5, \8734)" $ do
             Nothing @=? mkLowerBoundedClosed 4
         ]
 
@@ -221,15 +218,15 @@ specs =
     mkLowerBoundedClosed = Interval.mkInterval
 
     upperBoundedOpenTests =
-      T.testGroup
+      testGroup
         "Open upper bound"
-        [ HUnit.testCase "6 passes (-\8734, 50)" $ do
+        [ testCase "6 passes (-\8734, 50)" $ do
             let expected :: Interval None (Open 50) Int
                 expected = $$(Interval.mkIntervalTH 6)
             Just expected @=? mkUpperBoundedOpen 6,
-          HUnit.testCase "50 fails (-\8734, 50)" $ do
+          testCase "50 fails (-\8734, 50)" $ do
             Nothing @=? mkUpperBoundedOpen 50,
-          HUnit.testCase "55 fails (-\8734, 50)" $ do
+          testCase "55 fails (-\8734, 50)" $ do
             Nothing @=? mkUpperBoundedOpen 55
         ]
 
@@ -237,17 +234,17 @@ specs =
     mkUpperBoundedOpen = Interval.mkInterval
 
     upperBoundedClosedTests =
-      T.testGroup
+      testGroup
         "Open upper bound"
-        [ HUnit.testCase "6 passes (-\8734, 50]" $ do
+        [ testCase "6 passes (-\8734, 50]" $ do
             let expected :: Interval None (Closed 50) Int
                 expected = $$(Interval.mkIntervalTH 6)
             Just expected @=? mkUpperBoundedClosed 6,
-          HUnit.testCase "50 passes (-\8734, 50]" $ do
+          testCase "50 passes (-\8734, 50]" $ do
             let expected :: Interval None (Closed 50) Int
                 expected = $$(Interval.mkIntervalTH 50)
             Just expected @=? mkUpperBoundedClosed 50,
-          HUnit.testCase "55 fails (-\8734, 50]" $ do
+          testCase "55 fails (-\8734, 50]" $ do
             Nothing @=? mkUpperBoundedClosed 55
         ]
 
@@ -273,7 +270,7 @@ genWithClosedUpperBound :: Int -> Gen Int
 genWithClosedUpperBound = HG.integral . HR.exponential 0
 
 testUnsafe :: TestTree
-testUnsafe = HUnit.testCase "Test unsafeInterval" $ do
+testUnsafe = testCase "Test unsafeInterval" $ do
   UnsafeInterval 5 @=? Interval.unsafeInterval @(Open 1) @None @Integer 5
 
   Utils.assertPureErrorCall expectedEx (Interval.unsafeInterval @(Open 1) @None @Integer 1)
@@ -281,13 +278,13 @@ testUnsafe = HUnit.testCase "Test unsafeInterval" $ do
     expectedEx = "Numeric.Data.Interval.unsafeInterval: Wanted value in (1, ∞), received: 1"
 
 showSpecs :: TestTree
-showSpecs = HUnit.testCase "Shows intervals" $ do
+showSpecs = testCase "Shows intervals" $ do
   "UnsafeInterval None None 2" @=? show (Interval.unsafeInterval @None @None @Integer 2)
   "UnsafeInterval (Open 1) (Closed 10) 7" @=? show (Interval.unsafeInterval @(Open 1) @(Closed 10) @Integer 7)
   "UnsafeInterval (Closed 1) (Open 10) 7" @=? show (Interval.unsafeInterval @(Closed 1) @(Open 10) @Integer 7)
 
 displaySpecs :: TestTree
-displaySpecs = HUnit.testCase "Displays intervals" $ do
+displaySpecs = testCase "Displays intervals" $ do
   "2 \8712 (-\8734, \8734)" @=? D.display (Interval.unsafeInterval @None @None @Integer 2)
   "7 \8712 (1, 10]" @=? D.display (Interval.unsafeInterval @(Open 1) @(Closed 10) @Integer 7)
   "7 \8712 [1, 10)" @=? D.display (Interval.unsafeInterval @(Closed 1) @(Open 10) @Integer 7)

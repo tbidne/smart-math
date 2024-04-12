@@ -2,17 +2,14 @@ module Test.Algebra.Additive.AGroup (props) where
 
 import Equality (Equality (MkEqExact))
 import Gens qualified
-import Hedgehog (Gen, PropertyName, (===))
-import Hedgehog qualified as H
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
-import Test.Tasty (TestName, TestTree)
-import Test.Tasty qualified as T
+import Test.Prelude
 import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Additive Group"
     [ subProps,
       subIdentProps
@@ -20,7 +17,7 @@ props =
 
 subProps :: TestTree
 subProps =
-  T.testGroup
+  testGroup
     "(.-.) === (-)"
     [ fractionSub
     ]
@@ -30,7 +27,7 @@ fractionSub = agroupSubEq Gens.fraction MkEqExact "Fraction" "fractionSub"
 
 subIdentProps :: TestTree
 subIdentProps =
-  T.testGroup
+  testGroup
     "Subtraction is the inverse: zero == x .-. x"
     [ fractionSubIdent,
       modNSubIdent,
@@ -68,7 +65,7 @@ agroupSubIdent ::
   PropertyName ->
   TestTree
 agroupSubIdent gen desc propName =
-  Utils.testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
+  testPropertyCompat desc propName $
+    property $ do
+      x <- forAll gen
       zero === x .-. x

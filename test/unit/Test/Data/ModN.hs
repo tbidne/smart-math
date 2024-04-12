@@ -3,15 +3,7 @@
 module Test.Data.ModN (props) where
 
 import Data.Bounds (AnyUpperBounded)
-import Data.Int (Int16, Int32, Int64, Int8)
-import Data.Proxy (Proxy (Proxy))
 import Data.Text.Display qualified as D
-import Data.Typeable (Typeable)
-import Data.Word (Word16, Word32, Word64, Word8)
-import GHC.Natural (Natural)
-import GHC.TypeNats (KnownNat, natVal)
-import Hedgehog (Gen, Property, (===))
-import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
@@ -20,16 +12,11 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Data.ModN qualified as ModN
 import Numeric.Data.ModN.Internal (ModN (MkModN))
 import Test.Prelude
-import Test.Tasty (TestTree)
-import Test.Tasty qualified as T
-import Test.Tasty.HUnit ((@=?))
-import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal))
-import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Numeric.Data.ModN"
     [ int8Props,
       int16Props,
@@ -50,7 +37,7 @@ props =
 
 int8Props :: TestTree
 int8Props =
-  T.testGroup
+  testGroup
     "Int8"
     [ mkModNInt8,
       mkModNFailureInt8,
@@ -62,32 +49,32 @@ int8Props =
 
 mkModNInt8 :: TestTree
 mkModNInt8 =
-  Utils.testPropertyCompat "mkModN x" "mkModNInt8" $
+  testPropertyCompat "mkModN x" "mkModNInt8" $
     mkModN' @127 @Int8
 
 mkModNFailureInt8 :: TestTree
 mkModNFailureInt8 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureInt8" $
+  testPropertyCompat "mkModN fails" "mkModNFailureInt8" $
     mkModNFailure @128 @Int8 "Int8" "127" "128"
 
 addTotalInt8 :: TestTree
 addTotalInt8 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt8" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt8" $
     addTotal' @127 @Int8
 
 subTotalInt8 :: TestTree
 subTotalInt8 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt8" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt8" $
     subTotal' @127 @Int8
 
 multTotalInt8 :: TestTree
 multTotalInt8 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt8" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt8" $
     multTotal' @127 @Int8
 
 int16Props :: TestTree
 int16Props =
-  T.testGroup
+  testGroup
     "Int16"
     [ mkModNInt16,
       mkModNFailureInt16,
@@ -99,32 +86,32 @@ int16Props =
 
 mkModNInt16 :: TestTree
 mkModNInt16 =
-  Utils.testPropertyCompat "mkModN x" "mkModNInt16" $
+  testPropertyCompat "mkModN x" "mkModNInt16" $
     mkModN' @32767 @Int16
 
 mkModNFailureInt16 :: TestTree
 mkModNFailureInt16 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureInt16" $
+  testPropertyCompat "mkModN fails" "mkModNFailureInt16" $
     mkModNFailure @32768 @Int16 "Int16" "32767" "32768"
 
 addTotalInt16 :: TestTree
 addTotalInt16 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt16" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt16" $
     addTotal' @32767 @Int16
 
 subTotalInt16 :: TestTree
 subTotalInt16 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt16" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt16" $
     subTotal' @32767 @Int16
 
 multTotalInt16 :: TestTree
 multTotalInt16 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt16" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt16" $
     multTotal' @32767 @Int16
 
 int32Props :: TestTree
 int32Props =
-  T.testGroup
+  testGroup
     "Int32"
     [ mkModNInt32,
       mkModNFailureInt32,
@@ -136,32 +123,32 @@ int32Props =
 
 mkModNInt32 :: TestTree
 mkModNInt32 =
-  Utils.testPropertyCompat "mkModN x" "mkModNInt32" $
+  testPropertyCompat "mkModN x" "mkModNInt32" $
     mkModN' @2147483647 @Int32
 
 mkModNFailureInt32 :: TestTree
 mkModNFailureInt32 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureInt32" $
+  testPropertyCompat "mkModN fails" "mkModNFailureInt32" $
     mkModNFailure @2147483648 @Int32 "Int32" "2147483647" "2147483648"
 
 addTotalInt32 :: TestTree
 addTotalInt32 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt32" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt32" $
     addTotal' @2147483647 @Int32
 
 subTotalInt32 :: TestTree
 subTotalInt32 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt32" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt32" $
     subTotal' @2147483647 @Int32
 
 multTotalInt32 :: TestTree
 multTotalInt32 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt32" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt32" $
     multTotal' @2147483647 @Int32
 
 int64Props :: TestTree
 int64Props =
-  T.testGroup
+  testGroup
     "Int64"
     [ mkModNInt64,
       mkModNFailureInt64,
@@ -173,32 +160,32 @@ int64Props =
 
 mkModNInt64 :: TestTree
 mkModNInt64 =
-  Utils.testPropertyCompat "mkModN x" "mkModNInt64" $
+  testPropertyCompat "mkModN x" "mkModNInt64" $
     mkModN' @9223372036854775807 @Int64
 
 mkModNFailureInt64 :: TestTree
 mkModNFailureInt64 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureInt64" $
+  testPropertyCompat "mkModN fails" "mkModNFailureInt64" $
     mkModNFailure @9223372036854775808 @Int64 "Int64" "9223372036854775807" "9223372036854775808"
 
 addTotalInt64 :: TestTree
 addTotalInt64 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt64" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt64" $
     addTotal' @9223372036854775807 @Int64
 
 subTotalInt64 :: TestTree
 subTotalInt64 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt64" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt64" $
     subTotal' @9223372036854775807 @Int64
 
 multTotalInt64 :: TestTree
 multTotalInt64 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt64" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt64" $
     multTotal' @9223372036854775807 @Int64
 
 intProps :: TestTree
 intProps =
-  T.testGroup
+  testGroup
     "Int"
     [ mkModNInt,
       mkModNFailureInt,
@@ -210,32 +197,32 @@ intProps =
 
 mkModNInt :: TestTree
 mkModNInt =
-  Utils.testPropertyCompat "mkModN x" "mkModNInt" $
+  testPropertyCompat "mkModN x" "mkModNInt" $
     mkModN' @12 @Int
 
 mkModNFailureInt :: TestTree
 mkModNFailureInt =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureInt" $
+  testPropertyCompat "mkModN fails" "mkModNFailureInt" $
     mkModNFailure @9223372036854775808 @Int "Int" "9223372036854775807" "9223372036854775808"
 
 addTotalInt :: TestTree
 addTotalInt =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt" $
     addTotal' @65536 @Int
 
 subTotalInt :: TestTree
 subTotalInt =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt" $
     subTotal' @65536 @Int
 
 multTotalInt :: TestTree
 multTotalInt =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt" $
     multTotal' @65536 @Int
 
 integerProps :: TestTree
 integerProps =
-  T.testGroup
+  testGroup
     "Integer"
     [ mkModNInteger,
       addTotalInteger,
@@ -246,27 +233,27 @@ integerProps =
 
 mkModNInteger :: TestTree
 mkModNInteger =
-  Utils.testPropertyCompat "mkModN x" "mkModNInteger" $
+  testPropertyCompat "mkModN x" "mkModNInteger" $
     mkModN' @12 @Integer
 
 addTotalInteger :: TestTree
 addTotalInteger =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInteger" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInteger" $
     addTotal' @65536 @Integer
 
 subTotalInteger :: TestTree
 subTotalInteger =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInteger" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInteger" $
     subTotal' @65536 @Integer
 
 multTotalInteger :: TestTree
 multTotalInteger =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInteger" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInteger" $
     multTotal' @65536 @Integer
 
 word8Props :: TestTree
 word8Props =
-  T.testGroup
+  testGroup
     "Word8"
     [ mkModNWord8,
       mkModNFailureWord8,
@@ -278,32 +265,32 @@ word8Props =
 
 mkModNWord8 :: TestTree
 mkModNWord8 =
-  Utils.testPropertyCompat "mkModN x" "mkModNWord8" $
+  testPropertyCompat "mkModN x" "mkModNWord8" $
     mkModN' @255 @Word8
 
 mkModNFailureWord8 :: TestTree
 mkModNFailureWord8 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureWord8" $
+  testPropertyCompat "mkModN fails" "mkModNFailureWord8" $
     mkModNFailure @256 @Word8 "Word8" "255" "256"
 
 addTotalWord8 :: TestTree
 addTotalWord8 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord8" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord8" $
     addTotal' @255 @Word8
 
 subTotalWord8 :: TestTree
 subTotalWord8 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord8" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord8" $
     subTotal' @255 @Word8
 
 multTotalWord8 :: TestTree
 multTotalWord8 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord8" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord8" $
     multTotal' @255 @Word8
 
 word16Props :: TestTree
 word16Props =
-  T.testGroup
+  testGroup
     "Word16"
     [ mkModNWord16,
       mkModNFailureWord16,
@@ -315,32 +302,32 @@ word16Props =
 
 mkModNWord16 :: TestTree
 mkModNWord16 =
-  Utils.testPropertyCompat "mkModN x" "mkModNWord16" $
+  testPropertyCompat "mkModN x" "mkModNWord16" $
     mkModN' @65535 @Word16
 
 mkModNFailureWord16 :: TestTree
 mkModNFailureWord16 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureWord16" $
+  testPropertyCompat "mkModN fails" "mkModNFailureWord16" $
     mkModNFailure @65536 @Word16 "Word16" "65535" "65536"
 
 addTotalWord16 :: TestTree
 addTotalWord16 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord16" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord16" $
     addTotal' @65535 @Word16
 
 subTotalWord16 :: TestTree
 subTotalWord16 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord16" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord16" $
     subTotal' @65535 @Word16
 
 multTotalWord16 :: TestTree
 multTotalWord16 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord16" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord16" $
     multTotal' @65535 @Word16
 
 word32Props :: TestTree
 word32Props =
-  T.testGroup
+  testGroup
     "Word32"
     [ mkModNWord32,
       mkModNFailureWord32,
@@ -352,32 +339,32 @@ word32Props =
 
 mkModNWord32 :: TestTree
 mkModNWord32 =
-  Utils.testPropertyCompat "mkModN x" "mkModNWord32" $
+  testPropertyCompat "mkModN x" "mkModNWord32" $
     mkModN' @4294967295 @Word32
 
 mkModNFailureWord32 :: TestTree
 mkModNFailureWord32 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureWord32" $
+  testPropertyCompat "mkModN fails" "mkModNFailureWord32" $
     mkModNFailure @4294967296 @Word32 "Word32" "4294967295" "4294967296"
 
 addTotalWord32 :: TestTree
 addTotalWord32 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord32" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord32" $
     addTotal' @4294967295 @Word32
 
 subTotalWord32 :: TestTree
 subTotalWord32 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord32" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord32" $
     subTotal' @4294967295 @Word32
 
 multTotalWord32 :: TestTree
 multTotalWord32 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord32" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord32" $
     multTotal' @4294967295 @Word32
 
 word64Props :: TestTree
 word64Props =
-  T.testGroup
+  testGroup
     "Word64"
     [ mkModNWord64,
       mkModNFailureWord64,
@@ -389,32 +376,32 @@ word64Props =
 
 mkModNWord64 :: TestTree
 mkModNWord64 =
-  Utils.testPropertyCompat "mkModN x" "mkModNWord64" $
+  testPropertyCompat "mkModN x" "mkModNWord64" $
     mkModN' @18446744073709551615 @Word64
 
 mkModNFailureWord64 :: TestTree
 mkModNFailureWord64 =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureWord64" $
+  testPropertyCompat "mkModN fails" "mkModNFailureWord64" $
     mkModNFailure @18446744073709551616 @Word64 "Word64" "18446744073709551615" "18446744073709551616"
 
 addTotalWord64 :: TestTree
 addTotalWord64 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord64" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord64" $
     addTotal' @18446744073709551615 @Word64
 
 subTotalWord64 :: TestTree
 subTotalWord64 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord64" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord64" $
     subTotal' @18446744073709551615 @Word64
 
 multTotalWord64 :: TestTree
 multTotalWord64 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord64" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord64" $
     multTotal' @18446744073709551615 @Word64
 
 wordProps :: TestTree
 wordProps =
-  T.testGroup
+  testGroup
     "Word"
     [ mkModNWord,
       mkModNFailureWord,
@@ -426,32 +413,32 @@ wordProps =
 
 mkModNWord :: TestTree
 mkModNWord =
-  Utils.testPropertyCompat "mkModN x" "mkModNWord" $
+  testPropertyCompat "mkModN x" "mkModNWord" $
     mkModN' @12 @Word
 
 mkModNFailureWord :: TestTree
 mkModNFailureWord =
-  Utils.testPropertyCompat "mkModN fails" "mkModNFailureWord" $
+  testPropertyCompat "mkModN fails" "mkModNFailureWord" $
     mkModNFailure @18446744073709551616 @Word "Word" "18446744073709551615" "18446744073709551616"
 
 addTotalWord :: TestTree
 addTotalWord =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord" $
     addTotal' @65536 @Word
 
 subTotalWord :: TestTree
 subTotalWord =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord" $
     subTotal' @65536 @Word
 
 multTotalWord :: TestTree
 multTotalWord =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord" $
     multTotal' @65536 @Word
 
 naturalProps :: TestTree
 naturalProps =
-  T.testGroup
+  testGroup
     "Natural"
     [ mkModNNatural,
       addTotalNatural,
@@ -462,22 +449,22 @@ naturalProps =
 
 mkModNNatural :: TestTree
 mkModNNatural =
-  Utils.testPropertyCompat "mkModN x" "mkModNNat" $
+  testPropertyCompat "mkModN x" "mkModNNat" $
     mkModN' @12 @Natural
 
 addTotalNatural :: TestTree
 addTotalNatural =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalNatural" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalNatural" $
     addTotal' @65536 @Natural
 
 subTotalNatural :: TestTree
 subTotalNatural =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalNatural" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalNatural" $
     subTotal' @65536 @Natural
 
 multTotalNatural :: TestTree
 multTotalNatural =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalNatural" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalNatural" $
     multTotal' @65536 @Natural
 
 mkModN' ::
@@ -490,11 +477,11 @@ mkModN' ::
     Typeable a
   ) =>
   Property
-mkModN' = H.property $ do
-  x <- H.forAll (nonneg @a)
+mkModN' = property $ do
+  x <- forAll (nonneg @a)
   let mx@(MkModN x') = ModN.unsafeModN @n x
 
-  H.annotateShow mx
+  annotateShow mx
 
   x `mod` n' === x'
   where
@@ -513,13 +500,13 @@ mkModNFailure ::
   String ->
   String ->
   Property
-mkModNFailure tyStr maxStr modStr = H.property $ do
-  x <- H.forAll (nonneg @a)
+mkModNFailure tyStr maxStr modStr = property $ do
+  x <- forAll (nonneg @a)
   case ModN.mkModN @n x of
     Left s -> msg === s
     Right y -> do
-      H.annotate ("Expected failure, received: " ++ show y)
-      H.failure
+      annotate ("Expected failure, received: " ++ show y)
+      failure
   where
     msg =
       mconcat
@@ -541,7 +528,7 @@ boundedVals ::
     Typeable a
   ) =>
   TestTree
-boundedVals = HUnit.testCase "Min/max bounds" $ do
+boundedVals = testCase "Min/max bounds" $ do
   0 @=? ModN.unModN (minBound @(ModN n a))
 
   nTerm - 1 @=? ModN.unModN (maxBound @(ModN n a))
@@ -559,16 +546,16 @@ addTotal' ::
     Typeable a
   ) =>
   Property
-addTotal' = H.property $ do
-  mx@(MkModN x) <- H.forAll (anyNat @n @a)
-  my@(MkModN y) <- H.forAll anyNat
+addTotal' = property $ do
+  mx@(MkModN x) <- forAll (anyNat @n @a)
+  my@(MkModN y) <- forAll anyNat
 
   let mz@(MkModN z) = mx .+. my
       z' = (toInteger x + toInteger y) `mod` n'
 
-  H.annotateShow mx
-  H.annotateShow my
-  H.annotateShow mz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
   z' === toInteger z
   where
@@ -585,15 +572,15 @@ subTotal' ::
     Typeable a
   ) =>
   Property
-subTotal' = H.property $ do
-  mx@(MkModN x) <- H.forAll (anyNat @n @a)
-  my@(MkModN y) <- H.forAll anyNat
+subTotal' = property $ do
+  mx@(MkModN x) <- forAll (anyNat @n @a)
+  my@(MkModN y) <- forAll anyNat
   let mz@(MkModN z) = mx .-. my
       z' = (toInteger x - toInteger y) `mod` n'
 
-  H.annotateShow mx
-  H.annotateShow my
-  H.annotateShow mz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
   z' === toInteger z
   where
@@ -610,15 +597,15 @@ multTotal' ::
     Typeable a
   ) =>
   Property
-multTotal' = H.property $ do
-  mx@(MkModN x) <- H.forAll (anyNat @n @a)
-  my@(MkModN y) <- H.forAll anyNat
+multTotal' = property $ do
+  mx@(MkModN x) <- forAll (anyNat @n @a)
+  my@(MkModN y) <- forAll anyNat
   let mz@(MkModN z) = mx .*. my
       z' = (toInteger x * toInteger y) `mod` n'
 
-  H.annotateShow mx
-  H.annotateShow my
-  H.annotateShow mz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
   z' === toInteger z
   where
@@ -640,9 +627,9 @@ anyNat = ModN.unsafeModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
 
 elimProps :: TestTree
 elimProps =
-  Utils.testPropertyCompat desc "elimProps" $
-    H.property $ do
-      mn@(MkModN n) <- H.forAll (anyNat @350 @Int)
+  testPropertyCompat desc "elimProps" $
+    property $ do
+      mn@(MkModN n) <- forAll (anyNat @350 @Int)
 
       n === ModN.unModN mn
       n === mn.unModN
@@ -652,11 +639,11 @@ elimProps =
     desc = "elim (MkModN x) === x"
 
 showSpecs :: TestTree
-showSpecs = HUnit.testCase "Shows ModN" $ do
+showSpecs = testCase "Shows ModN" $ do
   "MkModN 2 (mod 8)" @=? show (ModN.unsafeModN @8 @Integer 2)
   "MkModN 10 (mod 12)" @=? show (ModN.unsafeModN @12 @Integer 22)
 
 displaySpecs :: TestTree
-displaySpecs = HUnit.testCase "Displays ModN" $ do
+displaySpecs = testCase "Displays ModN" $ do
   "2 (mod 8)" @=? D.display (ModN.unsafeModN @8 @Integer 2)
   "10 (mod 12)" @=? D.display (ModN.unsafeModN @12 @Integer 22)

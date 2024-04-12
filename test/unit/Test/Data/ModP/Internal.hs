@@ -1,8 +1,6 @@
 module Test.Data.ModP.Internal (props) where
 
 import Gens qualified
-import Hedgehog (MonadGen, (===))
-import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Data.ModP.Internal.Primality
@@ -14,14 +12,12 @@ import Numeric.Data.ModP.Internal.Primality
     T (T'),
   )
 import Numeric.Data.ModP.Internal.Primality qualified as ModPI
-import Test.Tasty (TestTree)
-import Test.Tasty qualified as T
+import Test.Prelude
 import Test.TestBounds (TestBounds (maxVal))
-import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Numeric.Data.ModP.Internal"
     [ isPrimeFalse,
       isPrimeTrue,
@@ -31,45 +27,45 @@ props =
 
 isPrimeFalse :: TestTree
 isPrimeFalse =
-  Utils.testPropertyCompat "isPrime returns Composite" "isPrimeFalse" $
-    H.property $ do
-      x <- H.forAll composite
+  testPropertyCompat "isPrime returns Composite" "isPrimeFalse" $
+    property $ do
+      x <- forAll composite
       Composite === ModPI.isPrime x
 
 isPrimeTrue :: TestTree
 isPrimeTrue =
-  Utils.testPropertyCompat "isPrime returns ProbablyPrime" "isPrimeTrue" $
-    H.property $ do
-      p <- H.forAll prime
+  testPropertyCompat "isPrime returns ProbablyPrime" "isPrimeTrue" $
+    property $ do
+      p <- forAll prime
       ProbablyPrime === ModPI.isPrime p
 
 findInverse :: TestTree
 findInverse =
-  Utils.testPropertyCompat "x * findInverse x m == 1 (mod m)" "findInverse" $
-    H.property $ do
-      (x, m) <- H.forAll coprime
+  testPropertyCompat "x * findInverse x m == 1 (mod m)" "findInverse" $
+    property $ do
+      (x, m) <- forAll coprime
       let d = ModPI.findInverse x (MkModulus m)
-      H.annotateShow d
+      annotateShow d
       x * d `mod` m === 1
 
 findBezout :: TestTree
 findBezout =
-  Utils.testPropertyCompat "findBezout satisfies ax + by = (a, b)" "findBezout" $
-    H.property $ do
-      x <- H.forAll Gens.integer
-      y <- H.forAll Gens.integer
+  testPropertyCompat "findBezout satisfies ax + by = (a, b)" "findBezout" $
+    property $ do
+      x <- forAll Gens.integer
+      y <- forAll Gens.integer
       let (MkBezout (R' r) (S' s) (T' t)) = ModPI.findBezout x (MkModulus y)
       x * t + y * s === r
       gcd x y === r
 
-coprime :: (MonadGen m) => m (Integer, Integer)
+coprime :: Gen (Integer, Integer)
 coprime = do
   x <- HG.integral $ HR.exponential 1 maxVal
   mult <- HG.integral $ HR.exponential 1 maxVal
   let m = x * mult + 1
   pure (x, m)
 
-composite :: (MonadGen m) => m Integer
+composite :: Gen Integer
 composite = do
   x <- HG.integral $ HR.exponentialFrom 2 2 maxVal
   pure (x + x)
@@ -77,7 +73,7 @@ composite = do
 -- Testing with Int to make sure our we work with bounded integral types.
 -- To make this work, we internally convert to integer and do our modular
 -- arithmetic there.
-prime :: (MonadGen m) => m Integer
+prime :: Gen Integer
 prime = do
   x <- HG.integral $ HR.exponentialFrom 0 0 1000
   let p = primeStream !! x

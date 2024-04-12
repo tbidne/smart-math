@@ -2,17 +2,13 @@ module Test.Algebra.Multiplicative.MGroup (props) where
 
 import Equality (Equality (MkEqExact))
 import Gens qualified
-import Hedgehog (Gen, PropertyName, (===))
-import Hedgehog qualified as H
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
-import Test.Tasty (TestName, TestTree)
-import Test.Tasty qualified as T
-import Utils qualified
+import Test.Prelude
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Multiplicative Group"
     [ divProps,
       divIdentProps
@@ -20,7 +16,7 @@ props =
 
 divProps :: TestTree
 divProps =
-  T.testGroup
+  testGroup
     "(.%.) === div / (/)"
     [ fractionDiv
     ]
@@ -30,7 +26,7 @@ fractionDiv = mgroupDivEq (/) Gens.fraction Gens.fractionNonZero MkEqExact "Frac
 
 divIdentProps :: TestTree
 divIdentProps =
-  T.testGroup
+  testGroup
     "Division is the inverse: one == x .%. x"
     [ fractionDivIdent,
       modPDivIdent,
@@ -44,9 +40,9 @@ fractionDivIdent = agroupDivIdent Gens.fractionNonZero MkEqExact "Fraction" "fra
 
 modPDivIdent :: TestTree
 modPDivIdent =
-  Utils.testPropertyCompat "ModP" "modPDivIdent" $
-    H.property $ do
-      x <- H.forAll Gens.modPNonZero
+  testPropertyCompat "ModP" "modPDivIdent" $
+    property $ do
+      x <- forAll Gens.modPNonZero
       one === x .%. x
 
 nonNegativeDivIdent :: TestTree
@@ -68,10 +64,10 @@ mgroupDivEq ::
   PropertyName ->
   TestTree
 mgroupDivEq expectedFn gen genNZ eqCons desc propName =
-  Utils.testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
-      d <- H.forAll genNZ
+  testPropertyCompat desc propName $
+    property $ do
+      x <- forAll gen
+      d <- forAll genNZ
       let actual = x .%. d
           expected = expectedFn x d
       eqCons expected === eqCons actual
@@ -84,7 +80,7 @@ agroupDivIdent ::
   PropertyName ->
   TestTree
 agroupDivIdent gen eqCons desc propName =
-  Utils.testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
+  testPropertyCompat desc propName $
+    property $ do
+      x <- forAll gen
       eqCons one === eqCons (x .%. x)

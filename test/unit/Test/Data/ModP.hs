@@ -3,15 +3,7 @@
 module Test.Data.ModP (props) where
 
 import Data.Bounds (AnyUpperBounded)
-import Data.Int (Int16, Int8)
-import Data.Proxy (Proxy (Proxy))
 import Data.Text.Display qualified as D
-import Data.Typeable (Typeable)
-import Data.Word (Word16, Word8)
-import GHC.Natural (Natural)
-import GHC.TypeNats (KnownNat, natVal)
-import Hedgehog (Gen, Property, (===))
-import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
@@ -21,8 +13,6 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Data.ModP qualified as ModP
 import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP), reallyUnsafeModP)
 import Test.Prelude
-import Test.Tasty qualified as T
-import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
 
@@ -34,7 +24,7 @@ import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Numeric.Data.ModP"
     [ testUnsafe,
       int8Props,
@@ -49,7 +39,7 @@ props =
     ]
 
 testUnsafe :: TestTree
-testUnsafe = HUnit.testCase "Test unsafeModP" $ do
+testUnsafe = testCase "Test unsafeModP" $ do
   UnsafeModP 5 @=? ModP.unsafeModP @7 @Integer 5
 
   Utils.assertPureErrorCall expectedEx (ModP.unsafeModP @8 @Integer 5)
@@ -58,7 +48,7 @@ testUnsafe = HUnit.testCase "Test unsafeModP" $ do
 
 int8Props :: TestTree
 int8Props =
-  T.testGroup
+  testGroup
     "Int8"
     [ mkModPInt8,
       mkModPFailLargeInt8,
@@ -73,47 +63,47 @@ int8Props =
 
 mkModPInt8 :: TestTree
 mkModPInt8 =
-  Utils.testPropertyCompat "mkModP x" "mkModNInt8" $
+  testPropertyCompat "mkModP x" "mkModNInt8" $
     mkModP' @127 @Int8
 
 mkModPFailLargeInt8 :: TestTree
 mkModPFailLargeInt8 =
-  Utils.testPropertyCompat "mkModP fails too large" "mkModPFailLargeInt8" $
+  testPropertyCompat "mkModP fails too large" "mkModPFailLargeInt8" $
     mkModPFailSize @131 @Int8 "Int8" "127" "131"
 
 mkModPFailCompositeInt8 :: TestTree
 mkModPFailCompositeInt8 =
-  Utils.testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeInt8" $
+  testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeInt8" $
     mkModPFailComposite @126 @Int8 "126"
 
 addTotalInt8 :: TestTree
 addTotalInt8 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt8" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt8" $
     addTotal' @127 @Int8
 
 subTotalInt8 :: TestTree
 subTotalInt8 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt8" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt8" $
     subTotal' @127 @Int8
 
 multTotalInt8 :: TestTree
 multTotalInt8 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt8" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt8" $
     multTotal' @127 @Int8
 
 divTotalInt8 :: TestTree
 divTotalInt8 =
-  Utils.testPropertyCompat "(.%.) implements modular division" "divTotalInt8" $
+  testPropertyCompat "(.%.) implements modular division" "divTotalInt8" $
     divTotal' @127 @Int8
 
 invertInt8 :: TestTree
 invertInt8 =
-  Utils.testPropertyCompat "1 == x * invert x" "invertInt8" $
+  testPropertyCompat "1 == x * invert x" "invertInt8" $
     invert' @127 @Int8
 
 int16Props :: TestTree
 int16Props =
-  T.testGroup
+  testGroup
     "Int16"
     [ mkModPInt16,
       mkModPFailLargeInt16,
@@ -128,47 +118,47 @@ int16Props =
 
 mkModPInt16 :: TestTree
 mkModPInt16 =
-  Utils.testPropertyCompat "mkModP x" "mkModNInt16" $
+  testPropertyCompat "mkModP x" "mkModNInt16" $
     mkModP' @32749 @Int16
 
 mkModPFailLargeInt16 :: TestTree
 mkModPFailLargeInt16 =
-  Utils.testPropertyCompat "mkModP fails too large" "mkModPFailLargeInt16" $
+  testPropertyCompat "mkModP fails too large" "mkModPFailLargeInt16" $
     mkModPFailSize @32771 @Int16 "Int16" "32767" "32771"
 
 mkModPFailCompositeInt16 :: TestTree
 mkModPFailCompositeInt16 =
-  Utils.testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeInt16" $
+  testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeInt16" $
     mkModPFailComposite @32766 @Int16 "32766"
 
 addTotalInt16 :: TestTree
 addTotalInt16 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInt16" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInt16" $
     addTotal' @32749 @Int16
 
 subTotalInt16 :: TestTree
 subTotalInt16 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt16" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInt16" $
     subTotal' @32749 @Int16
 
 multTotalInt16 :: TestTree
 multTotalInt16 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt16" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInt16" $
     multTotal' @32749 @Int16
 
 divTotalInt16 :: TestTree
 divTotalInt16 =
-  Utils.testPropertyCompat "(.%.) implements modular division" "divTotalInt16" $
+  testPropertyCompat "(.%.) implements modular division" "divTotalInt16" $
     divTotal' @32749 @Int16
 
 invertInt16 :: TestTree
 invertInt16 =
-  Utils.testPropertyCompat "1 == x * invert x" "invertInt16" $
+  testPropertyCompat "1 == x * invert x" "invertInt16" $
     invert' @32749 @Int16
 
 integerProps :: TestTree
 integerProps =
-  T.testGroup
+  testGroup
     "Integer"
     [ mkModPInteger,
       addTotalInteger,
@@ -181,37 +171,37 @@ integerProps =
 
 mkModPInteger :: TestTree
 mkModPInteger =
-  Utils.testPropertyCompat "mkModP x" "mkModNInteger" $
+  testPropertyCompat "mkModP x" "mkModNInteger" $
     mkModP' @65537 @Integer
 
 addTotalInteger :: TestTree
 addTotalInteger =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalInteger" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalInteger" $
     addTotal' @65537 @Integer
 
 subTotalInteger :: TestTree
 subTotalInteger =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalInteger" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalInteger" $
     subTotal' @65537 @Integer
 
 multTotalInteger :: TestTree
 multTotalInteger =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalInteger" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalInteger" $
     multTotal' @65537 @Integer
 
 divTotalInteger :: TestTree
 divTotalInteger =
-  Utils.testPropertyCompat "(.%.) implements modular division" "divTotalInteger" $
+  testPropertyCompat "(.%.) implements modular division" "divTotalInteger" $
     divTotal' @65537 @Integer
 
 invertInteger :: TestTree
 invertInteger =
-  Utils.testPropertyCompat "1 == x * invert x" "invertInteger" $
+  testPropertyCompat "1 == x * invert x" "invertInteger" $
     invert' @65537 @Integer
 
 word8Props :: TestTree
 word8Props =
-  T.testGroup
+  testGroup
     "Word8"
     [ mkModPWord8,
       mkModPFailLargeWord8,
@@ -226,47 +216,47 @@ word8Props =
 
 mkModPWord8 :: TestTree
 mkModPWord8 =
-  Utils.testPropertyCompat "mkModP x" "mkModNWord8" $
+  testPropertyCompat "mkModP x" "mkModNWord8" $
     mkModP' @251 @Word8
 
 mkModPFailLargeWord8 :: TestTree
 mkModPFailLargeWord8 =
-  Utils.testPropertyCompat "mkModP fails too large" "mkModPFailLargeWord8" $
+  testPropertyCompat "mkModP fails too large" "mkModPFailLargeWord8" $
     mkModPFailSize @257 @Word8 "Word8" "255" "257"
 
 mkModPFailCompositeWord8 :: TestTree
 mkModPFailCompositeWord8 =
-  Utils.testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeWord8" $
+  testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeWord8" $
     mkModPFailComposite @250 @Word8 "250"
 
 addTotalWord8 :: TestTree
 addTotalWord8 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord8" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord8" $
     addTotal' @251 @Word8
 
 subTotalWord8 :: TestTree
 subTotalWord8 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord8" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord8" $
     subTotal' @251 @Word8
 
 multTotalWord8 :: TestTree
 multTotalWord8 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord8" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord8" $
     multTotal' @251 @Word8
 
 divTotalWord8 :: TestTree
 divTotalWord8 =
-  Utils.testPropertyCompat "(.%.) implements modular division" "divTotalWord8" $
+  testPropertyCompat "(.%.) implements modular division" "divTotalWord8" $
     divTotal' @251 @Word8
 
 invertWord8 :: TestTree
 invertWord8 =
-  Utils.testPropertyCompat "1 == x * invert x" "invertWord8" $
+  testPropertyCompat "1 == x * invert x" "invertWord8" $
     invert' @251 @Word8
 
 word16Props :: TestTree
 word16Props =
-  T.testGroup
+  testGroup
     "Word16"
     [ mkModPWord16,
       mkModPFailLargeWord16,
@@ -281,47 +271,47 @@ word16Props =
 
 mkModPWord16 :: TestTree
 mkModPWord16 =
-  Utils.testPropertyCompat "mkModP x" "mkModNWord16" $
+  testPropertyCompat "mkModP x" "mkModNWord16" $
     mkModP' @65521 @Word16
 
 mkModPFailLargeWord16 :: TestTree
 mkModPFailLargeWord16 =
-  Utils.testPropertyCompat "mkModP fails too large" "mkModPFailLargeWord16" $
+  testPropertyCompat "mkModP fails too large" "mkModPFailLargeWord16" $
     mkModPFailSize @65537 @Word16 "Word16" "65535" "65537"
 
 mkModPFailCompositeWord16 :: TestTree
 mkModPFailCompositeWord16 =
-  Utils.testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeWord16" $
+  testPropertyCompat "mkModP fails for non-prime" "mkModPFailCompositeWord16" $
     mkModPFailComposite @65520 @Word16 "65520"
 
 addTotalWord16 :: TestTree
 addTotalWord16 =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalWord16" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalWord16" $
     addTotal' @65521 @Word16
 
 subTotalWord16 :: TestTree
 subTotalWord16 =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord16" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalWord16" $
     subTotal' @65521 @Word16
 
 multTotalWord16 :: TestTree
 multTotalWord16 =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord16" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalWord16" $
     multTotal' @65521 @Word16
 
 divTotalWord16 :: TestTree
 divTotalWord16 =
-  Utils.testPropertyCompat "(.%.) implements modular division" "divTotalWord16" $
+  testPropertyCompat "(.%.) implements modular division" "divTotalWord16" $
     divTotal' @65521 @Word16
 
 invertWord16 :: TestTree
 invertWord16 =
-  Utils.testPropertyCompat "1 == x * invert x" "invertWord16" $
+  testPropertyCompat "1 == x * invert x" "invertWord16" $
     invert' @65521 @Word16
 
 naturalProps :: TestTree
 naturalProps =
-  T.testGroup
+  testGroup
     "Natural"
     [ mkModPNatural,
       addTotalNatural,
@@ -334,32 +324,32 @@ naturalProps =
 
 mkModPNatural :: TestTree
 mkModPNatural =
-  Utils.testPropertyCompat "mkModP x" "mkModPNatural" $
+  testPropertyCompat "mkModP x" "mkModPNatural" $
     mkModP' @65537 @Natural
 
 addTotalNatural :: TestTree
 addTotalNatural =
-  Utils.testPropertyCompat "(.+.) implements modular addition" "addTotalNatural" $
+  testPropertyCompat "(.+.) implements modular addition" "addTotalNatural" $
     addTotal' @65537 @Natural
 
 subTotalNatural :: TestTree
 subTotalNatural =
-  Utils.testPropertyCompat "(.-.) implements modular subtraction" "subTotalNatural" $
+  testPropertyCompat "(.-.) implements modular subtraction" "subTotalNatural" $
     subTotal' @65537 @Natural
 
 multTotalNatural :: TestTree
 multTotalNatural =
-  Utils.testPropertyCompat "(.*.) implements modular multiplication" "multTotalNatural" $
+  testPropertyCompat "(.*.) implements modular multiplication" "multTotalNatural" $
     multTotal' @65537 @Natural
 
 divTotalNatural :: TestTree
 divTotalNatural =
-  Utils.testPropertyCompat "(.%.) implements modular division" "divTotalNatural" $
+  testPropertyCompat "(.%.) implements modular division" "divTotalNatural" $
     divTotal' @65537 @Natural
 
 invertNatural :: TestTree
 invertNatural =
-  Utils.testPropertyCompat "1 == x * invert x" "invertNatural" $
+  testPropertyCompat "1 == x * invert x" "invertNatural" $
     invert' @65537 @Natural
 
 addTotal' ::
@@ -371,15 +361,15 @@ addTotal' ::
     TestBounds a
   ) =>
   Property
-addTotal' = H.property $ do
-  mx@(MkModP x) <- H.forAll (anyNat @p @a)
-  my@(MkModP y) <- H.forAll anyNat
+addTotal' = property $ do
+  mx@(MkModP x) <- forAll (anyNat @p @a)
+  my@(MkModP y) <- forAll anyNat
   let mz@(MkModP z) = mx .+. my
       z' = (toInteger x + toInteger y) `mod` p'
 
-  H.annotateShow mx
-  H.annotateShow my
-  H.annotateShow mz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
   z' === toInteger z
   where
@@ -394,15 +384,15 @@ subTotal' ::
     TestBounds a
   ) =>
   Property
-subTotal' = H.property $ do
-  mx@(MkModP x) <- H.forAll (anyNat @p @a)
-  my@(MkModP y) <- H.forAll anyNat
+subTotal' = property $ do
+  mx@(MkModP x) <- forAll (anyNat @p @a)
+  my@(MkModP y) <- forAll anyNat
   let mz@(MkModP z) = mx .-. my
       z' = (toInteger x - toInteger y) `mod` p'
 
-  H.annotateShow mx
-  H.annotateShow my
-  H.annotateShow mz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
   z' === toInteger z
   where
@@ -417,15 +407,15 @@ multTotal' ::
     TestBounds a
   ) =>
   Property
-multTotal' = H.property $ do
-  mx@(MkModP x) <- H.forAll (anyNat @p @a)
-  my@(MkModP y) <- H.forAll anyNat
+multTotal' = property $ do
+  mx@(MkModP x) <- forAll (anyNat @p @a)
+  my@(MkModP y) <- forAll anyNat
   let mz@(MkModP z) = mx .*. my
       z' = (toInteger x * toInteger y) `mod` p'
 
-  H.annotateShow mx
-  H.annotateShow my
-  H.annotateShow mz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
   z' === toInteger z
   where
@@ -440,9 +430,9 @@ divTotal' ::
     TestBounds a
   ) =>
   Property
-divTotal' = H.property $ do
-  mx <- H.forAll (anyNat @p @a)
-  nzy <- H.forAll (genNZ @p @a)
+divTotal' = property $ do
+  mx <- forAll (anyNat @p @a)
+  nzy <- forAll (genNZ @p @a)
   let mz = mx .%. nzy
   mx === mz .*. nzy
 
@@ -455,8 +445,8 @@ invert' ::
     TestBounds a
   ) =>
   Property
-invert' = H.property $ do
-  nz <- H.forAll (genNZ @p @a)
+invert' = property $ do
+  nz <- forAll (genNZ @p @a)
   let nInv = ModP.invert nz
   reallyUnsafeModP 1 === nz .*. nInv
 
@@ -470,11 +460,11 @@ mkModP' ::
     Typeable a
   ) =>
   Property
-mkModP' = H.property $ do
-  x <- H.forAll (nonneg @a)
+mkModP' = property $ do
+  x <- forAll (nonneg @a)
   let mx@(MkModP x') = ModP.unsafeModP @p x
 
-  H.annotateShow mx
+  annotateShow mx
 
   x `mod` p' === x'
   where
@@ -493,13 +483,13 @@ mkModPFailSize ::
   String ->
   String ->
   Property
-mkModPFailSize tyStr maxStr modStr = H.property $ do
-  x <- H.forAll (nonneg @a)
+mkModPFailSize tyStr maxStr modStr = property $ do
+  x <- forAll (nonneg @a)
   case ModP.mkModP @p x of
     Left s -> msg === s
     Right y -> do
-      H.annotate ("Expected failure, received: " ++ show y)
-      H.failure
+      annotate ("Expected failure, received: " ++ show y)
+      failure
   where
     msg =
       mconcat
@@ -523,13 +513,13 @@ mkModPFailComposite ::
   ) =>
   String ->
   Property
-mkModPFailComposite primeStr = H.property $ do
-  x <- H.forAll (nonneg @a)
+mkModPFailComposite primeStr = property $ do
+  x <- forAll (nonneg @a)
   case ModP.mkModP @p x of
     Left s -> msg === s
     Right y -> do
-      H.annotate ("Expected failure, received: " ++ show y)
-      H.failure
+      annotate ("Expected failure, received: " ++ show y)
+      failure
   where
     msg =
       mconcat
@@ -546,7 +536,7 @@ boundedVals ::
     Typeable a
   ) =>
   TestTree
-boundedVals = HUnit.testCase "Min/max bounds" $ do
+boundedVals = testCase "Min/max bounds" $ do
   0 @=? ModP.unModP (minBound @(ModP p a))
 
   nTerm - 1 @=? ModP.unModP (maxBound @(ModP p a))
@@ -575,9 +565,9 @@ nonneg = HG.integral $ HR.exponentialFrom 1 1 maxVal
 
 elimProps :: TestTree
 elimProps =
-  Utils.testPropertyCompat desc "elimProps" $
-    H.property $ do
-      mp@(MkModP n) <- H.forAll (anyNat @350 @Int)
+  testPropertyCompat desc "elimProps" $
+    property $ do
+      mp@(MkModP n) <- forAll (anyNat @350 @Int)
 
       n === ModP.unModP mp
       n === mp.unModP
@@ -587,11 +577,11 @@ elimProps =
     desc = "elim (MkModP x) === x"
 
 showSpecs :: TestTree
-showSpecs = HUnit.testCase "Shows ModP" $ do
+showSpecs = testCase "Shows ModP" $ do
   "MkModP 2 (mod 7)" @=? show (ModP.unsafeModP @7 @Integer 2)
   "MkModP 9 (mod 13)" @=? show (ModP.unsafeModP @13 @Integer 22)
 
 displaySpecs :: TestTree
-displaySpecs = HUnit.testCase "Displays ModP" $ do
+displaySpecs = testCase "Displays ModP" $ do
   "2 (mod 7)" @=? D.display (ModP.unsafeModP @7 @Integer 2)
   "9 (mod 13)" @=? D.display (ModP.unsafeModP @13 @Integer 22)

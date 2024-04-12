@@ -1,7 +1,6 @@
 module Test.Data.NonNegative (props) where
 
 import Data.Text.Display qualified as D
-import Hedgehog qualified as H
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
@@ -15,14 +14,12 @@ import Numeric.Data.NonNegative.Internal
       ),
   )
 import Test.Prelude
-import Test.Tasty qualified as T
-import Test.Tasty.HUnit qualified as HUnit
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Numeric.Data.NonNegative"
     [ mkNonNegativeSucceeds,
       mkNonNegativeFails,
@@ -37,20 +34,20 @@ props =
 
 mkNonNegativeSucceeds :: TestTree
 mkNonNegativeSucceeds =
-  Utils.testPropertyCompat "x >= 0 succeeds" "mkNonNegativeSucceeds" $
-    H.property $ do
-      x <- H.forAll nonneg
+  testPropertyCompat "x >= 0 succeeds" "mkNonNegativeSucceeds" $
+    property $ do
+      x <- forAll nonneg
       Just (NonNeg.reallyUnsafeNonNegative x) === NonNeg.mkNonNegative x
 
 mkNonNegativeFails :: TestTree
 mkNonNegativeFails =
-  Utils.testPropertyCompat "x < 0 fails" "mkNonNegativeFails" $
-    H.property $ do
-      x <- H.forAll neg
+  testPropertyCompat "x < 0 fails" "mkNonNegativeFails" $
+    property $ do
+      x <- forAll neg
       Nothing === NonNeg.mkNonNegative x
 
 testUnsafe :: TestTree
-testUnsafe = HUnit.testCase "Test unsafeNonNegative" $ do
+testUnsafe = testCase "Test unsafeNonNegative" $ do
   UnsafeNonNegative 5 @=? NonNeg.unsafeNonNegative @Integer 5
 
   Utils.assertPureErrorCall expectedEx (NonNeg.unsafeNonNegative @Integer (-1))
@@ -59,28 +56,28 @@ testUnsafe = HUnit.testCase "Test unsafeNonNegative" $ do
 
 addTotal :: TestTree
 addTotal =
-  Utils.testPropertyCompat "(.+.) is total" "addTotal" $
-    H.property $ do
-      px@(MkNonNegative x) <- H.forAll nonnegative
-      py@(MkNonNegative y) <- H.forAll nonnegative
+  testPropertyCompat "(.+.) is total" "addTotal" $
+    property $ do
+      px@(MkNonNegative x) <- forAll nonnegative
+      py@(MkNonNegative y) <- forAll nonnegative
       let MkNonNegative pz = px .+. py
       x + y === pz
 
 multTotal :: TestTree
 multTotal =
-  Utils.testPropertyCompat "(.*.) is total" "multTotal" $
-    H.property $ do
-      px@(MkNonNegative x) <- H.forAll nonnegative
-      py@(MkNonNegative y) <- H.forAll nonnegative
+  testPropertyCompat "(.*.) is total" "multTotal" $
+    property $ do
+      px@(MkNonNegative x) <- forAll nonnegative
+      py@(MkNonNegative y) <- forAll nonnegative
       let MkNonNegative pz = px .*. py
       x * y === pz
 
 divTotal :: TestTree
 divTotal =
-  Utils.testPropertyCompat "(.%.) is total" "divTotal" $
-    H.property $ do
-      px@(MkNonNegative x) <- H.forAll nonnegative
-      py@(MkNonNegative y) <- H.forAll nonnegativeNZ
+  testPropertyCompat "(.%.) is total" "divTotal" $
+    property $ do
+      px@(MkNonNegative x) <- forAll nonnegative
+      py@(MkNonNegative y) <- forAll nonnegativeNZ
       let MkNonNegative pz = px .%. py
       x `div` y === pz
 
@@ -98,9 +95,9 @@ nonnegativeNZ = NonNeg.unsafeNonNegative <$> HG.integral (HR.exponentialFrom 1 1
 
 elimProps :: TestTree
 elimProps =
-  Utils.testPropertyCompat desc "elimProps" $
-    H.property $ do
-      mp@(MkNonNegative n) <- H.forAll nonnegative
+  testPropertyCompat desc "elimProps" $
+    property $ do
+      mp@(MkNonNegative n) <- forAll nonnegative
 
       n === NonNeg.unNonNegative mp
       n === mp.unNonNegative
@@ -110,9 +107,9 @@ elimProps =
     desc = "elim (MkNonNegative x) === x"
 
 showSpecs :: TestTree
-showSpecs = HUnit.testCase "Shows NonNegative" $ do
+showSpecs = testCase "Shows NonNegative" $ do
   "UnsafeNonNegative 2" @=? show (NonNeg.unsafeNonNegative @Int 2)
 
 displaySpecs :: TestTree
-displaySpecs = HUnit.testCase "Displays NonNegative" $ do
+displaySpecs = testCase "Displays NonNegative" $ do
   "2" @=? D.display (NonNeg.unsafeNonNegative @Int 2)

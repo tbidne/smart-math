@@ -110,6 +110,7 @@ library
     cpp-options:   -DUSE_ARITHMOI
 
   hs-source-dirs:   src
+  ghc-options:      -Wmissing-import-lists
   default-language: Haskell2010
 
 executable prime-prof
@@ -120,6 +121,7 @@ executable prime-prof
     , smart-math
 
   hs-source-dirs:   prime-prof
+  ghc-options:      -Wmissing-import-lists
   default-language: Haskell2010
 
 test-suite doctest
@@ -132,6 +134,7 @@ test-suite doctest
     , env-guard  ^>=0.2
 
   hs-source-dirs:   test/doctest
+  ghc-options:      -Wmissing-import-lists
   default-language: Haskell2010
 
 test-suite unit
@@ -173,7 +176,7 @@ test-suite unit
     , text-display
 
   hs-source-dirs:   test/unit
-  ghc-options:      -threaded -with-rtsopts=-N -Wno-missing-import-lists
+  ghc-options:      -threaded -with-rtsopts=-N
   default-language: Haskell2010
 
 benchmark benchmarks
@@ -186,4 +189,5 @@ benchmark benchmarks
     , tasty-bench  ^>=0.3
 
   hs-source-dirs:   benchmarks
+  ghc-options:      -Wmissing-import-lists
   default-language: GHC2021

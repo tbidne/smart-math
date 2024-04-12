@@ -2,15 +2,13 @@ module Test.Algebra.Additive.ASemigroup (props) where
 
 import Equality (Equality (MkEqExact))
 import Gens qualified
-import Hedgehog (Gen, PropertyName)
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Test.Tasty (TestName, TestTree)
-import Test.Tasty qualified as T
+import Test.Prelude
 import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Additive Semigroup"
     [ addNumProps,
       assocProps
@@ -18,7 +16,7 @@ props =
 
 addNumProps :: TestTree
 addNumProps =
-  T.testGroup
+  testGroup
     "(.+.) === (+)"
     [ fractionAddNum
     ]
@@ -40,7 +38,7 @@ asemigroupAddNum = Utils.binaryEq (+) (.+.)
 
 assocProps :: TestTree
 assocProps =
-  T.testGroup
+  testGroup
     "Associativity: (x .+. y) .+. z === x .+. (y .+. z)"
     [ fractionAssoc,
       modNAssoc,

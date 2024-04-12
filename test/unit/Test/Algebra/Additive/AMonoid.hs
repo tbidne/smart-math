@@ -2,19 +2,16 @@ module Test.Algebra.Additive.AMonoid (props) where
 
 import Equality (Equality (MkEqExact))
 import Gens qualified
-import Hedgehog (Gen, PropertyName, (===))
-import Hedgehog qualified as H
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Normed (Normed (norm))
-import Test.Tasty (TestName, TestTree)
-import Test.Tasty qualified as T
+import Test.Prelude
 import Utils ((<=>))
 import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Additive Monoid"
     [ identityProps,
       absProps
@@ -22,7 +19,7 @@ props =
 
 identityProps :: TestTree
 identityProps =
-  T.testGroup
+  testGroup
     "Identity: zero .+. x == x == x .+. zero"
     [ fractionId,
       modNId,
@@ -55,7 +52,7 @@ amonoidIdentity = Utils.identity (.+.) zero
 
 absProps :: TestTree
 absProps =
-  T.testGroup
+  testGroup
     "Absolute Value"
     [ fractionAbs
     ]
@@ -75,10 +72,10 @@ amonoidAbs ::
   PropertyName ->
   TestTree
 amonoidAbs gen eqCons desc propName =
-  Utils.testPropertyCompat desc propName $
-    H.property $ do
-      x <- H.forAll gen
-      y <- H.forAll gen
+  testPropertyCompat desc propName $
+    property $ do
+      x <- forAll gen
+      y <- forAll gen
 
       -- idempotence: |x| = ||x||
       let eqX = eqCons x
@@ -87,12 +84,12 @@ amonoidAbs gen eqCons desc propName =
 
       -- non-negative: |x| >= 0
       let eqZero = eqCons zero
-      H.diff eqAbs (>=) eqZero
+      diff eqAbs (>=) eqZero
 
       -- positive-definite: |x| == 0 <=> x == 0
-      H.diff (eqAbs == eqZero) (<=>) (eqX == eqZero)
+      diff (eqAbs == eqZero) (<=>) (eqX == eqZero)
 
       -- triangle equality: |x + y| <= |x| + |y|
       let sumAbs = eqCons $ norm x .+. norm y
           absSum = eqCons $ norm (x .+. y)
-      H.diff absSum (<=) sumAbs
+      diff absSum (<=) sumAbs

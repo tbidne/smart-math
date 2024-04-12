@@ -2,18 +2,14 @@ module Test.Data.Fraction (props) where
 
 import Data.Text.Display qualified as D
 import Gens qualified
-import Hedgehog qualified as H
 import Numeric.Data.Fraction (Fraction ((:%:)), (%!), _MkFraction)
 import Numeric.Data.Fraction qualified as Frac
-import Optics.Core (_1, _2)
 import Test.Prelude
-import Test.Tasty qualified as T
-import Test.Tasty.HUnit qualified as HUnit
 import Utils qualified
 
 props :: TestTree
 props =
-  T.testGroup
+  testGroup
     "Numeric.Data.Fraction"
     [ eqProps,
       reduceProps,
@@ -28,7 +24,7 @@ props =
 
 eqProps :: TestTree
 eqProps =
-  T.testGroup
+  testGroup
     "Equality"
     [ eqMult,
       eqZero
@@ -36,23 +32,23 @@ eqProps =
 
 eqMult :: TestTree
 eqMult =
-  Utils.testPropertyCompat "n :%: d === n * k :%: d * k" "eqMult" $
-    H.property $ do
-      x@(n :%: d) <- H.forAll Gens.fraction
-      k <- H.forAll Gens.integerNZ
+  testPropertyCompat "n :%: d === n * k :%: d * k" "eqMult" $
+    property $ do
+      x@(n :%: d) <- forAll Gens.fraction
+      k <- forAll Gens.integerNZ
       x === (n * k) %! (d * k)
 
 eqZero :: TestTree
 eqZero =
-  Utils.testPropertyCompat "0 :%: d1 === 0 :%: d2" "eqZero" $
-    H.property $ do
-      d1 <- H.forAll Gens.integerNZ
-      d2 <- H.forAll Gens.integerNZ
+  testPropertyCompat "0 :%: d1 === 0 :%: d2" "eqZero" $
+    property $ do
+      d1 <- forAll Gens.integerNZ
+      d2 <- forAll Gens.integerNZ
       0 %! d1 === 0 %! d2
 
 reduceProps :: TestTree
 reduceProps =
-  T.testGroup
+  testGroup
     "Reduction"
     [ reduceIdempotent,
       reducePosDenom,
@@ -61,28 +57,28 @@ reduceProps =
 
 reduceIdempotent :: TestTree
 reduceIdempotent =
-  Utils.testPropertyCompat "reduce x = reduce (reduce x)" "reduceIdempotent" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
+  testPropertyCompat "reduce x = reduce (reduce x)" "reduceIdempotent" $
+    property $ do
+      x <- forAll Gens.fraction
       Frac.reduce x === Frac.reduce (Frac.reduce x)
 
 reducePosDenom :: TestTree
 reducePosDenom =
-  Utils.testPropertyCompat "denom (reduce x) > 0" "reducePosDenom" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      H.diff x ((>) . Frac.denominator) 0
+  testPropertyCompat "denom (reduce x) > 0" "reducePosDenom" $
+    property $ do
+      x <- forAll Gens.fraction
+      diff x ((>) . Frac.denominator) 0
 
 reduceGCD1 :: TestTree
 reduceGCD1 =
-  Utils.testPropertyCompat "gcd n d <= 1" "reduceGCD1" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      H.diff x ((<=) . fracGcd) 1
+  testPropertyCompat "gcd n d <= 1" "reduceGCD1" $
+    property $ do
+      x <- forAll Gens.fraction
+      diff x ((<=) . fracGcd) 1
 
 numProps :: TestTree
 numProps =
-  T.testGroup
+  testGroup
     "Num"
     [ numAddReduces,
       numSubReduces,
@@ -93,55 +89,55 @@ numProps =
 
 numAddReduces :: TestTree
 numAddReduces =
-  Utils.testPropertyCompat "(+) is reduced" "numAddReduces" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      y <- H.forAll Gens.fraction
+  testPropertyCompat "(+) is reduced" "numAddReduces" $
+    property $ do
+      x <- forAll Gens.fraction
+      y <- forAll Gens.fraction
       let s = x + y
-      H.annotateShow s
-      H.assert $ isReduced s
+      annotateShow s
+      assert $ isReduced s
 
 numSubReduces :: TestTree
 numSubReduces =
-  Utils.testPropertyCompat "(-) is reduced" "numSubReduces" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      y <- H.forAll Gens.fraction
+  testPropertyCompat "(-) is reduced" "numSubReduces" $
+    property $ do
+      x <- forAll Gens.fraction
+      y <- forAll Gens.fraction
       let s = x - y
-      H.annotateShow s
-      H.assert $ isReduced s
+      annotateShow s
+      assert $ isReduced s
 
 numMultReduces :: TestTree
 numMultReduces =
-  Utils.testPropertyCompat "(*) is reduced" "numMultReduces" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      y <- H.forAll Gens.fraction
+  testPropertyCompat "(*) is reduced" "numMultReduces" $
+    property $ do
+      x <- forAll Gens.fraction
+      y <- forAll Gens.fraction
       let s = x * y
-      H.annotateShow s
-      H.assert $ isReduced s
+      annotateShow s
+      assert $ isReduced s
 
 absGtZero :: TestTree
 absGtZero =
-  Utils.testPropertyCompat "negate . negate === id" "absGtZero" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
-      y <- H.forAll Gens.fraction
+  testPropertyCompat "negate . negate === id" "absGtZero" $
+    property $ do
+      x <- forAll Gens.fraction
+      y <- forAll Gens.fraction
 
       -- idempotence: |x| = ||x||
       abs x === abs (abs x)
 
       -- non-negative: |x| >= 0
-      H.diff (abs x) (>=) 0
+      diff (abs x) (>=) 0
 
       -- triangle equality: |x + y| <= |x| + |y|
-      H.diff (abs (x + y)) (<=) (abs x + abs y)
+      diff (abs (x + y)) (<=) (abs x + abs y)
 
 signumProp :: TestTree
 signumProp =
-  Utils.testPropertyCompat "negate . negate === id" "signumProp" $
-    H.property $ do
-      x <- H.forAll Gens.fraction
+  testPropertyCompat "negate . negate === id" "signumProp" $
+    property $ do
+      x <- forAll Gens.fraction
       if
         | x > 0 -> 1 === signum x
         | x == 0 -> 0 === signum x
@@ -149,9 +145,9 @@ signumProp =
 
 numeratorProp :: TestTree
 numeratorProp =
-  Utils.testPropertyCompat "numerator x@(n :%: _) === n" "numeratorProp" $
-    H.property $ do
-      x@(n :%: _) <- H.forAll Gens.fraction
+  testPropertyCompat "numerator x@(n :%: _) === n" "numeratorProp" $
+    property $ do
+      x@(n :%: _) <- forAll Gens.fraction
       n === Frac.numerator x
       n === x.numerator
       n === view #numerator x
@@ -159,9 +155,9 @@ numeratorProp =
 
 denominatorProp :: TestTree
 denominatorProp =
-  Utils.testPropertyCompat "denominator x@(_ :%: d) === d" "denominatorProp" $
-    H.property $ do
-      x@(_ :%: d) <- H.forAll Gens.fraction
+  testPropertyCompat "denominator x@(_ :%: d) === d" "denominatorProp" $
+    property $ do
+      x@(_ :%: d) <- forAll Gens.fraction
       d === Frac.denominator x
       d === x.denominator
       d === view #denominator x
@@ -177,7 +173,7 @@ fracGcd :: (Integral a) => Fraction a -> a
 fracGcd (n :%: d) = gcd n d
 
 testUnsafe :: TestTree
-testUnsafe = HUnit.testCase "Test unsafeFraction" $ do
+testUnsafe = testCase "Test unsafeFraction" $ do
   1 %! 2 @=? Frac.unsafeFraction @Integer 5 10
 
   Utils.assertPureErrorCall expectedEx (Frac.unsafeFraction @Integer 5 0)
@@ -185,7 +181,7 @@ testUnsafe = HUnit.testCase "Test unsafeFraction" $ do
     expectedEx = "Numeric.Data.Fraction.unsafeFraction: Fraction has zero denominator"
 
 testRecip :: TestTree
-testRecip = HUnit.testCase "Test recip" $ do
+testRecip = testCase "Test recip" $ do
   1 %! 2 @=? recip (2 %! (1 :: Integer))
 
   Utils.assertPureErrorCall expectedEx (recip $ 0 %! (2 :: Integer))
@@ -193,13 +189,13 @@ testRecip = HUnit.testCase "Test recip" $ do
     expectedEx = "Numeric.Data.Fraction.recip: Fraction has zero numerator"
 
 showSpecs :: TestTree
-showSpecs = HUnit.testCase "Shows fractions" $ do
+showSpecs = testCase "Shows fractions" $ do
   "UnsafeFraction 1 5" @=? show (Frac.unsafeFraction @Integer 2 10)
   "UnsafeFraction (-1) 1" @=? show (Frac.unsafeFraction @Integer 1 (-1))
   "Just (UnsafeFraction 5 7)" @=? show (Just $ Frac.unsafeFraction @Integer 5 7)
 
 displaySpecs :: TestTree
-displaySpecs = HUnit.testCase "Displays fractions" $ do
+displaySpecs = testCase "Displays fractions" $ do
   "1 / 5" @=? D.display (Frac.unsafeFraction @Integer 2 10)
   "-1 / 1" @=? D.display (Frac.unsafeFraction @Integer 1 (-1))
   "-2340923 / 2095420" @=? D.display (Frac.unsafeFraction @Integer (-2340923) 2095420)

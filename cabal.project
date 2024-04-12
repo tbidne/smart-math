@@ -10,7 +10,6 @@ package smart-math
     -Wmissing-export-lists
     -Wmissing-exported-signatures
     -Wmissing-home-modules
-    -Wmissing-import-lists
     -Wpartial-fields
     -Wprepositive-qualified-module
     -Wredundant-constraints
