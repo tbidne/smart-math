@@ -76,8 +76,8 @@ reallyUnsafeInterval = UnsafeInterval
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkInterval' that allows for total
--- elimination and partial construction, along with a 'LabelOptic' 'Getter'
--- for @#unInterval@.
+-- elimination and partial construction, along with a 'Optics.Core.LabelOptic'
+-- 'Optics.Core.Getter' for @#unInterval@.
 --
 -- ==== __Examples__
 --

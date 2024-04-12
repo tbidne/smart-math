@@ -3,9 +3,7 @@
 
 -- See the note on Modulus for why this warning is disabled
 
--- | Internal tools for modular arithmetic and primality testing. The main
--- functions are 'isPrime' and 'findInverse', though others are exported for
--- testing.
+-- | Internal module for 'ModP'.
 --
 -- @since 0.1
 module Numeric.Data.ModP.Internal

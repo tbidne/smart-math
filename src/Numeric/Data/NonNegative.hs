@@ -103,7 +103,7 @@ unNonNegative (UnsafeNonNegative x) = x
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkNonNegative' that allows for total
--- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- elimination and partial construction, along with a 'Optics.Core.LabelOptic' 'Optics.Core.Getter'
 -- for @#unNonNegative@.
 --
 -- ==== __Examples__

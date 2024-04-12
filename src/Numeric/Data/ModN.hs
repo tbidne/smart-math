@@ -66,7 +66,7 @@ mkModNTH x = case Internal.mkModN x of
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkModN' that allows for total
--- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- elimination and partial construction, along with a 'Optics.Core.LabelOptic' 'Optics.Core.Getter'
 -- for @#unModN@.
 --
 -- ==== __Examples__

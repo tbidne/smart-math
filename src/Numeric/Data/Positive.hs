@@ -117,7 +117,7 @@ unPositive (UnsafePositive x) = x
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkPositive' that allows for total
--- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- elimination and partial construction, along with a 'Optics.Core.LabelOptic' 'Optics.Core.Getter'
 -- for @#unPositive@.
 --
 -- ==== __Examples__

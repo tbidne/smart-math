@@ -1,3 +1,4 @@
+-- | Internal utils.
 module Numeric.Data.Internal.Utils
   ( -- * Safe modular arithmetic
     checkModBound,
@@ -133,6 +134,8 @@ modSafeInc op x y modulus = case someUpperBound @a of
     integerToA :: Integer -> a
     integerToA = fromInteger
 
+-- | Performs modular subtraction, accounting for rounding in the type
+-- itself.
 modSafeSub ::
   forall a.
   ( AnyLowerBounded a,

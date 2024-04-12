@@ -78,7 +78,7 @@ reallyUnsafeNonZero = UnsafeNonZero
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkNonZero' that allows for total
--- elimination and partial construction, along with a 'LabelOptic' 'Getter'
+-- elimination and partial construction, along with a 'Optics.Core.LabelOptic' 'Optics.Core.Getter'
 -- for @#unNonZero@.
 --
 -- ==== __Examples__

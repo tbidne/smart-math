@@ -124,7 +124,7 @@ isPrime = isPrimeDefault
 -- By default, our isPrime function implements miller-rabin directly.
 -- Unfortunately, the performance scales poorly (this is an issue with our
 -- implementation, not miller-rabin). Thus we provide the optional flag
--- 'arithmoi' that instead uses the arithmoi package. Arithmoi is much faster,
+-- @arithmoi@ that instead uses the arithmoi package. Arithmoi is much faster,
 -- though it is not a light dependency, hence the option.
 --
 -- In other words, the flag controls the tradeoff between isPrime speed vs.
@@ -132,6 +132,7 @@ isPrime = isPrimeDefault
 -- isPrimeArithmoi? Benchmarking. We want to benchmark the difference, hence
 -- we need both available when the flag is on.
 
+-- | Uses arithmoi if available, otherwise errors.
 isPrimeArithmoi :: Integer -> MaybePrime
 #if USE_ARITHMOI
 isPrimeArithmoi n =
@@ -146,10 +147,11 @@ isPrimeArithmoi =
     "arithmoi flag is disabled. Either turn the flag on or use one of isPrime, isPrimeDefault."
 #endif
 
+-- | 'isPrimeTrials' with 100 trials.
 isPrimeDefault :: Integer -> MaybePrime
 isPrimeDefault = isPrimeTrials 100
 
--- | 'isPrime' that takes in an additional 'Word16' parameter for the number
+-- | 'isPrime' that takes in an additional 'Int' parameter for the number
 -- of trials to run. The more trials, the more confident we can be in
 -- 'ProbablyPrime'.
 --
@@ -340,6 +342,7 @@ factor2 (MkModulus n) = go (MkPow 0, MkMult n)
 
 {- ORMOLU_DISABLE -}
 
+-- | Finds the multiplicative inverse.
 invert :: forall p. (KnownNat p) => Natural -> Natural
 #if USE_ARITHMOI
 invert = invertArithmoi @p
@@ -348,6 +351,8 @@ invert = invertDefault @p
 #endif
 {-# INLINEABLE invert #-}
 
+-- | Finds the multiplicative inverse with arithmoi if available, otherwise
+-- errors.
 invertArithmoi :: forall p. (KnownNat p) => Natural -> Natural
 #if USE_ARITHMOI
 invertArithmoi d =
@@ -368,6 +373,7 @@ invertArithmoi =
     "arithmoi flag is disabled. Either turn the flag on or use one of invert, invertDefault."
 #endif
 
+-- | Finds the multiplicative inverse using the built-in algorithm.
 invertDefault :: forall p. (KnownNat p) => Natural -> Natural
 invertDefault d = fromIntegral $ findInverse d' p'
   where

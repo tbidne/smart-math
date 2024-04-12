@@ -124,7 +124,7 @@ reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkFraction' that allows for total
--- elimination and partial construction, along with 'LabelOptic' instances for
+-- elimination and partial construction, along with 'Optics.Core.LabelOptic' instances for
 -- "numerator" and "denominator".
 --
 -- ==== __Examples__
