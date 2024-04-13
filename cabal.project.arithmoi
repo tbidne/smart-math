@@ -10,7 +10,6 @@ package smart-math
     -Wmissing-export-lists
     -Wmissing-exported-signatures
     -Wmissing-home-modules
-    -Wmissing-import-lists
     -Wpartial-fields
     -Wprepositive-qualified-module
     -Wredundant-constraints
@@ -24,12 +23,12 @@ package smart-math
 source-repository-package
     type: git
     location: https://github.com/tbidne/algebra-simple.git
-    tag: a23ee42d30893dee44e96308c49e9441edfa052b
+    tag: f4f799cea958fb2b2309d70f47a658dff2481441
 
 source-repository-package
     type: git
     location: https://github.com/tbidne/bounds.git
-    tag: 0d76aff97ed06dbed9719a0126aede668a818f68
+    tag: 71cdf4357a0bfbc4d6f73cd0a951d50926b30be3
 
 allow-newer: hedgehog-1.2:template-haskell
 
