@@ -19,9 +19,13 @@ module Numeric.Data.Interval
     -- $optics
     _MkInterval,
     rmatching,
+    _Open,
+    _Closed,
+    _None,
   )
 where
 
+import GHC.TypeNats (Nat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.Internal.Utils (rmatching)
@@ -31,7 +35,7 @@ import Numeric.Data.Interval.Internal
     SingIntervalBound,
   )
 import Numeric.Data.Interval.Internal qualified as Internal
-import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
+import Optics.Core (Prism', ReversedPrism', ReversibleOptic (re), prism)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
@@ -116,3 +120,27 @@ _MkInterval = re (prism unInterval g)
       Nothing -> Left x
       Just x' -> Right x'
 {-# INLINEABLE _MkInterval #-}
+
+-- | @since 0.1
+_Open :: Prism' IntervalBound Nat
+_Open = prism Open g
+  where
+    g (Open x) = Right x
+    g other = Left other
+{-# INLINEABLE _Open #-}
+
+-- | @since 0.1
+_Closed :: Prism' IntervalBound Nat
+_Closed = prism Closed g
+  where
+    g (Closed x) = Right x
+    g other = Left other
+{-# INLINEABLE _Closed #-}
+
+-- | @since 0.1
+_None :: Prism' IntervalBound ()
+_None = prism (const None) g
+  where
+    g None = Right ()
+    g other = Left other
+{-# INLINEABLE _None #-}
