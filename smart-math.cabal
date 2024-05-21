@@ -3,7 +3,9 @@ name:               smart-math
 version:            0.1
 license:            MIT
 license-file:       LICENSE
-tested-with:        GHC ==9.2.8 || ==9.4.8 || ==9.6.5 || ==9.8.2
+tested-with:
+  GHC ==9.2.8 || ==9.4.8 || ==9.6.5 || ==9.8.2 || ==9.10.1
+
 copyright:          2022-2024 Thomas Bidne
 author:             Thomas Bidne
 maintainer:         tbidne@protonmail.com
@@ -93,12 +95,12 @@ library
 
   build-depends:
     , algebra-simple    ^>=0.1
-    , base              >=4.16.0.0 && <4.20
+    , base              >=4.16.0.0 && <4.21
     , bounds            ^>=0.1
     , deepseq           >=1.4.4.0  && <1.6
     , optics-core       ^>=0.4
     , random            ^>=1.2.0
-    , template-haskell  >=2.17.0.0 && <2.22
+    , template-haskell  >=2.17.0.0 && <2.23
     , text              >=1.2.4.0  && <2.2
     , text-display      >=0.0.3.0  && <0.6
 

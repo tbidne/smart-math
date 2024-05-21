@@ -1,0 +1,13 @@
+Name,Mean (ps),2*Stdev (ps)
+All.isPrime.2.default,9584,922
+All.isPrime.2.arithmoi,11130,1110
+All.isPrime.11.default,65881835,5342106
+All.isPrime.11.arithmoi,518971,22848
+All.isPrime.1_009.default,140482578,12965350
+All.isPrime.1_009.arithmoi,2252817,209788
+All.isPrime.10_007.default,9089230000,507967562
+All.isPrime.10_007.arithmoi,2930731,169288
+All.isPrime.100_003.default,277375620000,6895318100
+All.isPrime.100_003.arithmoi,4155869,343184
+All.isPrime.1_000_003.default,5238997900000,14144024384
+All.isPrime.1_000_003.arithmoi,6003696,335934
