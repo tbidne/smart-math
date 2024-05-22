@@ -59,6 +59,8 @@ common common-lang
     TypeFamilies
     TypeOperators
 
+  default-language:   Haskell2010
+
 -- NOTE: [TypeAbstractions default extensions]
 --
 -- We would like to enable TypeAbstractions globally i.e. the below logic,
@@ -73,7 +75,7 @@ common common-lang
 --  default-extensions: TypeAbstractions
 
 library
-  import:           common-lang
+  import:          common-lang
   exposed-modules:
     Numeric.Class.Division
     Numeric.Data.Fraction
@@ -111,38 +113,35 @@ library
 
     cpp-options:   -DUSE_ARITHMOI
 
-  hs-source-dirs:   src
-  ghc-options:      -Wmissing-import-lists
-  default-language: Haskell2010
+  hs-source-dirs:  src
+  ghc-options:     -Wmissing-import-lists
 
 executable prime-prof
-  import:           common-lang
-  main-is:          Main.hs
+  import:         common-lang
+  main-is:        Main.hs
   build-depends:
     , base
     , smart-math
 
-  hs-source-dirs:   prime-prof
-  ghc-options:      -Wmissing-import-lists
-  default-language: Haskell2010
+  hs-source-dirs: prime-prof
+  ghc-options:    -Wmissing-import-lists
 
 test-suite doctest
-  import:           common-lang
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
+  import:         common-lang
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
   build-depends:
     , base
     , doctest    >=0.16.3 && <0.23
     , env-guard  ^>=0.2
 
-  hs-source-dirs:   test/doctest
-  ghc-options:      -Wmissing-import-lists
-  default-language: Haskell2010
+  hs-source-dirs: test/doctest
+  ghc-options:    -Wmissing-import-lists
 
 test-suite unit
-  import:           common-lang
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
+  import:         common-lang
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
   other-modules:
     Equality
     Gens
@@ -177,19 +176,17 @@ test-suite unit
     , tasty-hunit     >=0.9     && <0.11
     , text-display
 
-  hs-source-dirs:   test/unit
-  ghc-options:      -threaded -with-rtsopts=-N
-  default-language: Haskell2010
+  hs-source-dirs: test/unit
+  ghc-options:    -threaded -with-rtsopts=-N
 
 benchmark benchmarks
-  import:           common-lang
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
+  import:         common-lang
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
   build-depends:
     , base
     , smart-math
     , tasty-bench  ^>=0.3
 
-  hs-source-dirs:   benchmarks
-  ghc-options:      -Wmissing-import-lists
-  default-language: GHC2021
+  hs-source-dirs: benchmarks
+  ghc-options:    -Wmissing-import-lists
