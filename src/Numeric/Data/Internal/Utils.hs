@@ -124,7 +124,6 @@ modSafeInc op x y modulus = case someUpperBound @a of
           else -- 3. Result does not fit within A. Do the modular arithmetic
           -- in Integer instead, converting the result. Note that this assumes
           -- that the final result fits within A.
-
             let modulusInt = aToInteger modulus
              in integerToA (resultInt `mod` modulusInt)
   where
@@ -161,7 +160,6 @@ modSafeSub x y modulus = case someLowerBound @a of
           else -- 3. Result does not fit within A. Do the modular arithmetic
           -- in Integer instead, converting the result. Note that this assumes
           -- that the final result fits within A. else modulus - y + x
-
             let modulusInt = aToInteger modulus
              in integerToA (diffInt `mod` modulusInt)
   where
