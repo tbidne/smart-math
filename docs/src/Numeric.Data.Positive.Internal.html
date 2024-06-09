@@ -1,0 +1,428 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- | Provides the 'Positive' type for enforcing a positive invariant.</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Numeric.Data.Positive.Internal</span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Type</span></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier">Positive</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#MkPositive"><span class="hs-identifier">MkPositive</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier">UnsafePositive</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Creation</span></span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#unsafePositive"><span class="hs-identifier">unsafePositive</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Misc</span></span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#errMsg"><span class="hs-identifier">errMsg</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NFData</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">bimap</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html"><span class="hs-identifier">Data.Bounds</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#UpperBounded"><span class="hs-identifier">UpperBounded</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#upperBound"><span class="hs-identifier">upperBound</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#UpperBoundless"><span class="hs-identifier">UpperBoundless</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///nix/store/hkk9l5v2qb2vfrgwb9daqls38g3vih5v-text-display-0.0.5.2-doc/share/doc/text-display-0.0.5.2/html/src/Data.Text.Display.html"><span class="hs-identifier">Data.Text.Display</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/hkk9l5v2qb2vfrgwb9daqls38g3vih5v-text-display-0.0.5.2-doc/share/doc/text-display-0.0.5.2/html/src/Data.Text.Display.Core.html#Display"><span class="hs-identifier">Display</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/hkk9l5v2qb2vfrgwb9daqls38g3vih5v-text-display-0.0.5.2-doc/share/doc/text-display-0.0.5.2/html/src/Data.Text.Display.Core.html#ShowInstance"><span class="hs-identifier">ShowInstance</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/hkk9l5v2qb2vfrgwb9daqls38g3vih5v-text-display-0.0.5.2-doc/share/doc/text-display-0.0.5.2/html/src/Data.Text.Display.Core.html#ShowInstance"><span class="hs-identifier">ShowInstance</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Records</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HasField</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">getField</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Stack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HasCallStack</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Additive.ASemigroup.html"><span class="hs-identifier">Numeric.Algebra.Additive.ASemigroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Additive.ASemigroup.html#ASemigroup"><span class="hs-identifier">ASemigroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Additive.ASemigroup.html#.%2B."><span class="hs-operator">(.+.)</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html"><span class="hs-identifier">Numeric.Algebra.Multiplicative.MEuclidean</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html#MEuclidean"><span class="hs-identifier">MEuclidean</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html#mdivMod"><span class="hs-identifier">mdivMod</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MGroup.html"><span class="hs-identifier">Numeric.Algebra.Multiplicative.MGroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MGroup.html#MGroup"><span class="hs-identifier">MGroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MGroup.html#.%25."><span class="hs-operator">(.%.)</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MMonoid.html"><span class="hs-identifier">Numeric.Algebra.Multiplicative.MMonoid</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MMonoid.html#MMonoid"><span class="hs-identifier">MMonoid</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MMonoid.html#one"><span class="hs-identifier">one</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MSemigroup.html"><span class="hs-identifier">Numeric.Algebra.Multiplicative.MSemigroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MSemigroup.html#MSemigroup"><span class="hs-identifier">MSemigroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MSemigroup.html#.%2A."><span class="hs-operator">(.*.)</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Normed.html"><span class="hs-identifier">Numeric.Algebra.Normed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Normed.html#Normed"><span class="hs-identifier">Normed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Normed.html#norm"><span class="hs-identifier">norm</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Class.Division.html"><span class="hs-identifier">Numeric.Class.Division</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Class.Division.html#Division"><span class="hs-identifier">Division</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Class.Division.html#divide"><span class="hs-identifier">divide</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Integer.html"><span class="hs-identifier">Numeric.Literal.Integer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Integer.html#FromInteger"><span class="hs-identifier">FromInteger</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Integer.html#afromInteger"><span class="hs-identifier">afromInteger</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Rational.html"><span class="hs-identifier">Numeric.Literal.Rational</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Rational.html#FromRational"><span class="hs-identifier">FromRational</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Rational.html#afromRational"><span class="hs-identifier">afromRational</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Core.html"><span class="hs-identifier">Optics.Core</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Internal.Optic.Types.html#A_Getter"><span class="hs-identifier">A_Getter</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Label.html#LabelOptic"><span class="hs-identifier">LabelOptic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Label.html#labelOptic"><span class="hs-identifier">labelOptic</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Getter.html#to"><span class="hs-identifier">to</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XTemplateHaskell</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XPostfixOperators</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- | Newtype wrapper that attaches a 'Positive' invariant to some @a@.</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- 'Positive' is an 'Numeric.Algebra.Additive.ASemigroup.ASemigroup' and</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- 'Numeric.Algebra.Multiplicative.MGroup.MGroup' i.e. supports addition,</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- multiplication, and division.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-48"></span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">newtype</span><span> </span><span id="Positive"><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span></span><span> </span><span id="local-6989586621679103139"><span class="annot"><a href="#local-6989586621679103139"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UnsafePositive"><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679103139"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-52"></span><span>      </span><span id="local-6989586621679103223"><span id="local-6989586621679103226"><span class="annot"><span class="annottext">Positive a -&gt; Positive a -&gt; Bool
+(Positive a -&gt; Positive a -&gt; Bool)
+-&gt; (Positive a -&gt; Positive a -&gt; Bool) -&gt; Eq (Positive a)
+forall a. Eq a =&gt; Positive a -&gt; Positive a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; Positive a -&gt; Positive a -&gt; Bool
+== :: Positive a -&gt; Positive a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Positive a -&gt; Positive a -&gt; Bool
+/= :: Positive a -&gt; Positive a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-53"></span><span>      </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-54"></span><span>      </span><span id="local-6989586621679103231"><span id="local-6989586621679103233"><span class="annot"><span class="annottext">(forall x. Positive a -&gt; Rep (Positive a) x)
+-&gt; (forall x. Rep (Positive a) x -&gt; Positive a)
+-&gt; Generic (Positive a)
+forall x. Rep (Positive a) x -&gt; Positive a
+forall x. Positive a -&gt; Rep (Positive a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall a x. Rep (Positive a) x -&gt; Positive a
+forall a x. Positive a -&gt; Rep (Positive a) x
+$cfrom :: forall a x. Positive a -&gt; Rep (Positive a) x
+from :: forall x. Positive a -&gt; Rep (Positive a) x
+$cto :: forall a x. Rep (Positive a) x -&gt; Positive a
+to :: forall x. Rep (Positive a) x -&gt; Positive a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>      </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-56"></span><span>      </span><span id="local-6989586621679103238"><span id="local-6989586621679103244"><span class="annot"><span class="annottext">(forall (m :: Type -&gt; Type). Quote m =&gt; Positive a -&gt; m Exp)
+-&gt; (forall (m :: Type -&gt; Type).
+    Quote m =&gt;
+    Positive a -&gt; Code m (Positive a))
+-&gt; Lift (Positive a)
+forall a (m :: Type -&gt; Type).
+(Lift a, Quote m) =&gt;
+Positive a -&gt; m Exp
+forall a (m :: Type -&gt; Type).
+(Lift a, Quote m) =&gt;
+Positive a -&gt; Code m (Positive a)
+forall t.
+(forall (m :: Type -&gt; Type). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: Type -&gt; Type). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: Type -&gt; Type). Quote m =&gt; Positive a -&gt; m Exp
+forall (m :: Type -&gt; Type).
+Quote m =&gt;
+Positive a -&gt; Code m (Positive a)
+$clift :: forall a (m :: Type -&gt; Type).
+(Lift a, Quote m) =&gt;
+Positive a -&gt; m Exp
+lift :: forall (m :: Type -&gt; Type). Quote m =&gt; Positive a -&gt; m Exp
+$cliftTyped :: forall a (m :: Type -&gt; Type).
+(Lift a, Quote m) =&gt;
+Positive a -&gt; Code m (Positive a)
+liftTyped :: forall (m :: Type -&gt; Type).
+Quote m =&gt;
+Positive a -&gt; Code m (Positive a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Lift</span></span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>      </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-58"></span><span>      </span><span id="local-6989586621679103256"><span id="local-6989586621679103259"><span id="local-6989586621679103262"><span id="local-6989586621679103266"><span id="local-6989586621679103269"><span id="local-6989586621679103272"><span id="local-6989586621679103275"><span class="annot"><span class="annottext">Eq (Positive a)
+Eq (Positive a) =&gt;
+(Positive a -&gt; Positive a -&gt; Ordering)
+-&gt; (Positive a -&gt; Positive a -&gt; Bool)
+-&gt; (Positive a -&gt; Positive a -&gt; Bool)
+-&gt; (Positive a -&gt; Positive a -&gt; Bool)
+-&gt; (Positive a -&gt; Positive a -&gt; Bool)
+-&gt; (Positive a -&gt; Positive a -&gt; Positive a)
+-&gt; (Positive a -&gt; Positive a -&gt; Positive a)
+-&gt; Ord (Positive a)
+Positive a -&gt; Positive a -&gt; Bool
+Positive a -&gt; Positive a -&gt; Ordering
+Positive a -&gt; Positive a -&gt; Positive a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Positive a)
+forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Bool
+forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Ordering
+forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Positive a
+$ccompare :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Ordering
+compare :: Positive a -&gt; Positive a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Bool
+&lt; :: Positive a -&gt; Positive a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Bool
+&lt;= :: Positive a -&gt; Positive a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Bool
+&gt; :: Positive a -&gt; Positive a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Bool
+&gt;= :: Positive a -&gt; Positive a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Positive a
+max :: Positive a -&gt; Positive a -&gt; Positive a
+$cmin :: forall a. Ord a =&gt; Positive a -&gt; Positive a -&gt; Positive a
+min :: Positive a -&gt; Positive a -&gt; Positive a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span>      </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-60"></span><span>      </span><span id="local-6989586621679103281"><span id="local-6989586621679103286"><span id="local-6989586621679103290"><span class="annot"><span class="annottext">Int -&gt; Positive a -&gt; ShowS
+[Positive a] -&gt; ShowS
+Positive a -&gt; String
+(Int -&gt; Positive a -&gt; ShowS)
+-&gt; (Positive a -&gt; String)
+-&gt; ([Positive a] -&gt; ShowS)
+-&gt; Show (Positive a)
+forall a. Show a =&gt; Int -&gt; Positive a -&gt; ShowS
+forall a. Show a =&gt; [Positive a] -&gt; ShowS
+forall a. Show a =&gt; Positive a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Positive a -&gt; ShowS
+showsPrec :: Int -&gt; Positive a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; Positive a -&gt; String
+show :: Positive a -&gt; String
+$cshowList :: forall a. Show a =&gt; [Positive a] -&gt; ShowS
+showList :: [Positive a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-64"></span><span>      </span><span id="local-6989586621679103295"><span class="annot"><span class="annottext">Positive a -&gt; ()
+(Positive a -&gt; ()) -&gt; NFData (Positive a)
+forall a. NFData a =&gt; Positive a -&gt; ()
+forall a. (a -&gt; ()) -&gt; NFData a
+$crnf :: forall a. NFData a =&gt; Positive a -&gt; ()
+rnf :: Positive a -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">,</span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-66"></span><span>      </span><span class="annot"><span class="annottext">UpperBoundless (Positive a)
+forall a. UpperBoundless a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#UpperBoundless"><span class="hs-identifier hs-var hs-var">UpperBoundless</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-keyword">deriving</span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-70"></span><span>      </span><span id="local-6989586621679103311"><span id="local-6989586621679103316"><span id="local-6989586621679103320"><span class="annot"><span class="annottext">Int -&gt; Positive a -&gt; Builder
+[Positive a] -&gt; Builder
+Positive a -&gt; Builder
+(Positive a -&gt; Builder)
+-&gt; ([Positive a] -&gt; Builder)
+-&gt; (Int -&gt; Positive a -&gt; Builder)
+-&gt; Display (Positive a)
+forall a. Show a =&gt; Int -&gt; Positive a -&gt; Builder
+forall a. Show a =&gt; [Positive a] -&gt; Builder
+forall a. Show a =&gt; Positive a -&gt; Builder
+forall a.
+(a -&gt; Builder)
+-&gt; ([a] -&gt; Builder) -&gt; (Int -&gt; a -&gt; Builder) -&gt; Display a
+$cdisplayBuilder :: forall a. Show a =&gt; Positive a -&gt; Builder
+displayBuilder :: Positive a -&gt; Builder
+$cdisplayList :: forall a. Show a =&gt; [Positive a] -&gt; Builder
+displayList :: [Positive a] -&gt; Builder
+$cdisplayPrec :: forall a. Show a =&gt; Int -&gt; Positive a -&gt; Builder
+displayPrec :: Int -&gt; Positive a -&gt; Builder
+</span><a href="file:///nix/store/hkk9l5v2qb2vfrgwb9daqls38g3vih5v-text-display-0.0.5.2-doc/share/doc/text-display-0.0.5.2/html/src/Data.Text.Display.Core.html#Display"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Display</span></a></span></span></span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-keyword">via</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/hkk9l5v2qb2vfrgwb9daqls38g3vih5v-text-display-0.0.5.2-doc/share/doc/text-display-0.0.5.2/html/src/Data.Text.Display.Core.html#ShowInstance"><span class="hs-identifier hs-type">ShowInstance</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103139"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103110"><span class="annot"><span class="hs-identifier hs-type">HasField</span></span><span> </span><span class="annot"><span class="hs-string">&quot;unPositive&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103110"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679103110"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679103328"><span class="annot"><span class="annottext">getField :: Positive a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">getField</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103329"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103329"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103329"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">instance</span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621679103125"><span id="local-6989586621679103126"><span id="local-6989586621679103127"><span id="local-6989586621679103128"><span class="hs-special">(</span><span> </span><span class="annot"><a href="#local-6989586621679103125"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Internal.Optic.Types.html#A_Getter"><span class="hs-identifier hs-type">A_Getter</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><a href="#local-6989586621679103126"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679103127"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><a href="#local-6989586621679103128"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679103127"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Label.html#LabelOptic"><span class="hs-identifier hs-type">LabelOptic</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;unPositive&quot;</span></span><span> </span><span class="annot"><a href="#local-6989586621679103125"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103127"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103127"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679103126"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103128"><span class="hs-identifier hs-type">y</span></a></span></span></span></span></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621679103339"><span class="annot"><span class="annottext">labelOptic :: Optic k NoIx (Positive a) (Positive a) x y
+</span><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Label.html#labelOptic"><span class="hs-identifier hs-var hs-var hs-var hs-var">labelOptic</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Positive a -&gt; x) -&gt; Getter (Positive a) x
+forall s a. (s -&gt; a) -&gt; Getter s a
+</span><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103340"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103340"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">x
+a
+</span><a href="#local-6989586621679103340"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="file:///nix/store/kpg5cmxmxp7aaby0kpg2q9k29pn7k6ng-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Label.html#labelOptic"><span class="hs-pragma hs-type">labelOptic</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- | Unidirectional pattern synonym for 'Positive'. This allows us to pattern</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- match on a positive term without exposing the unsafe internal details.</span><span>
+</span><span id="line-91"></span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-93"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#MkPositive"><span class="hs-identifier hs-type">MkPositive</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679103133"><span class="annot"><a href="#local-6989586621679103133"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103133"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">pattern</span><span> </span><span id="MkPositive"><span id="%24mMkPositive"><span class="annot"><span class="annottext">$mMkPositive :: forall {r} {a}. Positive a -&gt; (a -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
+</span><a href="Numeric.Data.Positive.Internal.html#MkPositive"><span class="hs-identifier hs-var hs-var">MkPositive</span></a></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679103342"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103342"><span class="annot"><a href="#local-6989586621679103342"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#MkPositive"><span class="hs-pragma hs-type">MkPositive</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103138"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bounded</span></span><span> </span><span class="annot"><a href="#local-6989586621679103138"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#UpperBounded"><span class="hs-identifier hs-type">UpperBounded</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103138"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-100"></span><span>  </span><span id="local-6989586621679103348"><span class="annot"><span class="annottext">upperBound :: Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#upperBound"><span class="hs-identifier hs-var hs-var hs-var hs-var">upperBound</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">a
+forall a. Bounded a =&gt; a
+</span><span class="hs-identifier hs-var">maxBound</span></span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/bounds-0.1-1d52084a1f971a4fdbd720f1e5ab47c1e60b195d90d8a7c895bfb619e4c0dfac/share/doc/html/src/Data.Bounds.html#upperBound"><span class="hs-pragma hs-type">upperBound</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103144"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679103144"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Additive.ASemigroup.html#ASemigroup"><span class="hs-identifier hs-type">ASemigroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103144"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>  </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103355"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103355"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679103356"><span class="annot"><span class="annottext">.+. :: Positive a -&gt; Positive a -&gt; Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Additive.ASemigroup.html#.%2B."><span class="hs-operator hs-var hs-var hs-var hs-var">.+.</span></a></span></span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103357"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103357"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Positive a) -&gt; a -&gt; Positive a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103355"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103357"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">.+.</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-109"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103153"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679103153"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MSemigroup.html#MSemigroup"><span class="hs-identifier hs-type">MSemigroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103153"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-110"></span><span>  </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103364"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103364"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679103365"><span class="annot"><span class="annottext">.*. :: Positive a -&gt; Positive a -&gt; Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MSemigroup.html#.%2A."><span class="hs-operator hs-var hs-var hs-var hs-var">.*.</span></a></span></span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103366"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103366"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Positive a) -&gt; a -&gt; Positive a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103364"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103366"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">.*.</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-114"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103157"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679103157"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MMonoid.html#MMonoid"><span class="hs-identifier hs-type">MMonoid</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103157"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-115"></span><span>  </span><span id="local-6989586621679103375"><span class="annot"><span class="annottext">one :: Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MMonoid.html#one"><span class="hs-identifier hs-var hs-var hs-var hs-var">one</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MMonoid.html#one"><span class="hs-pragma hs-type">one</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-119"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103162"><span class="hs-special">(</span><span class="annot"><a href="Numeric.Class.Division.html#Division"><span class="hs-identifier hs-type">Division</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679103162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MGroup.html#MGroup"><span class="hs-identifier hs-type">MGroup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103384"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103384"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679103385"><span class="annot"><span class="annottext">.%. :: Positive a -&gt; Positive a -&gt; Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MGroup.html#.%25."><span class="hs-operator hs-var hs-var hs-var hs-var">.%.</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103386"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103386"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Positive a) -&gt; a -&gt; Positive a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103384"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Division a =&gt; a -&gt; a -&gt; a
+</span><a href="Numeric.Class.Division.html#divide"><span class="hs-operator hs-var">`divide`</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103386"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-121"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">.%.</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-124"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103169"><span class="hs-special">(</span><span class="annot"><a href="Numeric.Class.Division.html#Division"><span class="hs-identifier hs-type">Division</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103169"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679103169"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html#MEuclidean"><span class="hs-identifier hs-type">MEuclidean</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103169"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-125"></span><span>  </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103401"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103401"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679103402"><span class="annot"><span class="annottext">mdivMod :: Positive a -&gt; Positive a -&gt; (Positive a, Positive a)
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html#mdivMod"><span class="hs-operator hs-var hs-var hs-var hs-var">`mdivMod`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-type">UnsafePositive</span></a></span><span> </span><span id="local-6989586621679103403"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103403"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-126"></span><span>    </span><span class="annot"><span class="annottext">(a -&gt; Positive a)
+-&gt; (a -&gt; Positive a) -&gt; (a, a) -&gt; (Positive a, Positive a)
+forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; (a, c) -&gt; (b, d)
+forall (p :: Type -&gt; Type -&gt; Type) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">((a, a) -&gt; (Positive a, Positive a))
+-&gt; (a, a) -&gt; (Positive a, Positive a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103401"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; (a, a)
+forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
+</span><span class="hs-operator hs-var">`divMod`</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103403"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html#mdivMod"><span class="hs-pragma hs-type">mdivMod</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-130"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103179"><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Normed.html#Normed"><span class="hs-identifier hs-type">Normed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103179"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-131"></span><span>  </span><span id="local-6989586621679103408"><span class="annot"><span class="annottext">norm :: Positive a -&gt; Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Normed.html#norm"><span class="hs-identifier hs-var hs-var hs-var hs-var">norm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Positive a -&gt; Positive a
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-132"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Algebra.Normed.html#norm"><span class="hs-pragma hs-type">norm</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- | __WARNING: Partial__</span><span>
+</span><span id="line-135"></span><span class="hs-comment">--</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-137"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103185"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679103185"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679103185"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679103185"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Integer.html#FromInteger"><span class="hs-identifier hs-type">FromInteger</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103185"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621679103423"><span class="annot"><span class="annottext">afromInteger :: HasCallStack =&gt; Integer -&gt; Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Integer.html#afromInteger"><span class="hs-identifier hs-var hs-var hs-var hs-var">afromInteger</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. (HasCallStack, Num a, Ord a, Show a) =&gt; a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#unsafePositive"><span class="hs-identifier hs-var">unsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Positive a) -&gt; (Integer -&gt; a) -&gt; Integer -&gt; Positive a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; a
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span>
+</span><span id="line-139"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Integer.html#afromInteger"><span class="hs-pragma hs-type">afromInteger</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- | __WARNING: Partial__</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--</span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-144"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679103193"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679103193"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679103193"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679103193"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Rational.html#FromRational"><span class="hs-identifier hs-type">FromRational</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103193"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-145"></span><span>  </span><span id="local-6989586621679103440"><span class="annot"><span class="annottext">afromRational :: HasCallStack =&gt; Rational -&gt; Positive a
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Rational.html#afromRational"><span class="hs-identifier hs-var hs-var hs-var hs-var">afromRational</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. (HasCallStack, Num a, Ord a, Show a) =&gt; a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#unsafePositive"><span class="hs-identifier hs-var">unsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Positive a) -&gt; (Rational -&gt; a) -&gt; Rational -&gt; Positive a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; a
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span>
+</span><span id="line-146"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.8.2/algebra-simple-0.1-eb2a2993560d9ccf5a7cb5ba2e184922ae85690c56669d96a71f578f58637d3a/share/doc/html/src/Numeric.Literal.Rational.html#afromRational"><span class="hs-pragma hs-type">afromRational</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- | Throws an error when given a value &lt;= 0.</span><span>
+</span><span id="line-149"></span><span class="hs-comment">--</span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- __WARNING: Partial__</span><span>
+</span><span id="line-151"></span><span class="hs-comment">--</span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- &gt;&gt;&gt; unsafePositive 7</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- UnsafePositive 7</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-157"></span><span id="local-6989586621679103186"><span class="annot"><a href="Numeric.Data.Positive.Internal.html#unsafePositive"><span class="hs-identifier hs-type">unsafePositive</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679103186"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679103186"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679103186"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103186"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#Positive"><span class="hs-identifier hs-type">Positive</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679103186"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-158"></span><span id="unsafePositive"><span class="annot"><span class="annottext">unsafePositive :: forall a. (HasCallStack, Num a, Ord a, Show a) =&gt; a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#unsafePositive"><span class="hs-identifier hs-var hs-var">unsafePositive</span></a></span></span><span> </span><span id="local-6989586621679103450"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103450"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-159"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103450"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Positive a
+forall a. a -&gt; Positive a
+</span><a href="Numeric.Data.Positive.Internal.html#UnsafePositive"><span class="hs-identifier hs-var">UnsafePositive</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103450"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-160"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-161"></span><span>      </span><span class="annot"><span class="annottext">String -&gt; Positive a
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Positive a) -&gt; String -&gt; Positive a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-162"></span><span>        </span><span class="annot"><span class="annottext">String -&gt; a -&gt; String
+forall a. Show a =&gt; String -&gt; a -&gt; String
+</span><a href="Numeric.Data.Positive.Internal.html#errMsg"><span class="hs-identifier hs-var">errMsg</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;unsafePositive&quot;</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103450"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-163"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Positive.Internal.html#unsafePositive"><span class="hs-pragma hs-type">unsafePositive</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-166"></span><span id="local-6989586621679103198"><span class="annot"><a href="Numeric.Data.Positive.Internal.html#errMsg"><span class="hs-identifier hs-type">errMsg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679103198"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679103198"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span></span><span>
+</span><span id="line-167"></span><span id="errMsg"><span class="annot"><span class="annottext">errMsg :: forall a. Show a =&gt; String -&gt; a -&gt; String
+</span><a href="Numeric.Data.Positive.Internal.html#errMsg"><span class="hs-identifier hs-var hs-var">errMsg</span></a></span></span><span> </span><span id="local-6989586621679103461"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679103461"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span id="local-6989586621679103462"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103462"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-168"></span><span>  </span><span class="annot"><span class="annottext">[String] -&gt; String
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">mconcat</span></span><span>
+</span><span id="line-169"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Numeric.Data.Positive.&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-170"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679103461"><span class="hs-identifier hs-var">fn</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-171"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;: Received value &lt;= zero: &quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-172"></span><span>      </span><span class="annot"><span class="annottext">a -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679103462"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-173"></span><span>    </span><span class="hs-special">]</span><span>
+</span><span id="line-174"></span></pre></body></html>
