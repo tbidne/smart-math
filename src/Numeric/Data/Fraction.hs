@@ -5,7 +5,7 @@
 -- @since 0.1
 module Numeric.Data.Fraction
   ( -- * Type
-    Fraction ((:%:)),
+    Fraction ((:%:), (:%!)),
 
     -- * Creation
     mkFraction,
@@ -33,7 +33,7 @@ import Data.Bounds
   )
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Data.Fraction.Internal (Fraction (UnsafeFraction, (:%:)))
+import Numeric.Data.Fraction.Internal (Fraction (UnsafeFraction, (:%!), (:%:)))
 import Numeric.Data.Fraction.Internal qualified as Internal
 import Numeric.Data.Internal.Utils (rmatching)
 import Optics.Core
@@ -79,7 +79,7 @@ mkFractionTH n = maybe (error err) liftTyped . mkFraction n
 -- @since 0.1
 mkFraction :: (Integral a, UpperBoundless a) => a -> a -> Maybe (Fraction a)
 mkFraction _ 0 = Nothing
-mkFraction n d = Just $ reduce (UnsafeFraction n d)
+mkFraction n d = Just $ Internal.reduce (UnsafeFraction n d)
 {-# INLINEABLE mkFraction #-}
 
 -- | Infix version of 'mkFractionTH'.

@@ -6,7 +6,7 @@
 -- @since 0.1
 module Numeric.Data.Fraction.Internal
   ( -- * Type
-    Fraction ((:%:), UnsafeFraction),
+    Fraction ((:%:), (:%!), UnsafeFraction),
 
     -- * Creation
     unsafeFraction,
@@ -171,6 +171,29 @@ pattern n :%: d <- UnsafeFraction n d
 {-# COMPLETE (:%:) #-}
 
 infixr 5 :%:
+
+-- | Bidirectional pattern synonym for 'Fraction'. Note that this is __not__
+-- safe in general, as construction with a zero denominator with throw an
+-- error.
+--
+-- __WARNING: Partial__
+--
+-- @since 0.1
+pattern (:%!) ::
+  ( HasCallStack,
+    Integral a,
+    UpperBoundless a
+  ) =>
+  a ->
+  a ->
+  Fraction a
+pattern n :%! d <- UnsafeFraction n d
+  where
+    n :%! d = unsafeFraction n d
+
+{-# COMPLETE (:%!) #-}
+
+infixr 5 :%!
 
 -- | @since 0.1
 instance (Bounded a, Num a) => Bounded (Fraction a) where
