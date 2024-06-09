@@ -19,7 +19,7 @@ module Numeric.Data.Fraction
     Internal.denominator,
 
     -- * Functions
-    reduce,
+    Internal.reduce,
 
     -- * Optics
     -- $optics
@@ -95,32 +95,6 @@ n %% d = mkFractionTH n d
 {-# INLINE (%%) #-}
 
 infixl 7 %%
-
--- | Reduces a fraction:
---
--- 1. Removes common factors.
--- 2. Factors out negative denominators.
--- 3. @reduce (0 :%: _) --> 0 :%: 1@.
---
--- ==== __Examples__
--- >>> reduce (7 %! 2)
--- UnsafeFraction 7 2
---
--- >>> reduce (18 %! 10)
--- UnsafeFraction 9 5
---
--- >>> reduce (-5 %! -5)
--- UnsafeFraction 1 1
---
--- @since 0.1
-reduce :: (Integral a, UpperBoundless a) => Fraction a -> Fraction a
-reduce (UnsafeFraction 0 _) = UnsafeFraction 0 1
-reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
-  where
-    n' = n `quot` g
-    d' = d `quot` g
-    g = gcd n d
-{-# INLINEABLE reduce #-}
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkFraction' that allows for total
