@@ -153,24 +153,33 @@ _MkInterval = re (prism unInterval g)
 
 -- | @since 0.1
 _Open :: Prism' IntervalBound Nat
-_Open = prism Open g
-  where
-    g (Open x) = Right x
-    g other = Left other
+_Open =
+  prism
+    Open
+    ( \case
+        Open x -> Right x
+        other -> Left other
+    )
 {-# INLINEABLE _Open #-}
 
 -- | @since 0.1
 _Closed :: Prism' IntervalBound Nat
-_Closed = prism Closed g
-  where
-    g (Closed x) = Right x
-    g other = Left other
+_Closed =
+  prism
+    Closed
+    ( \case
+        Closed x -> Right x
+        other -> Left other
+    )
 {-# INLINEABLE _Closed #-}
 
 -- | @since 0.1
 _None :: Prism' IntervalBound ()
-_None = prism (const None) g
-  where
-    g None = Right ()
-    g other = Left other
+_None =
+  prism
+    (const None)
+    ( \case
+        None -> Right ()
+        other -> Left other
+    )
 {-# INLINEABLE _None #-}
