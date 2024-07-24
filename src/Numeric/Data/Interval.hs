@@ -15,6 +15,12 @@ module Numeric.Data.Interval
     -- * Elimination
     unInterval,
 
+    -- * Bound aliases
+    -- $bound-aliases
+    O,
+    C,
+    N,
+
     -- * Optics
     -- $optics
     _MkInterval,
@@ -77,6 +83,30 @@ mkIntervalTH x = maybe (error msg) liftTyped $ Internal.mkInterval x
 reallyUnsafeInterval :: a -> Interval l r a
 reallyUnsafeInterval = UnsafeInterval
 {-# INLINEABLE reallyUnsafeInterval #-}
+
+-- $bound-aliases
+-- These aliases allow for writing interval types more concisely.
+--
+-- >>> Internal.unsafeInterval @(O 10) @(C 100) 50
+-- UnsafeInterval (Open 10) (Closed 100) 50
+--
+-- >>> Internal.unsafeInterval @N @(C 100) 50
+-- UnsafeInterval None (Closed 100) 50
+
+-- | Alias for 'Open', for writing bounds more concisely.
+type O :: Nat -> IntervalBound
+type family O n where
+  O n = Open n
+
+-- | Alias for 'Closed', for writing bounds more concisely.
+type C :: Nat -> IntervalBound
+type family C n where
+  C n = Closed n
+
+-- | Alias for 'None', for writing bounds more concisely.
+type N :: IntervalBound
+type family N where
+  N = None
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkInterval' that allows for total

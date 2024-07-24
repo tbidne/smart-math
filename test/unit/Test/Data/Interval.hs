@@ -9,6 +9,7 @@ module Test.Data.Interval (tests) where
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
+import Numeric.Data.Interval (C, N, O)
 import Numeric.Data.Interval qualified as Interval
 import Numeric.Data.Interval.Internal
   ( Interval (UnsafeInterval),
@@ -285,6 +286,6 @@ showSpecs = testCase "Shows intervals" $ do
 
 displaySpecs :: TestTree
 displaySpecs = testCase "Displays intervals" $ do
-  "2 \8712 (-\8734, \8734)" @=? D.display (Interval.unsafeInterval @None @None @Integer 2)
-  "7 \8712 (1, 10]" @=? D.display (Interval.unsafeInterval @(Open 1) @(Closed 10) @Integer 7)
-  "7 \8712 [1, 10)" @=? D.display (Interval.unsafeInterval @(Closed 1) @(Open 10) @Integer 7)
+  "2 \8712 (-\8734, \8734)" @=? D.display (Interval.unsafeInterval @N @N @Integer 2)
+  "7 \8712 (1, 10]" @=? D.display (Interval.unsafeInterval @(O 1) @(C 10) @Integer 7)
+  "7 \8712 [1, 10)" @=? D.display (Interval.unsafeInterval @(C 1) @(O 10) @Integer 7)
