@@ -19,9 +19,9 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bounds
-  ( AnyLowerBounded,
-    AnyUpperBounded,
-    LowerBounded,
+  ( LowerBounded,
+    MaybeLowerBounded,
+    MaybeUpperBounded,
     UpperBounded,
   )
 import Data.Kind (Type)
@@ -139,9 +139,9 @@ pattern MkModN x <- UnsafeModN x
 --
 -- @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   Bounded (ModN n a)
@@ -165,9 +165,9 @@ instance (KnownNat n, Show a) => Display (ModN n a) where
 
 -- | @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
-    KnownNat n
+  ( Integral a,
+    KnownNat n,
+    MaybeUpperBounded a
   ) =>
   ASemigroup (ModN n a)
   where
@@ -181,9 +181,9 @@ instance
 --
 -- @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   AMonoid (ModN n a)
@@ -193,10 +193,10 @@ instance
 
 -- | @since 0.1
 instance
-  ( AnyLowerBounded a,
-    AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeLowerBounded a,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   AGroup (ModN n a)
@@ -209,9 +209,9 @@ instance
 
 -- | @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
-    KnownNat n
+  ( Integral a,
+    KnownNat n,
+    MaybeUpperBounded a
   ) =>
   MSemigroup (ModN n a)
   where
@@ -225,9 +225,9 @@ instance
 --
 -- @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   MMonoid (ModN n a)
@@ -237,19 +237,19 @@ instance
 
 -- | @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   Semiring (ModN n a)
 
 -- | @since 0.1
 instance
-  ( AnyLowerBounded a,
-    AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeLowerBounded a,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   Ring (ModN n a)
@@ -258,9 +258,9 @@ instance
 --
 -- @since 0.1
 instance
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   FromInteger (ModN n a)
@@ -283,9 +283,9 @@ instance
 -- @since 0.1
 mkModN ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   a ->
@@ -309,10 +309,10 @@ mkModN x = maybe modN Left (Utils.checkModBound x n')
 -- @since 0.1
 unsafeModN ::
   forall n a.
-  ( AnyUpperBounded a,
-    HasCallStack,
+  ( HasCallStack,
     Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   a ->

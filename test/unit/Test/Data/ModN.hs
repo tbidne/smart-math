@@ -2,7 +2,7 @@
 
 module Test.Data.ModN (props) where
 
-import Data.Bounds (AnyUpperBounded)
+import Data.Bounds (MaybeUpperBounded)
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -469,9 +469,9 @@ multTotalNatural =
 
 mkModN' ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -489,9 +489,9 @@ mkModN' = property $ do
 
 mkModNFailure ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -521,9 +521,9 @@ mkModNFailure tyStr maxStr modStr = property $ do
 
 boundedVals ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Show a,
     Typeable a
   ) =>
@@ -537,10 +537,10 @@ boundedVals = testCase "Min/max bounds" $ do
 
 addTotal' ::
   forall n a.
-  ( AnyUpperBounded a,
-    ASemigroup (ModN n a),
+  ( ASemigroup (ModN n a),
     Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -564,9 +564,9 @@ addTotal' = property $ do
 subTotal' ::
   forall n a.
   ( AGroup (ModN n a),
-    AnyUpperBounded a,
     Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -588,9 +588,9 @@ subTotal' = property $ do
 
 multTotal' ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     MSemigroup (ModN n a),
     Show a,
     TestBounds a,
@@ -616,9 +616,9 @@ nonneg = HG.integral $ HR.exponentialFrom 20 20 maxVal
 
 anyNat ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     TestBounds a,
     Typeable a
   ) =>

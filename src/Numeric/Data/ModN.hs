@@ -23,7 +23,7 @@ module Numeric.Data.ModN
   )
 where
 
-import Data.Bounds (AnyUpperBounded)
+import Data.Bounds (MaybeUpperBounded)
 import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
@@ -51,10 +51,10 @@ unModN (UnsafeModN x) = x
 -- @since 0.1
 mkModNTH ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
     Lift a,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   a ->
@@ -94,9 +94,9 @@ mkModNTH x = case Internal.mkModN x of
 -- @since 0.1
 _MkModN ::
   forall n a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat n,
+    MaybeUpperBounded a,
     Ord a,
     Typeable a
   ) =>

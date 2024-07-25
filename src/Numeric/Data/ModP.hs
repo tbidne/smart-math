@@ -24,7 +24,7 @@ module Numeric.Data.ModP
   )
 where
 
-import Data.Bounds (AnyUpperBounded)
+import Data.Bounds (MaybeUpperBounded)
 import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH (Code, Q)
@@ -48,10 +48,10 @@ unModP (UnsafeModP x) = x
 -- @since 0.1
 mkModPTH ::
   forall p a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat p,
     Lift a,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   a ->
@@ -91,9 +91,9 @@ mkModPTH x = case Internal.mkModP x of
 -- @since 0.1
 _MkModP ::
   forall p a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   ReversedPrism' (ModP p a) a

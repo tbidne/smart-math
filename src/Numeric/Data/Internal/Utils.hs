@@ -12,8 +12,8 @@ module Numeric.Data.Internal.Utils
 where
 
 import Data.Bounds
-  ( AnyLowerBounded (someLowerBound),
-    AnyUpperBounded (someUpperBound),
+  ( MaybeLowerBounded (maybeLowerBound),
+    MaybeUpperBounded (maybeUpperBound),
   )
 import Data.Typeable (Typeable)
 import Data.Typeable qualified as Typeable
@@ -32,8 +32,8 @@ import Optics.Core
 -- the check fails.
 checkModBound ::
   forall a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
+    MaybeUpperBounded a,
     Typeable a
   ) =>
   -- | The type /a/ whose upper bound must be large enough to accommodate
@@ -44,7 +44,7 @@ checkModBound ::
   Integer ->
   Maybe String
 checkModBound aTerm modulus =
-  someUpperBound @a >>= \maxA ->
+  maybeUpperBound @a >>= \maxA ->
     let maxAInt = toInteger maxA
      in if maxS <= maxAInt
           then Nothing
@@ -69,8 +69,8 @@ checkModBound aTerm modulus =
 -- | Performs modular addition, accounting for rounding in the type itself.
 modSafeAdd ::
   forall a.
-  ( AnyUpperBounded a,
-    Integral a
+  ( Integral a,
+    MaybeUpperBounded a
   ) =>
   -- | x
   a ->
@@ -85,8 +85,8 @@ modSafeAdd = modSafeInc (+)
 -- itself.
 modSafeMult ::
   forall a.
-  ( AnyUpperBounded a,
-    Integral a
+  ( Integral a,
+    MaybeUpperBounded a
   ) =>
   -- | x
   a ->
@@ -99,8 +99,8 @@ modSafeMult = modSafeInc (*)
 
 modSafeInc ::
   forall a.
-  ( AnyUpperBounded a,
-    Integral a
+  ( Integral a,
+    MaybeUpperBounded a
   ) =>
   -- | Operations (addition or multiplication)
   (forall x. (Integral x) => x -> x -> x) ->
@@ -111,7 +111,7 @@ modSafeInc ::
   -- | n (modulus)
   a ->
   a
-modSafeInc op x y modulus = case someUpperBound @a of
+modSafeInc op x y modulus = case maybeUpperBound @a of
   -- 1. A is unbounded: Easy
   Nothing -> (x `op` y) `mod` modulus
   Just maxA ->
@@ -137,8 +137,8 @@ modSafeInc op x y modulus = case someUpperBound @a of
 -- itself.
 modSafeSub ::
   forall a.
-  ( AnyLowerBounded a,
-    Integral a
+  ( Integral a,
+    MaybeLowerBounded a
   ) =>
   -- | x
   a ->
@@ -147,7 +147,7 @@ modSafeSub ::
   -- | n (modulus)
   a ->
   a
-modSafeSub x y modulus = case someLowerBound @a of
+modSafeSub x y modulus = case maybeLowerBound @a of
   -- 1. A is unbounded: Easy
   Nothing -> (x - y) `mod` modulus
   Just minA ->

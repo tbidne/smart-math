@@ -3,7 +3,7 @@
 
 module Test.Data.ModP (props) where
 
-import Data.Bounds (AnyUpperBounded)
+import Data.Bounds (MaybeUpperBounded)
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -466,9 +466,9 @@ invert' = property $ do
 
 mkModP' ::
   forall p a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -486,9 +486,9 @@ mkModP' = property $ do
 
 mkModPFailSize ::
   forall p a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -518,9 +518,9 @@ mkModPFailSize tyStr maxStr modStr = property $ do
 
 mkModPFailComposite ::
   forall p a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
     Show a,
     TestBounds a,
     Typeable a
@@ -543,9 +543,9 @@ mkModPFailComposite primeStr = property $ do
 
 boundedVals ::
   forall p a.
-  ( AnyUpperBounded a,
-    Integral a,
+  ( Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
     Show a,
     Typeable a
   ) =>
