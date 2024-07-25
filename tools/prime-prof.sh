@@ -2,6 +2,6 @@ set -e
 
 export LANG="C.UTF-8"
 
-cabal build prime-prof --project-file=cabal.project.prime-prof
+cabal build prime-prof --project-file=cabal.prime-prof.project
 
-cabal run prime-prof --project-file=cabal.project.prime-prof -- +RTS -p -RTS
+cabal run prime-prof --project-file=cabal.prime-prof.project -- +RTS -p -RTS
