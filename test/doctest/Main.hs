@@ -47,6 +47,7 @@ exts =
     "-XFlexibleInstances",
     "-XGeneralizedNewtypeDeriving",
     "-XImportQualifiedPost",
+    "-XLambdaCase",
     "-XMultiParamTypeClasses",
     "-XMultiWayIf",
     "-XNegativeLiterals",
