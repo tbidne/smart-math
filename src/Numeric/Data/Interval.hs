@@ -95,18 +95,15 @@ reallyUnsafeInterval = UnsafeInterval
 
 -- | Alias for 'Open', for writing bounds more concisely.
 type O :: Nat -> IntervalBound
-type family O n where
-  O n = Open n
+type O n = Open n
 
 -- | Alias for 'Closed', for writing bounds more concisely.
 type C :: Nat -> IntervalBound
-type family C n where
-  C n = Closed n
+type C n = Closed n
 
 -- | Alias for 'None', for writing bounds more concisely.
 type N :: IntervalBound
-type family N where
-  N = None
+type N = None
 
 -- $optics
 -- We provide a 'ReversedPrism'' '_MkInterval' that allows for total
