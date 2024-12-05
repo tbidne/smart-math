@@ -6,6 +6,9 @@ module Numeric.Data.Internal.Utils
     modSafeMult,
     modSafeSub,
 
+    -- * Subtraction
+    safeDiff,
+
     -- * Optics
     rmatching,
   )
@@ -179,3 +182,8 @@ rmatching ::
   Either t a
 rmatching = matching . re
 {-# INLINEABLE rmatching #-}
+
+safeDiff :: (Real a) => a -> a -> Double
+safeDiff x y
+  | x <= y = realToFrac $ y - x
+  | otherwise = realToFrac $ x - y

@@ -46,6 +46,8 @@ import GHC.Show (showSpace)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
+import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
@@ -239,6 +241,11 @@ instance
       ]
     where
       (left, right) = getInterval @l @r
+
+-- | @since 0.1
+instance (Real a) => MetricSpace (Interval l r a) where
+  diff (UnsafeInterval x) (UnsafeInterval y) = Utils.safeDiff x y
+  {-# INLINEABLE diff #-}
 
 -- | __WARNING: Partial__
 --

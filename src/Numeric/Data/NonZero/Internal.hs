@@ -23,13 +23,16 @@ import GHC.Generics (Generic)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
+import Numeric.Algebra.MetricSpace (MetricSpace (diff))
 import Numeric.Algebra.Multiplicative
   ( MEuclidean (mdivMod),
     MGroup ((.%.)),
     MMonoid (one),
     MSemigroup ((.*.)),
   )
+import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Class.Division (Division (divide))
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
@@ -99,6 +102,16 @@ instance (Division a, Integral a) => MEuclidean (NonZero a) where
   UnsafeNonZero x `mdivMod` UnsafeNonZero d =
     bimap UnsafeNonZero UnsafeNonZero $ x `divMod` d
   {-# INLINE mdivMod #-}
+
+-- | @since 0.1
+instance (Real a) => MetricSpace (NonZero a) where
+  diff (UnsafeNonZero x) (UnsafeNonZero y) = Utils.safeDiff x y
+  {-# INLINEABLE diff #-}
+
+-- | @since 0.1
+instance (Num a) => Normed (NonZero a) where
+  norm (UnsafeNonZero x) = UnsafeNonZero $ abs x
+  {-# INLINEABLE norm #-}
 
 -- | __WARNING: Partial__
 --

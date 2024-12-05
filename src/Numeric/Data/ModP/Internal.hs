@@ -41,6 +41,7 @@ import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
+import Numeric.Algebra.MetricSpace (MetricSpace (diff))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
@@ -283,6 +284,21 @@ instance
     Typeable a
   ) =>
   Field (ModP p a)
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat p,
+    MaybeLowerBounded a,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  MetricSpace (ModP p a)
+  where
+  diff x y = realToFrac d
+    where
+      UnsafeModP d = y .-. x
+  {-# INLINEABLE diff #-}
 
 -- | __WARNING: Partial__
 --

@@ -44,6 +44,7 @@ import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
+import Numeric.Algebra.MetricSpace (MetricSpace (diff))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
@@ -355,6 +356,18 @@ instance MGroup (Fraction Integer) where
 instance MGroup (Fraction Natural) where
   x .%. (UnsafeFraction n d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
+
+-- | @since 0.1
+instance MetricSpace (Fraction Integer) where
+  diff x y = realToFrac $ abs (y - x)
+  {-# INLINEABLE diff #-}
+
+-- | @since 0.1
+instance MetricSpace (Fraction Natural) where
+  diff x y
+    | x <= y = realToFrac $ abs (y - x)
+    | otherwise = realToFrac $ abs (x - y)
+  {-# INLINEABLE diff #-}
 
 -- | @since 0.1
 instance Normed (Fraction Integer) where

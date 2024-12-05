@@ -25,12 +25,14 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
+import Numeric.Algebra.MetricSpace (MetricSpace (diff))
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Class.Division (Division (divide))
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (afromInteger))
 import Numeric.Literal.Rational (FromRational (afromRational))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
@@ -125,6 +127,11 @@ instance (Division a, Integral a) => MEuclidean (Positive a) where
   UnsafePositive x `mdivMod` (UnsafePositive d) =
     bimap UnsafePositive UnsafePositive $ x `divMod` d
   {-# INLINEABLE mdivMod #-}
+
+-- | @since 0.1
+instance (Real a) => MetricSpace (Positive a) where
+  diff (UnsafePositive x) (UnsafePositive y) = Utils.safeDiff x y
+  {-# INLINEABLE diff #-}
 
 -- | @since 0.1
 instance Normed (Positive a) where

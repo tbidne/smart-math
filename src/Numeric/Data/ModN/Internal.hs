@@ -36,6 +36,7 @@ import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
+import Numeric.Algebra.MetricSpace (MetricSpace (diff))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Ring (Ring)
@@ -253,6 +254,21 @@ instance
     Typeable a
   ) =>
   Ring (ModN n a)
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat n,
+    MaybeLowerBounded a,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  MetricSpace (ModN n a)
+  where
+  diff x y = realToFrac d
+    where
+      UnsafeModN d = y .-. x
+  {-# INLINEABLE diff #-}
 
 -- | __WARNING: Partial__
 --
