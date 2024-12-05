@@ -53,8 +53,8 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
-import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Literal.Rational (FromRational (afromRational))
+import Numeric.Literal.Integer (FromInteger (fromZ))
+import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
 import Optics.Core
   ( A_Getter,
     A_Lens,
@@ -399,27 +399,37 @@ instance Field (Fraction Integer)
 
 -- | @since 0.1
 instance FromInteger (Fraction Integer) where
-  afromInteger = fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = fromInteger
+  {-# INLINEABLE fromZ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance FromInteger (Fraction Natural) where
-  afromInteger = fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = fromInteger
+  {-# INLINEABLE fromZ #-}
 
 -- | @since 0.1
 instance FromRational (Fraction Integer) where
-  afromRational = fromRational
-  {-# INLINEABLE afromRational #-}
+  fromQ = fromRational
+  {-# INLINEABLE fromQ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance FromRational (Fraction Natural) where
-  afromRational = fromRational
-  {-# INLINEABLE afromRational #-}
+  fromQ = fromRational
+  {-# INLINEABLE fromQ #-}
+
+-- | @since 0.1
+instance ToRational (Fraction Integer) where
+  toQ (UnsafeFraction n d) = n :% d
+  {-# INLINEABLE toQ #-}
+
+-- | @since 0.1
+instance ToRational (Fraction Natural) where
+  toQ (UnsafeFraction n d) = toRational (n :% d)
+  {-# INLINEABLE toQ #-}
 
 -- | @since 0.1
 numerator :: Fraction a -> a

@@ -42,7 +42,8 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Data.Internal.Utils qualified as Utils
-import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Literal.Rational (ToRational (toQ))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -281,8 +282,18 @@ instance
   ) =>
   FromInteger (ModN n a)
   where
-  afromInteger = unsafeModN . fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = unsafeModN . fromInteger
+  {-# INLINEABLE fromZ #-}
+
+-- | @since 0.1
+instance (Integral a) => ToInteger (ModN n a) where
+  toZ (UnsafeModN x) = toInteger x
+  {-# INLINEABLE toZ #-}
+
+-- | @since 0.1
+instance (Real a) => ToRational (ModN n a) where
+  toQ (UnsafeModN x) = toRational x
+  {-# INLINEABLE toQ #-}
 
 -- | Constructor for 'ModN'.
 --

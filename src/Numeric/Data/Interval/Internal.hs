@@ -48,8 +48,8 @@ import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.MetricSpace (MetricSpace (diff))
 import Numeric.Data.Internal.Utils qualified as Utils
-import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Literal.Rational (FromRational (afromRational))
+import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -259,8 +259,13 @@ instance
   ) =>
   FromInteger (Interval l r a)
   where
-  afromInteger = unsafeInterval . fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = unsafeInterval . fromInteger
+  {-# INLINEABLE fromZ #-}
+
+-- | @since 0.1
+instance (Integral a) => ToInteger (Interval l r a) where
+  toZ (UnsafeInterval x) = toInteger x
+  {-# INLINEABLE toZ #-}
 
 -- | __WARNING: Partial__
 --
@@ -274,8 +279,13 @@ instance
   ) =>
   FromRational (Interval l r a)
   where
-  afromRational = unsafeInterval . fromRational
-  {-# INLINEABLE afromRational #-}
+  fromQ = unsafeInterval . fromRational
+  {-# INLINEABLE fromQ #-}
+
+-- | @since 0.1
+instance (Real a) => ToRational (Interval l r a) where
+  toQ (UnsafeInterval x) = toRational x
+  {-# INLINEABLE toQ #-}
 
 pattern MkInterval :: a -> Interval l r a
 pattern MkInterval x <- UnsafeInterval x

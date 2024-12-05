@@ -33,8 +33,8 @@ import Numeric.Algebra.Multiplicative
 import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Class.Division (Division (divide))
 import Numeric.Data.Internal.Utils qualified as Utils
-import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Literal.Rational (FromRational (afromRational))
+import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -117,15 +117,25 @@ instance (Num a) => Normed (NonZero a) where
 --
 -- @since 0.1
 instance (FromInteger a, Num a, Ord a) => FromInteger (NonZero a) where
-  afromInteger = unsafeNonZero . afromInteger
-  {-# INLINE afromInteger #-}
+  fromZ = unsafeNonZero . fromZ
+  {-# INLINE fromZ #-}
+
+-- | @since 0.1
+instance (Integral a) => ToInteger (NonZero a) where
+  toZ (UnsafeNonZero x) = toInteger x
+  {-# INLINEABLE toZ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (FromRational a, Num a, Ord a) => FromRational (NonZero a) where
-  afromRational = unsafeNonZero . afromRational
-  {-# INLINE afromRational #-}
+  fromQ = unsafeNonZero . fromQ
+  {-# INLINE fromQ #-}
+
+-- | @since 0.1
+instance (Real a) => ToRational (NonZero a) where
+  toQ (UnsafeNonZero x) = toRational x
+  {-# INLINEABLE toQ #-}
 
 -- | Unidirectional pattern synonym for 'NonZero'. This allows us to pattern
 -- match on a nonzero term without exposing the unsafe internal details.

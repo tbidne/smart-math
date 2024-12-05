@@ -56,7 +56,8 @@ import Numeric.Data.ModP.Internal.Primality
       ),
   )
 import Numeric.Data.ModP.Internal.Primality qualified as Prime
-import Numeric.Literal.Integer (FromInteger (afromInteger))
+import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Literal.Rational (ToRational (toQ))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -311,8 +312,18 @@ instance
   ) =>
   FromInteger (ModP p a)
   where
-  afromInteger = unsafeModP . fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = unsafeModP . fromInteger
+  {-# INLINEABLE fromZ #-}
+
+-- | @since 0.1
+instance (Integral a) => ToInteger (ModP p a) where
+  toZ (UnsafeModP x) = toInteger x
+  {-# INLINEABLE toZ #-}
+
+-- | @since 0.1
+instance (Real a) => ToRational (ModP p a) where
+  toQ (UnsafeModP x) = toRational x
+  {-# INLINEABLE toQ #-}
 
 -- | Constructor for 'ModP'. Fails if @p@ is not prime. This uses the
 -- Miller-Rabin primality test, which has complexity \(O(k \log^3 p)\), and we

@@ -40,8 +40,8 @@ import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
 import Numeric.Data.Internal.Utils qualified as Utils
-import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Literal.Rational (FromRational (afromRational))
+import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -165,15 +165,25 @@ instance Normed (NonNegative a) where
 --
 -- @since 0.1
 instance (Num a, Ord a, Show a) => FromInteger (NonNegative a) where
-  afromInteger = unsafeNonNegative . fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = unsafeNonNegative . fromInteger
+  {-# INLINEABLE fromZ #-}
+
+-- | @since 0.1
+instance (Integral a) => ToInteger (NonNegative a) where
+  toZ (UnsafeNonNegative x) = toInteger x
+  {-# INLINEABLE toZ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (Fractional a, Ord a, Show a) => FromRational (NonNegative a) where
-  afromRational = unsafeNonNegative . fromRational
-  {-# INLINEABLE afromRational #-}
+  fromQ = unsafeNonNegative . fromRational
+  {-# INLINEABLE fromQ #-}
+
+-- | @since 0.1
+instance (Real a) => ToRational (NonNegative a) where
+  toQ (UnsafeNonNegative x) = toRational x
+  {-# INLINEABLE toQ #-}
 
 -- | @since 0.1
 instance (Num a) => Semiring (NonNegative a)

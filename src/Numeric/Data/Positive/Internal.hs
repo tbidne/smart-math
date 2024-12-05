@@ -33,8 +33,8 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Class.Division (Division (divide))
 import Numeric.Data.Internal.Utils qualified as Utils
-import Numeric.Literal.Integer (FromInteger (afromInteger))
-import Numeric.Literal.Rational (FromRational (afromRational))
+import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -142,15 +142,25 @@ instance Normed (Positive a) where
 --
 -- @since 0.1
 instance (Num a, Ord a, Show a) => FromInteger (Positive a) where
-  afromInteger = unsafePositive . fromInteger
-  {-# INLINEABLE afromInteger #-}
+  fromZ = unsafePositive . fromInteger
+  {-# INLINEABLE fromZ #-}
+
+-- | @since 0.1
+instance (Integral a) => ToInteger (Positive a) where
+  toZ (UnsafePositive x) = toInteger x
+  {-# INLINEABLE toZ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance (Fractional a, Ord a, Show a) => FromRational (Positive a) where
-  afromRational = unsafePositive . fromRational
-  {-# INLINEABLE afromRational #-}
+  fromQ = unsafePositive . fromRational
+  {-# INLINEABLE fromQ #-}
+
+-- | @since 0.1
+instance (Real a) => ToRational (Positive a) where
+  toQ (UnsafePositive x) = toRational x
+  {-# INLINEABLE toQ #-}
 
 -- | Throws an error when given a value <= 0.
 --
