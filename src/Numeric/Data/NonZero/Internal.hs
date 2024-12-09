@@ -23,7 +23,7 @@ import GHC.Generics (Generic)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
-import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative
   ( MEuclidean (mdivMod),
     MGroup ((.%.)),
@@ -35,6 +35,7 @@ import Numeric.Class.Division (Division (divide))
 import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
+import Numeric.Literal.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -105,8 +106,8 @@ instance (Division a, Integral a) => MEuclidean (NonZero a) where
 
 -- | @since 0.1
 instance (Real a) => MetricSpace (NonZero a) where
-  diff (UnsafeNonZero x) (UnsafeNonZero y) = Utils.safeDiff x y
-  {-# INLINEABLE diff #-}
+  diffR (UnsafeNonZero x) (UnsafeNonZero y) = Utils.safeDiff x y
+  {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
 instance (Num a) => Normed (NonZero a) where
@@ -136,6 +137,18 @@ instance (FromRational a, Num a, Ord a) => FromRational (NonZero a) where
 instance (Real a) => ToRational (NonZero a) where
   toQ (UnsafeNonZero x) = toRational x
   {-# INLINEABLE toQ #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, Ord a) => FromReal (NonZero a) where
+  fromR = unsafeNonZero . realToFrac
+  {-# INLINEABLE fromR #-}
+
+-- | @since 0.1
+instance (Real a) => ToReal (NonZero a) where
+  toR (UnsafeNonZero x) = realToFrac x
+  {-# INLINEABLE toR #-}
 
 -- | Unidirectional pattern synonym for 'NonZero'. This allows us to pattern
 -- match on a nonzero term without exposing the unsafe internal details.

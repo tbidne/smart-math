@@ -46,10 +46,11 @@ import GHC.Show (showSpace)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
-import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
+import Numeric.Literal.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -244,8 +245,8 @@ instance
 
 -- | @since 0.1
 instance (Real a) => MetricSpace (Interval l r a) where
-  diff (UnsafeInterval x) (UnsafeInterval y) = Utils.safeDiff x y
-  {-# INLINEABLE diff #-}
+  diffR (UnsafeInterval x) (UnsafeInterval y) = Utils.safeDiff x y
+  {-# INLINEABLE diffR #-}
 
 -- | __WARNING: Partial__
 --
@@ -286,6 +287,26 @@ instance
 instance (Real a) => ToRational (Interval l r a) where
   toQ (UnsafeInterval x) = toRational x
   {-# INLINEABLE toQ #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance
+  ( Fractional a,
+    Ord a,
+    SingIntervalBound l,
+    SingIntervalBound r,
+    Show a
+  ) =>
+  FromReal (Interval l r a)
+  where
+  fromR = unsafeInterval . realToFrac
+  {-# INLINEABLE fromR #-}
+
+-- | @since 0.1
+instance (Real a) => ToReal (Interval l r a) where
+  toR (UnsafeInterval x) = realToFrac x
+  {-# INLINEABLE toR #-}
 
 pattern MkInterval :: a -> Interval l r a
 pattern MkInterval x <- UnsafeInterval x

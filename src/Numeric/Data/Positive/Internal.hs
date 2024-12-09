@@ -25,7 +25,7 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
@@ -35,6 +35,7 @@ import Numeric.Class.Division (Division (divide))
 import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
+import Numeric.Literal.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -130,8 +131,8 @@ instance (Division a, Integral a) => MEuclidean (Positive a) where
 
 -- | @since 0.1
 instance (Real a) => MetricSpace (Positive a) where
-  diff (UnsafePositive x) (UnsafePositive y) = Utils.safeDiff x y
-  {-# INLINEABLE diff #-}
+  diffR (UnsafePositive x) (UnsafePositive y) = Utils.safeDiff x y
+  {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
 instance Normed (Positive a) where
@@ -161,6 +162,18 @@ instance (Fractional a, Ord a, Show a) => FromRational (Positive a) where
 instance (Real a) => ToRational (Positive a) where
   toQ (UnsafePositive x) = toRational x
   {-# INLINEABLE toQ #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance (Fractional a, Ord a, Show a) => FromReal (Positive a) where
+  fromR = unsafePositive . realToFrac
+  {-# INLINEABLE fromR #-}
+
+-- | @since 0.1
+instance (Real a) => ToReal (Positive a) where
+  toR (UnsafePositive x) = realToFrac x
+  {-# INLINEABLE toR #-}
 
 -- | Throws an error when given a value <= 0.
 --

@@ -41,7 +41,7 @@ import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
-import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
@@ -58,6 +58,7 @@ import Numeric.Data.ModP.Internal.Primality
 import Numeric.Data.ModP.Internal.Primality qualified as Prime
 import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Literal.Rational (ToRational (toQ))
+import Numeric.Literal.Real (ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -296,10 +297,10 @@ instance
   ) =>
   MetricSpace (ModP p a)
   where
-  diff x y = realToFrac d
+  diffR x y = realToFrac d
     where
       UnsafeModP d = y .-. x
-  {-# INLINEABLE diff #-}
+  {-# INLINEABLE diffR #-}
 
 -- | __WARNING: Partial__
 --
@@ -324,6 +325,11 @@ instance (Integral a) => ToInteger (ModP p a) where
 instance (Real a) => ToRational (ModP p a) where
   toQ (UnsafeModP x) = toRational x
   {-# INLINEABLE toQ #-}
+
+-- | @since 0.1
+instance (Real a) => ToReal (ModP p a) where
+  toR (UnsafeModP x) = realToFrac x
+  {-# INLINEABLE toR #-}
 
 -- | Constructor for 'ModP'. Fails if @p@ is not prime. This uses the
 -- Miller-Rabin primality test, which has complexity \(O(k \log^3 p)\), and we

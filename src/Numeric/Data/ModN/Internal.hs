@@ -36,7 +36,7 @@ import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Ring (Ring)
@@ -44,6 +44,7 @@ import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Literal.Rational (ToRational (toQ))
+import Numeric.Literal.Real (ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -266,10 +267,10 @@ instance
   ) =>
   MetricSpace (ModN n a)
   where
-  diff x y = realToFrac d
+  diffR x y = realToFrac d
     where
       UnsafeModN d = y .-. x
-  {-# INLINEABLE diff #-}
+  {-# INLINEABLE diffR #-}
 
 -- | __WARNING: Partial__
 --
@@ -294,6 +295,11 @@ instance (Integral a) => ToInteger (ModN n a) where
 instance (Real a) => ToRational (ModN n a) where
   toQ (UnsafeModN x) = toRational x
   {-# INLINEABLE toQ #-}
+
+-- | @since 0.1
+instance (Real a) => ToReal (ModN n a) where
+  toR (UnsafeModN x) = realToFrac x
+  {-# INLINEABLE toR #-}
 
 -- | Constructor for 'ModN'.
 --

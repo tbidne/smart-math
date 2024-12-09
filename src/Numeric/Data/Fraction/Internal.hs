@@ -44,7 +44,7 @@ import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
-import Numeric.Algebra.MetricSpace (MetricSpace (diff))
+import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
@@ -55,6 +55,7 @@ import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
 import Numeric.Literal.Integer (FromInteger (fromZ))
 import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
+import Numeric.Literal.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core
   ( A_Getter,
     A_Lens,
@@ -359,15 +360,15 @@ instance MGroup (Fraction Natural) where
 
 -- | @since 0.1
 instance MetricSpace (Fraction Integer) where
-  diff x y = realToFrac $ abs (y - x)
-  {-# INLINEABLE diff #-}
+  diffR x y = realToFrac $ abs (y - x)
+  {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
 instance MetricSpace (Fraction Natural) where
-  diff x y
+  diffR x y
     | x <= y = realToFrac $ abs (y - x)
     | otherwise = realToFrac $ abs (x - y)
-  {-# INLINEABLE diff #-}
+  {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
 instance Normed (Fraction Integer) where
@@ -430,6 +431,30 @@ instance ToRational (Fraction Integer) where
 instance ToRational (Fraction Natural) where
   toQ (UnsafeFraction n d) = toRational (n :% d)
   {-# INLINEABLE toQ #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance FromReal (Fraction Integer) where
+  fromR = fromRational . realToFrac
+  {-# INLINEABLE fromR #-}
+
+-- | @since 0.1
+instance ToReal (Fraction Integer) where
+  toR (UnsafeFraction n d) = realToFrac (n :% d)
+  {-# INLINEABLE toR #-}
+
+-- | __WARNING: Partial__
+--
+-- @since 0.1
+instance FromReal (Fraction Natural) where
+  fromR = fromRational . realToFrac
+  {-# INLINEABLE fromR #-}
+
+-- | @since 0.1
+instance ToReal (Fraction Natural) where
+  toR (UnsafeFraction n d) = realToFrac (n :% d)
+  {-# INLINEABLE toR #-}
 
 -- | @since 0.1
 numerator :: Fraction a -> a
