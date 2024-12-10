@@ -3,16 +3,23 @@
 
 module Test.Data.ModP (props) where
 
-import Data.Bounds (MaybeUpperBounded)
+import Data.Bounds (MaybeLowerBounded, MaybeUpperBounded)
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Data.ModP qualified as ModP
-import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP), reallyUnsafeModP)
+import Numeric.Algebra
+  ( AGroup ((.-.)),
+    AMonoid,
+    ASemigroup ((.+.)),
+    MEuclidean,
+    MGroup ((.%.)),
+    MSemigroup ((.*.)),
+  )
+import Numeric.Convert.Integer (FromInteger, ToInteger)
+import Numeric.Data.ModP.Algebra qualified as AModP
+import Numeric.Data.ModP.Algebra.Internal qualified as AModPI
+import Numeric.Data.ModP.Base qualified as BModP
+import Numeric.Data.ModP.Base.Internal qualified as BModPI
 import Test.Prelude
 import Test.TestBounds (TestBounds (maxVal))
 import Utils qualified
@@ -54,9 +61,11 @@ props =
 
 testUnsafe :: TestTree
 testUnsafe = testCase "Test unsafeModP" $ do
-  UnsafeModP 5 @=? ModP.unsafeModP @7 @Integer 5
+  AModPI.UnsafeModP 5 @=? AModP.unsafeModP @7 @Integer 5
+  Utils.assertPureErrorCall expectedEx (AModP.unsafeModP @8 @Integer 5)
 
-  Utils.assertPureErrorCall expectedEx (ModP.unsafeModP @8 @Integer 5)
+  BModPI.UnsafeModP 5 @=? BModP.unsafeModP @7 @Integer 5
+  Utils.assertPureErrorCall expectedEx (BModP.unsafeModP @8 @Integer 5)
   where
     expectedEx = "Numeric.Data.ModP.unsafeModP: Received non-prime: 8"
 
@@ -368,128 +377,202 @@ invertNatural =
 
 addTotal' ::
   forall p a.
-  ( ASemigroup (ModP p a),
+  ( ASemigroup a,
+    FromInteger a,
     Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
-    TestBounds a
+    TestBounds a,
+    ToInteger a
   ) =>
   Property
 addTotal' = property $ do
-  mx@(MkModP x) <- forAll (anyNat @p @a)
-  my@(MkModP y) <- forAll anyNat
-  let mz@(MkModP z) = mx .+. my
-      z' = (toInteger x + toInteger y) `mod` p'
+  amx@(AModP.MkModP ax) <- forAll (aanyNat @p @a)
+  amy@(AModP.MkModP ay) <- forAll aanyNat
+  let amz@(AModP.MkModP az) = amx .+. amy
+      az' = (toInteger ax + toInteger ay) `mod` p'
 
-  annotateShow mx
-  annotateShow my
-  annotateShow mz
+  annotateShow amx
+  annotateShow amy
+  annotateShow amz
 
-  z' === toInteger z
+  az' === toInteger az
+
+  bmx@(BModP.MkModP bx) <- forAll (banyNat @p @a)
+  bmy@(BModP.MkModP by) <- forAll banyNat
+  let bmz@(BModP.MkModP bz) = bmx .+. bmy
+      bz' = (toInteger bx + toInteger by) `mod` p'
+
+  annotateShow bmx
+  annotateShow bmy
+  annotateShow bmz
+
+  bz' === toInteger bz
   where
     p' = toInteger $ natVal @p Proxy
 
 subTotal' ::
   forall p a.
-  ( AGroup (ModP p a),
+  ( AMonoid a,
+    FromInteger a,
     Integral a,
     KnownNat p,
+    MaybeLowerBounded a,
+    MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
-    TestBounds a
+    TestBounds a,
+    ToInteger a,
+    Typeable a
   ) =>
   Property
 subTotal' = property $ do
-  mx@(MkModP x) <- forAll (anyNat @p @a)
-  my@(MkModP y) <- forAll anyNat
-  let mz@(MkModP z) = mx .-. my
-      z' = (toInteger x - toInteger y) `mod` p'
+  amx@(AModP.MkModP ax) <- forAll (aanyNat @p @a)
+  amy@(AModP.MkModP ay) <- forAll aanyNat
+  let amz@(AModP.MkModP az) = amx .-. amy
+      az' = (toInteger ax - toInteger ay) `mod` p'
 
-  annotateShow mx
-  annotateShow my
-  annotateShow mz
+  annotateShow amx
+  annotateShow amy
+  annotateShow amz
 
-  z' === toInteger z
+  az' === toInteger az
+
+  bmx@(BModP.MkModP bx) <- forAll (banyNat @p @a)
+  bmy@(BModP.MkModP by) <- forAll banyNat
+  let bmz@(BModP.MkModP bz) = bmx .-. bmy
+      bz' = (toInteger bx - toInteger by) `mod` p'
+
+  annotateShow bmx
+  annotateShow bmy
+  annotateShow bmz
+
+  bz' === toInteger bz
   where
     p' = fromIntegral $ natVal @p Proxy
 
 multTotal' ::
   forall p a.
-  ( MSemigroup (ModP p a),
+  ( FromInteger a,
     Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
-    TestBounds a
+    TestBounds a,
+    ToInteger a
   ) =>
   Property
 multTotal' = property $ do
-  mx@(MkModP x) <- forAll (anyNat @p @a)
-  my@(MkModP y) <- forAll anyNat
-  let mz@(MkModP z) = mx .*. my
-      z' = (toInteger x * toInteger y) `mod` p'
+  amx@(AModP.MkModP ax) <- forAll (aanyNat @p @a)
+  amy@(AModP.MkModP ay) <- forAll aanyNat
+  let amz@(AModP.MkModP az) = amx .*. amy
+      az' = (toInteger ax * toInteger ay) `mod` p'
 
-  annotateShow mx
-  annotateShow my
-  annotateShow mz
+  annotateShow amx
+  annotateShow amy
+  annotateShow amz
 
-  z' === toInteger z
+  az' === toInteger az
+
+  bmx@(BModP.MkModP bx) <- forAll (banyNat @p @a)
+  bmy@(BModP.MkModP by) <- forAll banyNat
+  let bmz@(BModP.MkModP bz) = bmx .*. bmy
+      bz' = (toInteger bx * toInteger by) `mod` p'
+
+  annotateShow bmx
+  annotateShow bmy
+  annotateShow bmz
+
+  bz' === toInteger bz
   where
     p' = fromIntegral $ natVal @p Proxy
 
 divTotal' ::
   forall p a.
-  ( MGroup (ModP p a),
+  ( FromInteger a,
     Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
-    TestBounds a
+    TestBounds a,
+    ToInteger a,
+    Typeable a
   ) =>
   Property
 divTotal' = property $ do
-  mx <- forAll (anyNat @p @a)
-  nzy <- forAll (genNZ @p @a)
-  let mz = mx .%. nzy
-  mx === mz .*. nzy
+  amx <- forAll (aanyNat @p @a)
+  anzy <- forAll (agenNZ @p @a)
+  let amz = amx .%. anzy
+  amx === amz .*. anzy
+
+  bmx <- forAll (banyNat @p @a)
+  bnzy <- forAll (bgenNZ @p @a)
+  let bmz = bmx .%. bnzy
+  bmx === bmz .*. bnzy
 
 invert' ::
   forall p a.
-  ( MGroup (ModP p a),
+  ( FromInteger a,
     Integral a,
     KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
-    TestBounds a
+    TestBounds a,
+    ToInteger a
   ) =>
   Property
 invert' = property $ do
-  nz <- forAll (genNZ @p @a)
-  let nInv = ModP.invert nz
-  reallyUnsafeModP 1 === nz .*. nInv
+  anz <- forAll (agenNZ @p @a)
+  let anInv = AModP.invert anz
+  AModP.reallyUnsafeModP 1 === anz .*. anInv
+
+  bnz <- forAll (bgenNZ @p @a)
+  let bnInv = BModP.invert bnz
+  BModP.reallyUnsafeModP 1 === bnz .*. bnInv
 
 mkModP' ::
   forall p a.
-  ( Integral a,
+  ( FromInteger a,
+    Integral a,
     KnownNat p,
     MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
+    ToInteger a,
     TestBounds a,
     Typeable a
   ) =>
   Property
 mkModP' = property $ do
   x <- forAll (nonneg @a)
-  let mx@(MkModP x') = ModP.unsafeModP @p x
+  let amx@(AModP.MkModP ax') = AModP.unsafeModP @p x
 
-  annotateShow mx
+  annotateShow amx
 
-  x `mod` p' === x'
+  x `mod` p' === ax'
+
+  let bmx@(BModP.MkModP bx') = BModP.unsafeModP @p x
+
+  annotateShow bmx
+
+  x `mod` p' === bx'
   where
     p' = fromIntegral $ natVal @p Proxy
 
 mkModPFailSize ::
   forall p a.
-  ( Integral a,
+  ( FromInteger a,
+    Integral a,
     KnownNat p,
     MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
+    ToInteger a,
     TestBounds a,
     Typeable a
   ) =>
@@ -499,7 +582,13 @@ mkModPFailSize ::
   Property
 mkModPFailSize tyStr maxStr modStr = property $ do
   x <- forAll (nonneg @a)
-  case ModP.mkModP @p x of
+  case AModP.mkModP @p x of
+    Left s -> msg === s
+    Right y -> do
+      annotate ("Expected failure, received: " ++ show y)
+      failure
+
+  case BModP.mkModP @p x of
     Left s -> msg === s
     Right y -> do
       annotate ("Expected failure, received: " ++ show y)
@@ -518,10 +607,13 @@ mkModPFailSize tyStr maxStr modStr = property $ do
 
 mkModPFailComposite ::
   forall p a.
-  ( Integral a,
+  ( FromInteger a,
+    Integral a,
     KnownNat p,
     MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
+    ToInteger a,
     TestBounds a,
     Typeable a
   ) =>
@@ -529,7 +621,13 @@ mkModPFailComposite ::
   Property
 mkModPFailComposite primeStr = property $ do
   x <- forAll (nonneg @a)
-  case ModP.mkModP @p x of
+  case AModP.mkModP @p x of
+    Left s -> msg === s
+    Right y -> do
+      annotate ("Expected failure, received: " ++ show y)
+      failure
+
+  case BModP.mkModP @p x of
     Left s -> msg === s
     Right y -> do
       annotate ("Expected failure, received: " ++ show y)
@@ -543,36 +641,69 @@ mkModPFailComposite primeStr = property $ do
 
 boundedVals ::
   forall p a.
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
+    Integral a,
     KnownNat p,
     MaybeUpperBounded a,
+    MEuclidean a,
     Show a,
+    ToInteger a,
     Typeable a
   ) =>
   TestTree
 boundedVals = testCase "Min/max bounds" $ do
-  0 @=? ModP.unModP (minBound @(ModP p a))
+  0 @=? AModP.unModP (minBound @(AModP.ModP p a))
+  nTerm - 1 @=? AModP.unModP (maxBound @(AModP.ModP p a))
 
-  nTerm - 1 @=? ModP.unModP (maxBound @(ModP p a))
+  0 @=? BModP.unModP (minBound @(BModP.ModP p a))
+  nTerm - 1 @=? BModP.unModP (maxBound @(BModP.ModP p a))
   where
     nTerm = fromIntegral $ natVal @p Proxy
 
-genNZ ::
+agenNZ ::
+  forall p a.
+  ( FromInteger a,
+    Integral a,
+    KnownNat p,
+    MEuclidean a,
+    TestBounds a
+  ) =>
+  Gen (AModP.ModP p a)
+agenNZ = do
+  x <- HG.filter (\x' -> x' `mod` p' /= 0) $ HG.integral $ HR.exponential 2 maxVal
+  let y = AModP.reallyUnsafeModP @p x
+  pure y
+  where
+    p' = fromIntegral $ natVal @p Proxy
+
+bgenNZ ::
   forall p a.
   ( Integral a,
     KnownNat p,
     TestBounds a
   ) =>
-  Gen (ModP p a)
-genNZ = do
+  Gen (BModP.ModP p a)
+bgenNZ = do
   x <- HG.filter (\x' -> x' `mod` p' /= 0) $ HG.integral $ HR.exponential 2 maxVal
-  let y = reallyUnsafeModP @p x
+  let y = BModP.reallyUnsafeModP @p x
   pure y
   where
     p' = fromIntegral $ natVal @p Proxy
 
-anyNat :: forall p a. (Integral a, KnownNat p, TestBounds a) => Gen (ModP p a)
-anyNat = reallyUnsafeModP <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
+aanyNat ::
+  forall p a.
+  ( FromInteger a,
+    Integral a,
+    KnownNat p,
+    MEuclidean a,
+    TestBounds a
+  ) =>
+  Gen (AModP.ModP p a)
+aanyNat = AModP.reallyUnsafeModP <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
+
+banyNat :: forall p a. (Integral a, KnownNat p, TestBounds a) => Gen (BModP.ModP p a)
+banyNat = BModP.reallyUnsafeModP <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
 
 nonneg :: forall a. (Integral a, TestBounds a) => Gen a
 nonneg = HG.integral $ HR.exponentialFrom 1 1 maxVal
@@ -581,24 +712,37 @@ elimProps :: TestTree
 elimProps =
   testPropertyCompat desc "elimProps" $
     property $ do
-      mp@(MkModP n) <- forAll (anyNat @350 @Int)
+      amp@(AModP.MkModP an) <- forAll (aanyNat @350 @Int)
 
-      n === ModP.unModP mp
-      n === mp.unModP
-      n === view #unModP mp
-      n === view ModP._MkModP mp
+      an === AModP.unModP amp
+      an === amp.unModP
+      an === view #unModP amp
+      an === view AModP._MkModP amp
+
+      bmp@(BModP.MkModP bn) <- forAll (banyNat @350 @Int)
+
+      bn === BModP.unModP bmp
+      bn === bmp.unModP
+      bn === view #unModP bmp
+      bn === view BModP._MkModP bmp
   where
     desc = "elim (MkModP x) === x"
 
 showSpecs :: TestTree
 showSpecs = testCase "Shows ModP" $ do
-  "MkModP 2 (mod 7)" @=? show (ModP.unsafeModP @7 @Integer 2)
-  "MkModP 9 (mod 13)" @=? show (ModP.unsafeModP @13 @Integer 22)
+  "MkModP 2 (mod 7)" @=? show (AModP.unsafeModP @7 @Integer 2)
+  "MkModP 9 (mod 13)" @=? show (AModP.unsafeModP @13 @Integer 22)
+
+  "MkModP 2 (mod 7)" @=? show (BModP.unsafeModP @7 @Integer 2)
+  "MkModP 9 (mod 13)" @=? show (BModP.unsafeModP @13 @Integer 22)
 
 displaySpecs :: TestTree
 displaySpecs = testCase "Displays ModP" $ do
-  "2 (mod 7)" @=? D.display (ModP.unsafeModP @7 @Integer 2)
-  "9 (mod 13)" @=? D.display (ModP.unsafeModP @13 @Integer 22)
+  "2 (mod 7)" @=? D.display (AModP.unsafeModP @7 @Integer 2)
+  "9 (mod 13)" @=? D.display (AModP.unsafeModP @13 @Integer 22)
+
+  "2 (mod 7)" @=? D.display (BModP.unsafeModP @7 @Integer 2)
+  "9 (mod 13)" @=? D.display (BModP.unsafeModP @13 @Integer 22)
 
 extraIntProps :: [TestTree]
 extraWordProps :: [TestTree]

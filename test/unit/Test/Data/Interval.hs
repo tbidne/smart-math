@@ -9,9 +9,9 @@ module Test.Data.Interval (tests) where
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Data.Interval (C, N, O)
-import Numeric.Data.Interval qualified as Interval
-import Numeric.Data.Interval.Internal
+import Numeric.Data.Interval.Base (C, N, O)
+import Numeric.Data.Interval.Base qualified as Interval
+import Numeric.Data.Interval.Base.Internal
   ( Interval (UnsafeInterval),
     IntervalBound (Closed, None, Open),
   )
@@ -276,7 +276,7 @@ testUnsafe = testCase "Test unsafeInterval" $ do
 
   Utils.assertPureErrorCall expectedEx (Interval.unsafeInterval @(Open 1) @None @Integer 1)
   where
-    expectedEx = "Numeric.Data.Interval.unsafeInterval: Wanted value in (1, ∞), received: 1"
+    expectedEx = "Numeric.Data.Interval.Base.unsafeInterval: Wanted value in (1, ∞), received: 1"
 
 showSpecs :: TestTree
 showSpecs = testCase "Shows intervals" $ do

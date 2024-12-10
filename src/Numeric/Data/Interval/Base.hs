@@ -1,7 +1,7 @@
 -- | Provides types for enforcing minimum and maximum bounds.
 --
 -- @since 0.1
-module Numeric.Data.Interval
+module Numeric.Data.Interval.Base
   ( -- * Types
     IntervalBound (..),
     Interval (MkInterval),
@@ -35,12 +35,12 @@ import GHC.TypeNats (Nat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.Interval.Internal
+import Numeric.Data.Interval.Base.Internal
   ( Interval (MkInterval, UnsafeInterval),
     IntervalBound (Closed, None, Open),
     SingIntervalBound,
   )
-import Numeric.Data.Interval.Internal qualified as Internal
+import Numeric.Data.Interval.Base.Internal qualified as Internal
 import Optics.Core (Prism', ReversedPrism', ReversibleOptic (re), prism)
 
 -- $setup

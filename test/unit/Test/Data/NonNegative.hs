@@ -6,8 +6,8 @@ import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Data.NonNegative qualified as NonNeg
-import Numeric.Data.NonNegative.Internal
+import Numeric.Data.NonNegative.Base qualified as NonNeg
+import Numeric.Data.NonNegative.Base.Internal
   ( NonNegative
       ( MkNonNegative,
         UnsafeNonNegative
@@ -52,7 +52,7 @@ testUnsafe = testCase "Test unsafeNonNegative" $ do
 
   Utils.assertPureErrorCall expectedEx (NonNeg.unsafeNonNegative @Integer (-1))
   where
-    expectedEx = "Numeric.Data.NonNegative.unsafeNonNegative: Received value < zero: -1"
+    expectedEx = "Numeric.Data.NonNegative.Base.unsafeNonNegative: Received value < zero: -1"
 
 addTotal :: TestTree
 addTotal =

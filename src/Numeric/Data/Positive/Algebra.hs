@@ -1,7 +1,9 @@
 -- | Provides the 'Positive' type for enforcing a positive invariant.
+-- In contrast to "Numeric.Data.Positive.Base", typeclass instances are
+-- provided in terms of algebra-simple classes, where possible.
 --
 -- @since 0.1
-module Numeric.Data.Positive
+module Numeric.Data.Positive.Algebra
   ( -- * Type
     Positive (MkPositive),
 
@@ -28,9 +30,10 @@ where
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Data.NonZero (NonZero, reallyUnsafeNonZero, rmatching)
-import Numeric.Data.Positive.Internal (Positive (MkPositive, UnsafePositive))
-import Numeric.Data.Positive.Internal qualified as Internal
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Data.NonZero.Algebra (NonZero, reallyUnsafeNonZero, rmatching)
+import Numeric.Data.Positive.Algebra.Internal (Positive (MkPositive, UnsafePositive))
+import Numeric.Data.Positive.Algebra.Internal qualified as Internal
 import Optics.Core
   ( ReversedPrism',
     ReversibleOptic (re),
@@ -40,7 +43,7 @@ import Optics.Core
 -- $setup
 -- >>> :set -XTemplateHaskell
 -- >>> :set -XPostfixOperators
--- >>> import Numeric.Data.Positive.Internal (unsafePositive)
+-- >>> import Numeric.Data.Positive.Algebra.Internal (unsafePositive)
 
 -- | Template haskell for creating a 'Positive' at compile-time.
 --
@@ -49,7 +52,7 @@ import Optics.Core
 -- UnsafePositive 1
 --
 -- @since 0.1
-mkPositiveTH :: (Integral a, Lift a, Show a) => a -> Code Q (Positive a)
+mkPositiveTH :: (AMonoid a, Lift a, Ord a, Show a) => a -> Code Q (Positive a)
 mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
   where
     err = Internal.errMsg "mkPositiveTH" x
@@ -66,9 +69,9 @@ mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
 -- Nothing
 --
 -- @since 0.1
-mkPositive :: (Num a, Ord a) => a -> Maybe (Positive a)
+mkPositive :: (AMonoid a, Ord a) => a -> Maybe (Positive a)
 mkPositive x
-  | x > 0 = Just (UnsafePositive x)
+  | x > zero = Just (UnsafePositive x)
   | otherwise = Nothing
 {-# INLINEABLE mkPositive #-}
 
@@ -82,7 +85,7 @@ mkPositive x
 -- UnsafePositive 7
 --
 -- @since 0.1
-(+!) :: (HasCallStack, Num a, Ord a, Show a) => a -> Positive a
+(+!) :: (AMonoid a, HasCallStack, Ord a, Show a) => a -> Positive a
 (+!) = Internal.unsafePositive
 {-# INLINE (+!) #-}
 
@@ -143,7 +146,7 @@ unPositive (UnsafePositive x) = x
 -- Left 0
 --
 -- @since 0.1
-_MkPositive :: (Num a, Ord a) => ReversedPrism' (Positive a) a
+_MkPositive :: (AMonoid a, Ord a) => ReversedPrism' (Positive a) a
 _MkPositive = re (prism unPositive g)
   where
     g x = case mkPositive x of

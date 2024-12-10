@@ -3,7 +3,7 @@
 -- | Provides the 'Positive' type for enforcing a positive invariant.
 --
 -- @since 0.1
-module Numeric.Data.Positive.Internal
+module Numeric.Data.Positive.Algebra.Internal
   ( -- * Type
     Positive (MkPositive, UnsafePositive),
 
@@ -24,6 +24,8 @@ import GHC.Generics (Generic)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
+import Numeric.Algebra.Additive (AMonoid)
+import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
@@ -31,11 +33,9 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Normed (Normed (norm))
-import Numeric.Class.Division (Division (divide))
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
 import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
-import Numeric.Data.Internal.Utils qualified as Utils
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -104,34 +104,34 @@ instance (Bounded a) => UpperBounded (Positive a) where
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
-instance (Num a) => ASemigroup (Positive a) where
-  UnsafePositive x .+. UnsafePositive y = UnsafePositive $ x + y
+instance (ASemigroup a) => ASemigroup (Positive a) where
+  (.+.) = liftPositive2 (.+.)
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance (Num a) => MSemigroup (Positive a) where
-  UnsafePositive x .*. UnsafePositive y = UnsafePositive $ x * y
+instance (MSemigroup a) => MSemigroup (Positive a) where
+  (.*.) = liftPositive2 (.*.)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance (Num a) => MMonoid (Positive a) where
-  one = UnsafePositive 1
+instance (MMonoid a) => MMonoid (Positive a) where
+  one = UnsafePositive one
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance (Division a, Num a) => MGroup (Positive a) where
-  UnsafePositive x .%. (UnsafePositive d) = UnsafePositive $ x `divide` d
+instance (MGroup a) => MGroup (Positive a) where
+  (.%.) = liftPositive2 (.%.)
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance (Division a, Integral a) => MEuclidean (Positive a) where
+instance (MEuclidean a) => MEuclidean (Positive a) where
   UnsafePositive x `mdivMod` (UnsafePositive d) =
-    bimap UnsafePositive UnsafePositive $ x `divMod` d
+    bimap UnsafePositive UnsafePositive $ x `mdivMod` d
   {-# INLINEABLE mdivMod #-}
 
 -- | @since 0.1
-instance (Real a) => MetricSpace (Positive a) where
-  diffR (UnsafePositive x) (UnsafePositive y) = Utils.safeDiff x y
+instance (MetricSpace a) => MetricSpace (Positive a) where
+  diffR = applyPositive2 diffR
   {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
@@ -142,37 +142,37 @@ instance Normed (Positive a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Num a, Ord a, Show a) => FromInteger (Positive a) where
-  fromZ = unsafePositive . fromInteger
+instance (AMonoid a, FromInteger a, Ord a, Show a) => FromInteger (Positive a) where
+  fromZ = unsafePositive . fromZ
   {-# INLINEABLE fromZ #-}
 
 -- | @since 0.1
-instance (Integral a) => ToInteger (Positive a) where
-  toZ (UnsafePositive x) = toInteger x
+instance (ToInteger a) => ToInteger (Positive a) where
+  toZ (UnsafePositive x) = toZ x
   {-# INLINEABLE toZ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Fractional a, Ord a, Show a) => FromRational (Positive a) where
-  fromQ = unsafePositive . fromRational
+instance (AMonoid a, FromRational a, Ord a, Show a) => FromRational (Positive a) where
+  fromQ = unsafePositive . fromQ
   {-# INLINEABLE fromQ #-}
 
 -- | @since 0.1
-instance (Real a) => ToRational (Positive a) where
-  toQ (UnsafePositive x) = toRational x
+instance (ToRational a) => ToRational (Positive a) where
+  toQ (UnsafePositive x) = toQ x
   {-# INLINEABLE toQ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Fractional a, Ord a, Show a) => FromReal (Positive a) where
-  fromR = unsafePositive . realToFrac
+instance (AMonoid a, FromReal a, Ord a, Show a) => FromReal (Positive a) where
+  fromR = unsafePositive . fromR
   {-# INLINEABLE fromR #-}
 
 -- | @since 0.1
-instance (Real a) => ToReal (Positive a) where
-  toR (UnsafePositive x) = realToFrac x
+instance (ToReal a) => ToReal (Positive a) where
+  toR (UnsafePositive x) = toR x
   {-# INLINEABLE toR #-}
 
 -- | Throws an error when given a value <= 0.
@@ -184,9 +184,9 @@ instance (Real a) => ToReal (Positive a) where
 -- UnsafePositive 7
 --
 -- @since 0.1
-unsafePositive :: (HasCallStack, Num a, Ord a, Show a) => a -> Positive a
+unsafePositive :: (AMonoid a, HasCallStack, Ord a, Show a) => a -> Positive a
 unsafePositive x
-  | x > 0 = UnsafePositive x
+  | x > zero = UnsafePositive x
   | otherwise =
       error $
         errMsg "unsafePositive" x
@@ -196,8 +196,23 @@ unsafePositive x
 errMsg :: (Show a) => String -> a -> String
 errMsg fn x =
   mconcat
-    [ "Numeric.Data.Positive.",
+    [ "Numeric.Data.Positive.Algebra.",
       fn,
       ": Received value <= zero: ",
       show x
     ]
+
+liftPositive2 ::
+  forall a.
+  (a -> a -> a) ->
+  Positive a ->
+  Positive a ->
+  Positive a
+liftPositive2 f x = UnsafePositive . applyPositive2 f x
+
+applyPositive2 ::
+  (a -> a -> r) ->
+  Positive a ->
+  Positive a ->
+  r
+applyPositive2 f (UnsafePositive x) (UnsafePositive y) = f x y

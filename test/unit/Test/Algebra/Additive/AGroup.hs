@@ -30,18 +30,26 @@ subIdentProps =
   testGroup
     "Subtraction is the inverse: zero == x .-. x"
     [ fractionSubIdent,
-      modNSubIdent,
-      modPSubIdent
+      amodNSubIdent,
+      bmodNSubIdent,
+      amodPSubIdent,
+      bmodPSubIdent
     ]
 
 fractionSubIdent :: TestTree
 fractionSubIdent = agroupSubIdent Gens.fraction "Fraction" "fractionSubIdent"
 
-modNSubIdent :: TestTree
-modNSubIdent = agroupSubIdent Gens.modN "ModN" "modNSubIdent"
+amodNSubIdent :: TestTree
+amodNSubIdent = agroupSubIdent Gens.amodN "ModN.Algebra" "amodNSubIdent"
 
-modPSubIdent :: TestTree
-modPSubIdent = agroupSubIdent Gens.modP "ModP" "modPSubIdent"
+bmodNSubIdent :: TestTree
+bmodNSubIdent = agroupSubIdent Gens.bmodN "ModN.Base" "bmodNSubIdent"
+
+amodPSubIdent :: TestTree
+amodPSubIdent = agroupSubIdent Gens.amodP "ModP.Algebra" "amodPSubIdent"
+
+bmodPSubIdent :: TestTree
+bmodPSubIdent = agroupSubIdent Gens.bmodP "ModP.Base" "bmodPSubIdent"
 
 agroupSubEq ::
   ( AGroup a,

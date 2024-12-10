@@ -3,7 +3,7 @@
 -- | Provides the 'ModN' type for modular arithmetic.
 --
 -- @since 0.1
-module Numeric.Data.ModN
+module Numeric.Data.ModN.Algebra
   ( -- * Type
     ModN (MkModN),
 
@@ -27,15 +27,17 @@ import Data.Bounds (MaybeUpperBounded)
 import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
+import Numeric.Algebra (MEuclidean)
+import Numeric.Convert.Integer (FromInteger, ToInteger)
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.ModN.Internal (ModN (MkModN, UnsafeModN))
-import Numeric.Data.ModN.Internal qualified as Internal
+import Numeric.Data.ModN.Algebra.Internal (ModN (MkModN, UnsafeModN))
+import Numeric.Data.ModN.Algebra.Internal qualified as Internal
 import Optics.Core (ReversedPrism', prism, re)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
 -- >>> import Data.Int (Int8)
--- >>> import Numeric.Data.ModN.Internal (mkModN)
+-- >>> import Numeric.Data.ModN.Algebra.Internal (mkModN)
 
 -- | @since 0.1
 unModN :: ModN n a -> a
@@ -51,10 +53,12 @@ unModN (UnsafeModN x) = x
 -- @since 0.1
 mkModNTH ::
   forall n a.
-  ( Integral a,
-    KnownNat n,
+  ( FromInteger a,
     Lift a,
+    ToInteger a,
+    KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
     Typeable a
   ) =>
   a ->
@@ -94,10 +98,11 @@ mkModNTH x = case Internal.mkModN x of
 -- @since 0.1
 _MkModN ::
   forall n a.
-  ( Integral a,
+  ( FromInteger a,
+    ToInteger a,
     KnownNat n,
     MaybeUpperBounded a,
-    Ord a,
+    MEuclidean a,
     Typeable a
   ) =>
   ReversedPrism' (ModN n a) a

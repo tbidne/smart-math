@@ -6,7 +6,7 @@
 -- | Internal module for 'ModP'.
 --
 -- @since 0.1
-module Numeric.Data.ModP.Internal
+module Numeric.Data.ModP.Base.Internal
   ( -- * Type
     ModP (MkModP, ..),
 

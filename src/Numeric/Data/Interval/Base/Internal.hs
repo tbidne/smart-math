@@ -12,7 +12,7 @@
 -- | Provides types for enforcing minimum and maximum bounds.
 --
 -- @since 0.1
-module Numeric.Data.Interval.Internal
+module Numeric.Data.Interval.Base.Internal
   ( -- * Types
     IntervalBound (..),
     Interval (MkInterval, UnsafeInterval),
@@ -409,7 +409,7 @@ errMsg x fnName =
     (left, right) = getInterval @l @r
     msg =
       mconcat
-        [ "Numeric.Data.Interval.",
+        [ "Numeric.Data.Interval.Base.",
           fnName,
           ": Wanted value in ",
           intervalStr,

@@ -84,19 +84,31 @@ library
     Numeric.Data.Fraction
     Numeric.Data.Fraction.Internal
     Numeric.Data.Internal.Utils
-    Numeric.Data.Interval
-    Numeric.Data.Interval.Internal
-    Numeric.Data.ModN
-    Numeric.Data.ModN.Internal
-    Numeric.Data.ModP
-    Numeric.Data.ModP.Internal
+    Numeric.Data.Interval.Algebra
+    Numeric.Data.Interval.Algebra.Internal
+    Numeric.Data.Interval.Base
+    Numeric.Data.Interval.Base.Internal
+    Numeric.Data.ModN.Algebra
+    Numeric.Data.ModN.Algebra.Internal
+    Numeric.Data.ModN.Base
+    Numeric.Data.ModN.Base.Internal
+    Numeric.Data.ModP.Algebra
+    Numeric.Data.ModP.Algebra.Internal
+    Numeric.Data.ModP.Base
+    Numeric.Data.ModP.Base.Internal
     Numeric.Data.ModP.Internal.Primality
-    Numeric.Data.NonNegative
-    Numeric.Data.NonNegative.Internal
-    Numeric.Data.NonZero
-    Numeric.Data.NonZero.Internal
-    Numeric.Data.Positive
-    Numeric.Data.Positive.Internal
+    Numeric.Data.NonNegative.Algebra
+    Numeric.Data.NonNegative.Algebra.Internal
+    Numeric.Data.NonNegative.Base
+    Numeric.Data.NonNegative.Base.Internal
+    Numeric.Data.NonZero.Algebra
+    Numeric.Data.NonZero.Algebra.Internal
+    Numeric.Data.NonZero.Base
+    Numeric.Data.NonZero.Base.Internal
+    Numeric.Data.Positive.Algebra
+    Numeric.Data.Positive.Algebra.Internal
+    Numeric.Data.Positive.Base
+    Numeric.Data.Positive.Base.Internal
 
   build-depends:
     , algebra-simple    ^>=0.1

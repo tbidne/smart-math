@@ -29,30 +29,60 @@ divIdentProps =
   testGroup
     "Division is the inverse: one == x .%. x"
     [ fractionDivIdent,
-      modPDivIdent,
-      nonNegativeDivIdent,
-      nonZeroDivIdent,
-      positiveDivIdent
+      amodPDivIdent,
+      bmodPDivIdent,
+      anonNegativeDivIdent,
+      bnonNegativeDivIdent,
+      anonZeroDivIdent,
+      bnonZeroDivIdent,
+      apositiveDivIdent,
+      bpositiveDivIdent
     ]
 
 fractionDivIdent :: TestTree
 fractionDivIdent = agroupDivIdent Gens.fractionNonZero MkEqExact "Fraction" "fractionDivIdent"
 
-modPDivIdent :: TestTree
-modPDivIdent =
-  testPropertyCompat "ModP" "modPDivIdent" $
+amodPDivIdent :: TestTree
+amodPDivIdent =
+  testPropertyCompat "ModP.Algebra" "amodPDivIdent" $
     property $ do
-      x <- forAll Gens.modPNonZero
+      x <- forAll Gens.amodPNonZero
       one === x .%. x
 
-nonNegativeDivIdent :: TestTree
-nonNegativeDivIdent = agroupDivIdent Gens.nonNegativeNonZero MkEqExact "NonNegative" "nonNegativeDivIdent"
+bmodPDivIdent :: TestTree
+bmodPDivIdent =
+  testPropertyCompat "ModP.Base" "bmodPDivIdent" $
+    property $ do
+      x <- forAll Gens.bmodPNonZero
+      one === x .%. x
 
-nonZeroDivIdent :: TestTree
-nonZeroDivIdent = agroupDivIdent Gens.nonZero MkEqExact "NonZero" "nonZeroDivIdent"
+anonNegativeDivIdent :: TestTree
+anonNegativeDivIdent = agroupDivIdent Gens.anonNegativeNonZero MkEqExact "NonNegative.Algebra" "anonNegativeDivIdent"
 
-positiveDivIdent :: TestTree
-positiveDivIdent = agroupDivIdent Gens.positiveNonZero MkEqExact "Positive" "positiveDivIdent"
+bnonNegativeDivIdent :: TestTree
+bnonNegativeDivIdent = agroupDivIdent Gens.bnonNegativeNonZero MkEqExact "NonNegative.Base" "bnonNegativeDivIdent"
+
+anonZeroDivIdent :: TestTree
+anonZeroDivIdent = agroupDivIdent Gens.anonZero MkEqExact "NonZero.Algebra" "anonZeroDivIdent"
+
+bnonZeroDivIdent :: TestTree
+bnonZeroDivIdent = agroupDivIdent Gens.bnonZero MkEqExact "NonZero.Base" "bnonZeroDivIdent"
+
+apositiveDivIdent :: TestTree
+apositiveDivIdent =
+  agroupDivIdent
+    Gens.apositiveNonZero
+    MkEqExact
+    "Positive.Algebra"
+    "apositiveDivIdent"
+
+bpositiveDivIdent :: TestTree
+bpositiveDivIdent =
+  agroupDivIdent
+    Gens.bpositiveNonZero
+    MkEqExact
+    "Positive.Base"
+    "bpositiveDivIdent"
 
 mgroupDivEq ::
   (MGroup a, Show a) =>

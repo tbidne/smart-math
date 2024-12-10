@@ -1,7 +1,7 @@
 -- | Provides the 'ModP' type for modular arithmetic.
 --
 -- @since 0.1
-module Numeric.Data.ModP
+module Numeric.Data.ModP.Base
   ( -- * Type
     ModP (MkModP),
 
@@ -30,8 +30,8 @@ import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP))
-import Numeric.Data.ModP.Internal qualified as Internal
+import Numeric.Data.ModP.Base.Internal (ModP (MkModP, UnsafeModP))
+import Numeric.Data.ModP.Base.Internal qualified as Internal
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- | @since 0.1

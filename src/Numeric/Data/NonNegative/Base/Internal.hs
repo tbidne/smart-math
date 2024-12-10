@@ -3,7 +3,7 @@
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
 --
 -- @since 0.1
-module Numeric.Data.NonNegative.Internal
+module Numeric.Data.NonNegative.Base.Internal
   ( -- * Type
     NonNegative (MkNonNegative, UnsafeNonNegative),
 
@@ -223,7 +223,7 @@ unsafeNonNegative x
 errMsg :: (Show a) => String -> a -> String
 errMsg fn x =
   mconcat
-    [ "Numeric.Data.NonNegative.",
+    [ "Numeric.Data.NonNegative.Base.",
       fn,
       ": Received value < zero: ",
       show x

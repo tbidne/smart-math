@@ -8,20 +8,28 @@ module Gens
     integer,
     natural,
     fraction,
-    modN,
-    modP,
-    nonNegative,
-    nonZero,
-    positive,
+    amodN,
+    bmodN,
+    amodP,
+    bmodP,
+    anonNegative,
+    bnonNegative,
+    anonZero,
+    bnonZero,
+    apositive,
+    bpositive,
 
     -- * NonZero
 
     -- ** Specializations
     integerNZ,
     fractionNonZero,
-    modPNonZero,
-    nonNegativeNonZero,
-    positiveNonZero,
+    amodPNonZero,
+    bmodPNonZero,
+    anonNegativeNonZero,
+    bnonNegativeNonZero,
+    apositiveNonZero,
+    bpositiveNonZero,
   )
 where
 
@@ -31,11 +39,16 @@ import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
 import Numeric.Data.Fraction (Fraction, unsafeFraction)
-import Numeric.Data.ModN (ModN, unsafeModN)
-import Numeric.Data.ModP (ModP, reallyUnsafeModP)
-import Numeric.Data.NonNegative (NonNegative, unsafeNonNegative)
-import Numeric.Data.NonZero (NonZero, unsafeNonZero)
-import Numeric.Data.Positive (Positive, unsafePositive)
+import Numeric.Data.ModN.Algebra qualified as AModN
+import Numeric.Data.ModN.Base qualified as BModN
+import Numeric.Data.ModP.Algebra qualified as AModP
+import Numeric.Data.ModP.Base qualified as BModP
+import Numeric.Data.NonNegative.Algebra qualified as ANonNeg
+import Numeric.Data.NonNegative.Base qualified as BNonNeg
+import Numeric.Data.NonZero.Algebra qualified as ANonZero
+import Numeric.Data.NonZero.Base qualified as BNonZero
+import Numeric.Data.Positive.Algebra qualified as APos
+import Numeric.Data.Positive.Base qualified as BPos
 import Test.TestBounds (TestBounds (maxVal, minVal))
 
 integer :: Gen Integer
@@ -47,20 +60,37 @@ natural = HG.integral $ HR.exponential minVal maxVal
 fraction :: Gen (Fraction Integer)
 fraction = unsafeFraction <$> integer <*> integerNZ
 
-modN :: Gen (ModN 10 Natural)
-modN = unsafeModN <$> natural
+amodN :: Gen (AModN.ModN 10 Natural)
+amodN = AModN.unsafeModN <$> natural
 
-modP :: Gen (ModP 17 Natural)
-modP = reallyUnsafeModP <$> natural
+bmodN :: Gen (BModN.ModN 10 Natural)
+bmodN = BModN.unsafeModN <$> natural
 
-nonNegative :: Gen (NonNegative Natural)
-nonNegative = unsafeNonNegative <$> natural
+amodP :: Gen (AModP.ModP 17 Natural)
+amodP = AModP.reallyUnsafeModP <$> natural
 
-nonZero :: Gen (NonZero Integer)
-nonZero = unsafeNonZero <$> integerNZ
+bmodP :: Gen (BModP.ModP 17 Natural)
+bmodP = BModP.reallyUnsafeModP <$> natural
 
-positive :: Gen (Positive Integer)
-positive = unsafePositive <$> pos
+anonNegative :: Gen (ANonNeg.NonNegative Natural)
+anonNegative = ANonNeg.unsafeNonNegative <$> natural
+
+bnonNegative :: Gen (BNonNeg.NonNegative Natural)
+bnonNegative = BNonNeg.unsafeNonNegative <$> natural
+
+anonZero :: Gen (ANonZero.NonZero Integer)
+anonZero = ANonZero.unsafeNonZero <$> integerNZ
+
+bnonZero :: Gen (BNonZero.NonZero Integer)
+bnonZero = BNonZero.unsafeNonZero <$> integerNZ
+
+apositive :: Gen (APos.Positive Integer)
+apositive = APos.unsafePositive <$> pos
+  where
+    pos = HG.integral $ HR.exponential 1 maxVal
+
+bpositive :: Gen (BPos.Positive Integer)
+bpositive = BPos.unsafePositive <$> pos
   where
     pos = HG.integral $ HR.exponential 1 maxVal
 
@@ -73,16 +103,27 @@ naturalNZ = HG.integral $ HR.exponential 1 maxVal
 fractionNonZero :: Gen (Fraction Integer)
 fractionNonZero = unsafeFraction <$> integerNZ <*> integerNZ
 
-modPNonZero :: Gen (ModP 17 Natural)
-modPNonZero = reallyUnsafeModP <$> pos
+amodPNonZero :: Gen (AModP.ModP 17 Natural)
+amodPNonZero = AModP.reallyUnsafeModP <$> pos
   where
     pos = HG.filter (\x -> x `mod` 17 /= 0) $ HG.integral $ HR.exponential 1 maxVal
 
-nonNegativeNonZero :: Gen (NonNegative Natural)
-nonNegativeNonZero = unsafeNonNegative <$> naturalNZ
+bmodPNonZero :: Gen (BModP.ModP 17 Natural)
+bmodPNonZero = BModP.reallyUnsafeModP <$> pos
+  where
+    pos = HG.filter (\x -> x `mod` 17 /= 0) $ HG.integral $ HR.exponential 1 maxVal
 
-positiveNonZero :: Gen (Positive Natural)
-positiveNonZero = unsafePositive <$> naturalNZ
+anonNegativeNonZero :: Gen (ANonNeg.NonNegative Natural)
+anonNegativeNonZero = ANonNeg.unsafeNonNegative <$> naturalNZ
+
+bnonNegativeNonZero :: Gen (BNonNeg.NonNegative Natural)
+bnonNegativeNonZero = BNonNeg.unsafeNonNegative <$> naturalNZ
+
+apositiveNonZero :: Gen (BPos.Positive Natural)
+apositiveNonZero = BPos.unsafePositive <$> naturalNZ
+
+bpositiveNonZero :: Gen (BPos.Positive Natural)
+bpositiveNonZero = BPos.unsafePositive <$> naturalNZ
 
 nzBounds :: (Integral a) => (Range a -> Gen a) -> a -> a -> Gen a
 nzBounds gen lower upper =

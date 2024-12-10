@@ -41,26 +41,42 @@ assocProps =
   testGroup
     "Associativity: (x .*. y) .*. z === x .*. (y .*. z)"
     [ fractionAssoc,
-      modNAssoc,
-      modPAssoc,
-      nonNegativeAssoc,
-      positiveAssoc
+      amodNAssoc,
+      bmodNAssoc,
+      amodPAssoc,
+      bmodPAssoc,
+      anonNegativeAssoc,
+      bnonNegativeAssoc,
+      apositiveAssoc,
+      bpositiveAssoc
     ]
 
 fractionAssoc :: TestTree
 fractionAssoc = msemigroupAssoc Gens.fraction "Fraction" "fractionAssoc"
 
-modNAssoc :: TestTree
-modNAssoc = msemigroupAssoc Gens.modN "ModN" "modNAssoc"
+amodNAssoc :: TestTree
+amodNAssoc = msemigroupAssoc Gens.amodN "ModN.Algebra" "amodNAssoc"
 
-modPAssoc :: TestTree
-modPAssoc = msemigroupAssoc Gens.modN "ModP" "modPAssoc"
+bmodNAssoc :: TestTree
+bmodNAssoc = msemigroupAssoc Gens.bmodN "ModN.Base" "bmodNAssoc"
 
-nonNegativeAssoc :: TestTree
-nonNegativeAssoc = msemigroupAssoc Gens.nonNegative "NonNegative" "nonNegativeAssoc"
+amodPAssoc :: TestTree
+amodPAssoc = msemigroupAssoc Gens.amodP "ModP.Algebra" "amodPAssoc"
 
-positiveAssoc :: TestTree
-positiveAssoc = msemigroupAssoc Gens.positive "Positive" "positiveAssoc"
+bmodPAssoc :: TestTree
+bmodPAssoc = msemigroupAssoc Gens.bmodP "ModP.Base" "bmodPAssoc"
+
+anonNegativeAssoc :: TestTree
+anonNegativeAssoc = msemigroupAssoc Gens.anonNegative "NonNegative.Algebra" "anonNegativeAssoc"
+
+bnonNegativeAssoc :: TestTree
+bnonNegativeAssoc = msemigroupAssoc Gens.bnonNegative "NonNegative.Base" "bnonNegativeAssoc"
+
+apositiveAssoc :: TestTree
+apositiveAssoc = msemigroupAssoc Gens.apositive "Positive.Algebra" "apositiveAssoc"
+
+bpositiveAssoc :: TestTree
+bpositiveAssoc = msemigroupAssoc Gens.bpositive "Positive.Base" "bpositiveAssoc"
 
 msemigroupAssoc ::
   ( Eq a,
