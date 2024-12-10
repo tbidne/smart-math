@@ -1,7 +1,7 @@
 -- | Provides the 'NonZero' type for enforcing a non-zero invariant.
 --
 -- @since 0.1
-module Numeric.Data.NonZero
+module Numeric.Data.NonZero.Algebra
   ( -- * Type
     NonZero (MkNonZero),
 
@@ -23,9 +23,10 @@ where
 
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Algebra (AMonoid (zero))
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.NonZero.Internal (NonZero (MkNonZero, UnsafeNonZero))
-import Numeric.Data.NonZero.Internal qualified as Internal
+import Numeric.Data.NonZero.Algebra.Internal (NonZero (MkNonZero, UnsafeNonZero))
+import Numeric.Data.NonZero.Algebra.Internal qualified as Internal
 import Optics.Core (ReversedPrism', prism, re)
 
 -- $setup
@@ -45,9 +46,9 @@ unNonZero (UnsafeNonZero x) = x
 -- Nothing
 --
 -- @since 0.1
-mkNonZero :: (Eq a, Num a) => a -> Maybe (NonZero a)
+mkNonZero :: (AMonoid a, Eq a) => a -> Maybe (NonZero a)
 mkNonZero x
-  | x == 0 = Nothing
+  | x == zero = Nothing
   | otherwise = Just (UnsafeNonZero x)
 {-# INLINEABLE mkNonZero #-}
 
@@ -59,9 +60,9 @@ mkNonZero x
 -- UnsafeNonZero 7
 --
 -- @since 0.1
-mkNonZeroTH :: (Eq a, Lift a, Num a) => a -> Code Q (NonZero a)
+mkNonZeroTH :: (AMonoid a, Eq a, Lift a) => a -> Code Q (NonZero a)
 mkNonZeroTH x
-  | x == 0 = error $ Internal.errMsg "mkNonZeroTH"
+  | x == zero = error $ Internal.errMsg "mkNonZeroTH"
   | otherwise = liftTyped (UnsafeNonZero x)
 {-# INLINEABLE mkNonZeroTH #-}
 
@@ -104,7 +105,7 @@ reallyUnsafeNonZero = UnsafeNonZero
 -- Left 0
 --
 -- @since 0.1
-_MkNonZero :: (Eq a, Num a) => ReversedPrism' (NonZero a) a
+_MkNonZero :: (AMonoid a, Eq a) => ReversedPrism' (NonZero a) a
 _MkNonZero = re (prism f g)
   where
     f = unNonZero

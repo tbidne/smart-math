@@ -3,7 +3,7 @@
 -- | Provides the 'NonZero' type for enforcing a non-zero invariant.
 --
 -- @since 0.1
-module Numeric.Data.NonZero.Internal
+module Numeric.Data.NonZero.Base.Internal
   ( -- * Type
     NonZero (MkNonZero, UnsafeNonZero),
 
@@ -178,7 +178,7 @@ unsafeNonZero x
 errMsg :: String -> String
 errMsg fn =
   mconcat
-    [ "Numeric.Data.NonZero.",
+    [ "Numeric.Data.NonZero.Base.",
       fn,
       ": Received zero"
     ]

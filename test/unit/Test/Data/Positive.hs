@@ -6,8 +6,8 @@ import Hedgehog.Range qualified as HR
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Data.Positive qualified as Pos
-import Numeric.Data.Positive.Internal (Positive (MkPositive, UnsafePositive))
+import Numeric.Data.Positive.Base qualified as BPos
+import Numeric.Data.Positive.Base.Internal qualified as BPosI
 import Test.Prelude
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
@@ -32,48 +32,48 @@ mkPositiveSucceeds =
   testPropertyCompat "x > 0 succeeds" "mkPositiveSucceeds" $
     property $ do
       x <- forAll pos
-      Just (Pos.reallyUnsafePositive x) === Pos.mkPositive x
+      Just (BPos.reallyUnsafePositive x) === BPos.mkPositive x
 
 mkPositiveFails :: TestTree
 mkPositiveFails =
   testPropertyCompat "x < 1 fails" "mkPositiveFails" $
     property $ do
       x <- forAll nonpos
-      Nothing === Pos.mkPositive x
+      Nothing === BPos.mkPositive x
 
 testUnsafe :: TestTree
 testUnsafe = testCase "Test unsafePositive" $ do
-  UnsafePositive 5 @=? Pos.unsafePositive @Integer 5
+  BPosI.UnsafePositive 5 @=? BPos.unsafePositive @Integer 5
 
-  Utils.assertPureErrorCall expectedEx (Pos.unsafePositive @Integer 0)
+  Utils.assertPureErrorCall expectedEx (BPos.unsafePositive @Integer 0)
   where
-    expectedEx = "Numeric.Data.Positive.unsafePositive: Received value <= zero: 0"
+    expectedEx = "Numeric.Data.Positive.Base.unsafePositive: Received value <= zero: 0"
 
 addTotal :: TestTree
 addTotal =
   testPropertyCompat "(.+.) is total" "addTotal" $
     property $ do
-      px@(MkPositive x) <- forAll positive
-      py@(MkPositive y) <- forAll positive
-      let MkPositive pz = px .+. py
+      px@(BPos.MkPositive x) <- forAll positive
+      py@(BPos.MkPositive y) <- forAll positive
+      let BPos.MkPositive pz = px .+. py
       x + y === pz
 
 multTotal :: TestTree
 multTotal =
   testPropertyCompat "(.*.) is total" "multTotal" $
     property $ do
-      px@(MkPositive x) <- forAll positive
-      py@(MkPositive y) <- forAll positive
-      let MkPositive pz = px .*. py
+      px@(BPos.MkPositive x) <- forAll positive
+      py@(BPos.MkPositive y) <- forAll positive
+      let BPos.MkPositive pz = px .*. py
       x * y === pz
 
 divTotal :: TestTree
 divTotal =
   testPropertyCompat "(.%.) is total" "divTotal" $
     property $ do
-      px@(MkPositive x) <- forAll positive
-      py@(MkPositive y) <- forAll positive
-      let MkPositive pz = px .%. py
+      px@(BPos.MkPositive x) <- forAll positive
+      py@(BPos.MkPositive y) <- forAll positive
+      let BPos.MkPositive pz = px .%. py
       x `div` y === pz
 
 pos :: Gen Int
@@ -82,26 +82,26 @@ pos = HG.integral $ HR.exponentialFrom 1 1 maxVal
 nonpos :: Gen Int
 nonpos = HG.integral $ HR.exponentialFrom minVal 0 0
 
-positive :: Gen (Positive Int)
-positive = Pos.unsafePositive <$> pos
+positive :: Gen (BPos.Positive Int)
+positive = BPos.unsafePositive <$> pos
 
 elimProps :: TestTree
 elimProps =
   testPropertyCompat desc "elimProps" $
     property $ do
-      nz@(MkPositive n) <- forAll positive
+      nz@(BPos.MkPositive n) <- forAll positive
 
-      n === Pos.unPositive nz
+      n === BPos.unPositive nz
       n === nz.unPositive
       n === view #unPositive nz
-      n === view Pos._MkPositive nz
+      n === view BPos._MkPositive nz
   where
     desc = "elim (MkPositive x) === x"
 
 showSpecs :: TestTree
 showSpecs = testCase "Shows Positive" $ do
-  "UnsafePositive 2" @=? show (Pos.unsafePositive @Int 2)
+  "UnsafePositive 2" @=? show (BPos.unsafePositive @Int 2)
 
 displaySpecs :: TestTree
 displaySpecs = testCase "Displays Positive" $ do
-  "2" @=? D.display (Pos.unsafePositive @Int 2)
+  "2" @=? D.display (BPos.unsafePositive @Int 2)

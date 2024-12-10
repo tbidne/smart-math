@@ -43,8 +43,10 @@ assocProps =
     [ fractionAssoc,
       modNAssoc,
       modPAssoc,
-      nonNegativeAssoc,
-      positiveAssoc
+      anonNegativeAssoc,
+      bnonNegativeAssoc,
+      apositiveAssoc,
+      bpositiveAssoc
     ]
 
 fractionAssoc :: TestTree
@@ -56,11 +58,17 @@ modNAssoc = asemigroupAssoc Gens.modN "ModN" "modNAssoc"
 modPAssoc :: TestTree
 modPAssoc = asemigroupAssoc Gens.modP "ModP" "modPAssoc"
 
-nonNegativeAssoc :: TestTree
-nonNegativeAssoc = asemigroupAssoc Gens.nonNegative "NonNegative" "nonNegativeAssoc"
+anonNegativeAssoc :: TestTree
+anonNegativeAssoc = asemigroupAssoc Gens.anonNegative "NonNegative.Algebra" "anonNegativeAssoc"
 
-positiveAssoc :: TestTree
-positiveAssoc = asemigroupAssoc Gens.positive "Positive" "positiveAssoc"
+bnonNegativeAssoc :: TestTree
+bnonNegativeAssoc = asemigroupAssoc Gens.bnonNegative "NonNegative.Base" "bnonNegativeAssoc"
+
+apositiveAssoc :: TestTree
+apositiveAssoc = asemigroupAssoc Gens.apositive "Positive.Algebra" "apositiveAssoc"
+
+bpositiveAssoc :: TestTree
+bpositiveAssoc = asemigroupAssoc Gens.bpositive "Positive.Base" "bpositiveAssoc"
 
 asemigroupAssoc ::
   ( ASemigroup a,

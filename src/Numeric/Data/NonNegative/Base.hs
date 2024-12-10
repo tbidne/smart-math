@@ -1,7 +1,8 @@
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
+-- Typeclass instances are provided in terms of base classes e.g. Num.
 --
 -- @since 0.1
-module Numeric.Data.NonNegative
+module Numeric.Data.NonNegative.Base
   ( -- * Type
     NonNegative (MkNonNegative),
 
@@ -26,13 +27,13 @@ import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.NonNegative.Internal
+import Numeric.Data.NonNegative.Base.Internal
   ( NonNegative
       ( MkNonNegative,
         UnsafeNonNegative
       ),
   )
-import Numeric.Data.NonNegative.Internal qualified as Internal
+import Numeric.Data.NonNegative.Base.Internal qualified as Internal
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- $setup
