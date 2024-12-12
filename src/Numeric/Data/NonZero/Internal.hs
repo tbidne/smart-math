@@ -32,10 +32,10 @@ import Numeric.Algebra.Multiplicative
   )
 import Numeric.Algebra.Normed (Normed (norm))
 import Numeric.Class.Division (Division (divide))
+import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
+import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
 import Numeric.Data.Internal.Utils qualified as Utils
-import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
-import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
-import Numeric.Literal.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -141,7 +141,7 @@ instance (Real a) => ToRational (NonZero a) where
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance (Fractional a, Ord a) => FromReal (NonZero a) where
+instance (Fractional a, FromRational a, Ord a) => FromReal (NonZero a) where
   fromR = unsafeNonZero . realToFrac
   {-# INLINEABLE fromR #-}
 

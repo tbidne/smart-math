@@ -53,9 +53,9 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
-import Numeric.Literal.Integer (FromInteger (fromZ))
-import Numeric.Literal.Rational (FromRational (fromQ), ToRational (toQ))
-import Numeric.Literal.Real (FromReal (fromR), ToReal (toR))
+import Numeric.Convert.Integer (FromInteger (fromZ))
+import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
+import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core
   ( A_Getter,
     A_Lens,

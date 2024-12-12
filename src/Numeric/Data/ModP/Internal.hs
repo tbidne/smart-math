@@ -48,6 +48,9 @@ import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
+import Numeric.Convert.Rational (ToRational (toQ))
+import Numeric.Convert.Real (ToReal (toR))
 import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Data.ModP.Internal.Primality
   ( MaybePrime
@@ -56,9 +59,6 @@ import Numeric.Data.ModP.Internal.Primality
       ),
   )
 import Numeric.Data.ModP.Internal.Primality qualified as Prime
-import Numeric.Literal.Integer (FromInteger (fromZ), ToInteger (toZ))
-import Numeric.Literal.Rational (ToRational (toQ))
-import Numeric.Literal.Real (ToReal (toR))
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
