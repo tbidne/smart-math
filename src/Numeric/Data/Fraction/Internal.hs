@@ -34,7 +34,6 @@ import Data.Bounds
 import Data.Kind (Type)
 import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
-import GHC.Natural (Natural)
 import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as R
 import GHC.Records (HasField (getField))
@@ -294,165 +293,88 @@ instance (Integral a, UpperBoundless a) => RealFrac (Fraction a) where
   {-# INLINEABLE properFraction #-}
 
 -- | @since 0.1
-instance Division (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => Division (Fraction a) where
   divide = (/)
   {-# INLINEABLE divide #-}
 
 -- | @since 0.1
-instance Division (Fraction Natural) where
-  divide = (/)
-  {-# INLINEABLE divide #-}
-
--- | @since 0.1
-instance ASemigroup (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => ASemigroup (Fraction a) where
   (.+.) = (+)
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance ASemigroup (Fraction Natural) where
-  (.+.) = (+)
-  {-# INLINEABLE (.+.) #-}
-
--- | @since 0.1
-instance AMonoid (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => AMonoid (Fraction a) where
   zero = UnsafeFraction 0 1
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance AMonoid (Fraction Natural) where
-  zero = UnsafeFraction 0 1
-  {-# INLINEABLE zero #-}
-
--- | @since 0.1
-instance AGroup (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => AGroup (Fraction a) where
   (.-.) = (-)
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance MSemigroup (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => MSemigroup (Fraction a) where
   (.*.) = (*)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance MSemigroup (Fraction Natural) where
-  (.*.) = (*)
-  {-# INLINEABLE (.*.) #-}
-
--- | @since 0.1
-instance MMonoid (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => MMonoid (Fraction a) where
   one = UnsafeFraction 1 1
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance MMonoid (Fraction Natural) where
-  one = UnsafeFraction 1 1
-  {-# INLINEABLE one #-}
-
--- | @since 0.1
-instance MGroup (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => MGroup (Fraction a) where
   x .%. (UnsafeFraction n d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance MGroup (Fraction Natural) where
-  x .%. (UnsafeFraction n d) = x .*. UnsafeFraction d n
-  {-# INLINEABLE (.%.) #-}
-
--- | @since 0.1
-instance MetricSpace (Fraction Integer) where
-  diffR x y = realToFrac $ abs (y - x)
-  {-# INLINEABLE diffR #-}
-
--- | @since 0.1
-instance MetricSpace (Fraction Natural) where
+instance (Integral a, UpperBoundless a) => MetricSpace (Fraction a) where
   diffR x y
     | x <= y = realToFrac $ abs (y - x)
     | otherwise = realToFrac $ abs (x - y)
   {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
-instance Normed (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => Normed (Fraction a) where
   norm = abs
   {-# INLINEABLE norm #-}
 
 -- | @since 0.1
-instance Normed (Fraction Natural) where
-  norm = abs
-  {-# INLINEABLE norm #-}
+instance (Integral a, UpperBoundless a) => Semiring (Fraction a)
 
 -- | @since 0.1
-instance Semiring (Fraction Integer)
+instance (Integral a, UpperBoundless a) => Ring (Fraction a)
 
 -- | @since 0.1
-instance Semiring (Fraction Natural)
+instance (Integral a, UpperBoundless a) => Semifield (Fraction a)
 
 -- | @since 0.1
-instance Ring (Fraction Integer)
+instance (Integral a, UpperBoundless a) => Field (Fraction a)
 
 -- | @since 0.1
-instance Semifield (Fraction Natural)
-
--- | @since 0.1
-instance Semifield (Fraction Integer)
-
--- | @since 0.1
-instance Field (Fraction Integer)
-
--- | @since 0.1
-instance FromInteger (Fraction Integer) where
-  fromZ = fromInteger
-  {-# INLINEABLE fromZ #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance FromInteger (Fraction Natural) where
+instance (Integral a, UpperBoundless a) => FromInteger (Fraction a) where
   fromZ = fromInteger
   {-# INLINEABLE fromZ #-}
 
 -- | @since 0.1
-instance FromRational (Fraction Integer) where
-  fromQ = fromRational
-  {-# INLINEABLE fromQ #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance FromRational (Fraction Natural) where
+instance (Integral a, UpperBoundless a) => FromRational (Fraction a) where
   fromQ = fromRational
   {-# INLINEABLE fromQ #-}
 
 -- | @since 0.1
-instance ToRational (Fraction Integer) where
-  toQ (UnsafeFraction n d) = n :% d
-  {-# INLINEABLE toQ #-}
-
--- | @since 0.1
-instance ToRational (Fraction Natural) where
+instance (Integral a, UpperBoundless a) => ToRational (Fraction a) where
   toQ (UnsafeFraction n d) = toRational (n :% d)
   {-# INLINEABLE toQ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
-instance FromReal (Fraction Integer) where
+instance (Integral a, UpperBoundless a) => FromReal (Fraction a) where
   fromR = fromRational . realToFrac
   {-# INLINEABLE fromR #-}
 
 -- | @since 0.1
-instance ToReal (Fraction Integer) where
-  toR (UnsafeFraction n d) = realToFrac (n :% d)
-  {-# INLINEABLE toR #-}
-
--- | __WARNING: Partial__
---
--- @since 0.1
-instance FromReal (Fraction Natural) where
-  fromR = fromRational . realToFrac
-  {-# INLINEABLE fromR #-}
-
--- | @since 0.1
-instance ToReal (Fraction Natural) where
+instance (Integral a, UpperBoundless a) => ToReal (Fraction a) where
   toR (UnsafeFraction n d) = realToFrac (n :% d)
   {-# INLINEABLE toR #-}
 
