@@ -23,9 +23,10 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bounds
-  ( LowerBounded,
-    MaybeUpperBounded,
-    UpperBounded,
+  ( LowerBounded (lowerBound),
+    MaybeLowerBounded (maybeLowerBound),
+    MaybeUpperBounded (maybeUpperBound),
+    UpperBounded (upperBound),
   )
 import Data.Data (Proxy (Proxy))
 import Data.Kind (Type)
@@ -95,11 +96,7 @@ newtype ModP p a = UnsafeModP a
     )
   deriving anyclass
     ( -- | @since 0.1
-      LowerBounded,
-      -- | @since 0.1
-      NFData,
-      -- | @since 0.1
-      UpperBounded
+      NFData
     )
 
 -- | Unidirectional pattern synonym for 'ModP'. This allows us to pattern
@@ -152,10 +149,68 @@ instance
   ) =>
   Bounded (ModP p a)
   where
-  minBound = unsafeModP zero
-  maxBound = unsafeModP $ fromZ $ toZ (natVal @p Proxy - 1)
+  minBound = lowerBound
+  maxBound = upperBound
   {-# INLINEABLE minBound #-}
   {-# INLINEABLE maxBound #-}
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  LowerBounded (ModP p a)
+  where
+  lowerBound = unsafeModP zero
+  {-# INLINEABLE lowerBound #-}
+
+-- | @since 0.1
+instance
+  ( FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  UpperBounded (ModP p a)
+  where
+  upperBound = unsafeModP $ fromZ $ toZ (natVal @p Proxy - 1)
+  {-# INLINEABLE upperBound #-}
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  MaybeLowerBounded (ModP p a)
+  where
+  maybeLowerBound = Just lowerBound
+  {-# INLINEABLE maybeLowerBound #-}
+
+-- | @since 0.1
+instance
+  ( FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  MaybeUpperBounded (ModP p a)
+  where
+  maybeUpperBound = Just upperBound
+  {-# INLINEABLE maybeUpperBound #-}
 
 -- | @since 0.1
 instance (KnownNat p, Show a) => Display (ModP p a) where

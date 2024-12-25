@@ -17,7 +17,12 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (bimap))
-import Data.Bounds (UpperBounded (upperBound), UpperBoundless)
+import Data.Bounds
+  ( MaybeLowerBounded (maybeLowerBound),
+    MaybeUpperBounded (maybeUpperBound),
+    UpperBounded (upperBound),
+    UpperBoundless,
+  )
 import Data.Kind (Type)
 import Data.Text.Display (Display, ShowInstance (ShowInstance))
 import GHC.Generics (Generic)
@@ -99,9 +104,19 @@ pattern MkPositive x <- UnsafePositive x
 {-# COMPLETE MkPositive #-}
 
 -- | @since 0.1
-instance (Bounded a) => UpperBounded (Positive a) where
-  upperBound = UnsafePositive maxBound
+instance (UpperBounded a) => UpperBounded (Positive a) where
+  upperBound = UnsafePositive upperBound
   {-# INLINEABLE upperBound #-}
+
+-- | @since 0.1
+instance MaybeLowerBounded (Positive a) where
+  maybeLowerBound = Nothing
+  {-# INLINEABLE maybeLowerBound #-}
+
+-- | @since 0.1
+instance (MaybeUpperBounded a) => MaybeUpperBounded (Positive a) where
+  maybeUpperBound = UnsafePositive <$> maybeUpperBound
+  {-# INLINEABLE maybeUpperBound #-}
 
 -- | @since 0.1
 instance (ASemigroup a) => ASemigroup (Positive a) where

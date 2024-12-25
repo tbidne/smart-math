@@ -23,10 +23,10 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bounds
-  ( LowerBounded,
-    MaybeLowerBounded,
-    MaybeUpperBounded,
-    UpperBounded,
+  ( LowerBounded (lowerBound),
+    MaybeLowerBounded (maybeLowerBound),
+    MaybeUpperBounded (maybeUpperBound),
+    UpperBounded (upperBound),
   )
 import Data.Data (Proxy (Proxy))
 import Data.Kind (Type)
@@ -94,11 +94,7 @@ newtype ModP p a = UnsafeModP a
     )
   deriving anyclass
     ( -- | @since 0.1
-      LowerBounded,
-      -- | @since 0.1
-      NFData,
-      -- | @since 0.1
-      UpperBounded
+      NFData
     )
 
 -- | Unidirectional pattern synonym for 'ModP'. This allows us to pattern
@@ -148,10 +144,58 @@ instance
   ) =>
   Bounded (ModP p a)
   where
-  minBound = unsafeModP 0
-  maxBound = unsafeModP $ fromIntegral (natVal @p Proxy - 1)
+  minBound = lowerBound
+  maxBound = upperBound
   {-# INLINEABLE minBound #-}
   {-# INLINEABLE maxBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  LowerBounded (ModP p a)
+  where
+  lowerBound = unsafeModP 0
+  {-# INLINEABLE lowerBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  UpperBounded (ModP p a)
+  where
+  upperBound = unsafeModP $ fromIntegral (natVal @p Proxy - 1)
+  {-# INLINEABLE upperBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  MaybeLowerBounded (ModP p a)
+  where
+  maybeLowerBound = Just lowerBound
+  {-# INLINEABLE maybeLowerBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  MaybeUpperBounded (ModP p a)
+  where
+  maybeUpperBound = Just upperBound
+  {-# INLINEABLE maybeUpperBound #-}
 
 -- | @since 0.1
 instance (KnownNat p, Show a) => Display (ModP p a) where

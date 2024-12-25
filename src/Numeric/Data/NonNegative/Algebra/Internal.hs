@@ -19,6 +19,8 @@ import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (bimap))
 import Data.Bounds
   ( LowerBounded (lowerBound),
+    MaybeLowerBounded (maybeLowerBound),
+    MaybeUpperBounded (maybeUpperBound),
     UpperBounded (upperBound),
     UpperBoundless,
   )
@@ -103,9 +105,9 @@ pattern MkNonNegative x <- UnsafeNonNegative x
 {-# COMPLETE MkNonNegative #-}
 
 -- | @since 0.1
-instance (AMonoid a, Bounded a) => Bounded (NonNegative a) where
-  minBound = UnsafeNonNegative zero
-  maxBound = UnsafeNonNegative maxBound
+instance (AMonoid a, UpperBounded a) => Bounded (NonNegative a) where
+  minBound = lowerBound
+  maxBound = upperBound
   {-# INLINEABLE minBound #-}
   {-# INLINEABLE maxBound #-}
 
@@ -118,6 +120,16 @@ instance (AMonoid a) => LowerBounded (NonNegative a) where
 instance (UpperBounded a) => UpperBounded (NonNegative a) where
   upperBound = UnsafeNonNegative upperBound
   {-# INLINEABLE upperBound #-}
+
+-- | @since 0.1
+instance (AMonoid a) => MaybeLowerBounded (NonNegative a) where
+  maybeLowerBound = Just lowerBound
+  {-# INLINEABLE maybeLowerBound #-}
+
+-- | @since 0.1
+instance (MaybeUpperBounded a) => MaybeUpperBounded (NonNegative a) where
+  maybeUpperBound = UnsafeNonNegative <$> maybeUpperBound
+  {-# INLINEABLE maybeUpperBound #-}
 
 -- | @since 0.1
 instance (ASemigroup a) => ASemigroup (NonNegative a) where

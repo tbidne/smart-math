@@ -19,10 +19,10 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bounds
-  ( LowerBounded,
-    MaybeLowerBounded,
-    MaybeUpperBounded,
-    UpperBounded,
+  ( LowerBounded (lowerBound),
+    MaybeLowerBounded (maybeLowerBound),
+    MaybeUpperBounded (maybeUpperBound),
+    UpperBounded (upperBound),
   )
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
@@ -95,11 +95,7 @@ newtype ModN n a = UnsafeModN a
     )
   deriving anyclass
     ( -- | @since 0.1
-      LowerBounded,
-      -- | @since 0.1
-      NFData,
-      -- | @since 0.1
-      UpperBounded
+      NFData
     )
 
 -- | @since 0.1
@@ -149,10 +145,58 @@ instance
   ) =>
   Bounded (ModN n a)
   where
-  minBound = unsafeModN 0
-  maxBound = unsafeModN $ fromIntegral (natVal @n Proxy - 1)
+  minBound = lowerBound
+  maxBound = upperBound
   {-# INLINEABLE minBound #-}
   {-# INLINEABLE maxBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  LowerBounded (ModN n a)
+  where
+  lowerBound = unsafeModN 0
+  {-# INLINEABLE lowerBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  UpperBounded (ModN n a)
+  where
+  upperBound = unsafeModN $ fromIntegral (natVal @n Proxy - 1)
+  {-# INLINEABLE upperBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  MaybeLowerBounded (ModN n a)
+  where
+  maybeLowerBound = Just lowerBound
+  {-# INLINEABLE maybeLowerBound #-}
+
+-- | @since 0.1
+instance
+  ( Integral a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    Typeable a
+  ) =>
+  MaybeUpperBounded (ModN n a)
+  where
+  maybeUpperBound = Just upperBound
+  {-# INLINEABLE maybeUpperBound #-}
 
 -- | @since 0.1
 instance (KnownNat n, Show a) => Display (ModN n a) where

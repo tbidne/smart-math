@@ -26,9 +26,9 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bounds
-  ( LowerBounded,
+  ( LowerBounded (lowerBound),
     LowerBoundless,
-    UpperBounded,
+    MaybeLowerBounded (maybeLowerBound),
     UpperBoundless,
   )
 import Data.Kind (Type)
@@ -125,11 +125,7 @@ data Fraction a = UnsafeFraction !a !a
     )
   deriving anyclass
     ( -- | @since 0.1
-      LowerBounded,
-      -- | @since 0.1
-      NFData,
-      -- | @since 0.1
-      UpperBounded
+      NFData
     )
 
 -- | @since 0.1
@@ -196,12 +192,18 @@ pattern n :%! d <- UnsafeFraction n d
 
 infixr 5 :%!
 
+-- NOTE: No UpperBounded (consequently no Bounded) instance because we intend
+-- for Fraction to only be used with types w/o an upper bound.
+
 -- | @since 0.1
-instance (Bounded a, Num a) => Bounded (Fraction a) where
-  minBound = UnsafeFraction minBound 1
-  maxBound = UnsafeFraction maxBound 1
-  {-# INLINEABLE minBound #-}
-  {-# INLINEABLE maxBound #-}
+instance (LowerBounded a, Num a) => LowerBounded (Fraction a) where
+  lowerBound = UnsafeFraction lowerBound 1
+  {-# INLINEABLE lowerBound #-}
+
+-- | @since 0.1
+instance (MaybeLowerBounded a, Num a) => MaybeLowerBounded (Fraction a) where
+  maybeLowerBound = (\n -> UnsafeFraction n 1) <$> maybeLowerBound
+  {-# INLINEABLE maybeLowerBound #-}
 
 -- | @since 0.1
 instance (LowerBoundless a) => LowerBoundless (Fraction a)
