@@ -522,7 +522,7 @@ instance
 
 -- | @since 0.1
 instance
-  ( FromRational a,
+  ( FromInteger a,
     MEuclidean a,
     Normed a,
     Ord a,
@@ -541,7 +541,7 @@ instance (ToInteger a, UpperBoundless a) => ToRational (Fraction a) where
 
 -- | @since 0.1
 instance
-  ( FromRational a,
+  ( FromInteger a,
     MEuclidean a,
     Normed a,
     Ord a,
