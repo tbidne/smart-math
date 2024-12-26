@@ -300,7 +300,6 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
-    MMonoid a,
     ToInteger a,
     Typeable a
   ) =>
@@ -315,7 +314,6 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
-    MMonoid a,
     ToInteger a,
     Typeable a
   ) =>
@@ -331,7 +329,6 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
-    MMonoid a,
     ToInteger a,
     Typeable a
   ) =>
@@ -344,7 +341,6 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
-    MMonoid a,
     ToInteger a,
     Typeable a
   ) =>
@@ -357,7 +353,6 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
-    MMonoid a,
     ToInteger a,
     Typeable a
   ) =>
@@ -370,7 +365,6 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
-    MMonoid a,
     ToInteger a,
     Typeable a
   ) =>
