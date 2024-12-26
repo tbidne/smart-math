@@ -4,7 +4,7 @@
 -- | Provides the 'Fraction' type, a safer alternative to 'Ratio'.
 --
 -- @since 0.1
-module Numeric.Data.Fraction.Internal
+module Numeric.Data.Fraction.Base.Internal
   ( -- * Type
     Fraction ((:%:), (:%!), UnsafeFraction),
 
@@ -47,7 +47,7 @@ import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Algebra.Normed (Normed (norm))
+import Numeric.Algebra.Normed (Normed (norm, sgn))
 import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
@@ -255,7 +255,7 @@ instance (Integral a, UpperBoundless a) => Fractional (Fraction a) where
     unsafeFraction (n1 * d2) (n2 * d1)
   {-# INLINEABLE (/) #-}
   recip (UnsafeFraction 0 _) =
-    error "Numeric.Data.Fraction.recip: Fraction has zero numerator"
+    error "Numeric.Data.Fraction.Base.recip: Fraction has zero numerator"
   recip (UnsafeFraction n d) = unsafeFraction d n
   {-# INLINEABLE recip #-}
   fromRational (n :% d) = unsafeFraction (fromInteger n) (fromInteger d)
@@ -340,6 +340,9 @@ instance (Integral a, UpperBoundless a) => MetricSpace (Fraction a) where
 instance (Integral a, UpperBoundless a) => Normed (Fraction a) where
   norm = abs
   {-# INLINEABLE norm #-}
+
+  sgn = signum
+  {-# INLINEABLE sgn #-}
 
 -- | @since 0.1
 instance (Integral a, UpperBoundless a) => Semiring (Fraction a)
@@ -471,7 +474,7 @@ infixr 2 `xor`
 errMsg :: String -> String
 errMsg fn =
   mconcat
-    [ "Numeric.Data.Fraction.",
+    [ "Numeric.Data.Fraction.Base.",
       fn,
       ": Fraction has zero denominator"
     ]

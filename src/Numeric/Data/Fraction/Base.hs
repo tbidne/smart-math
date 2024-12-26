@@ -3,7 +3,7 @@
 -- | Provides the 'Fraction' type, a safer alternative to 'GHC.Real.Ratio'.
 --
 -- @since 0.1
-module Numeric.Data.Fraction
+module Numeric.Data.Fraction.Base
   ( -- * Type
     Fraction ((:%:), (:%!)),
 
@@ -33,8 +33,14 @@ import Data.Bounds
   )
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Data.Fraction.Internal (Fraction (UnsafeFraction, (:%!), (:%:)))
-import Numeric.Data.Fraction.Internal qualified as Internal
+import Numeric.Data.Fraction.Base.Internal
+  ( Fraction
+      ( UnsafeFraction,
+        (:%!),
+        (:%:)
+      ),
+  )
+import Numeric.Data.Fraction.Base.Internal qualified as Internal
 import Numeric.Data.Internal.Utils (rmatching)
 import Optics.Core
   ( ReversedPrism',
@@ -44,7 +50,7 @@ import Optics.Core
 
 -- $setup
 -- >>> :set -XTemplateHaskell
--- >>> import Numeric.Data.Fraction.Internal ((%!))
+-- >>> import Numeric.Data.Fraction.Base.Internal ((%!))
 
 -- | Template haskell for creating a 'Fraction' at compile-time.
 --

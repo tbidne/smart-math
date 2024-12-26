@@ -37,7 +37,7 @@ import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Algebra.Normed (Normed (norm))
+import Numeric.Algebra.Normed (Normed (norm, sgn))
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
@@ -168,9 +168,12 @@ instance (MetricSpace a) => MetricSpace (NonNegative a) where
   {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
-instance Normed (NonNegative a) where
+instance (Normed a) => Normed (NonNegative a) where
   norm = id
   {-# INLINEABLE norm #-}
+
+  sgn (UnsafeNonNegative x) = UnsafeNonNegative $ sgn x
+  {-# INLINEABLE sgn #-}
 
 -- | __WARNING: Partial__
 --

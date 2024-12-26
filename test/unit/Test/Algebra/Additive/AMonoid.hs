@@ -21,7 +21,8 @@ identityProps :: TestTree
 identityProps =
   testGroup
     "Identity: zero .+. x == x == x .+. zero"
-    [ fractionId,
+    [ afractionId,
+      bfractionId,
       amodNId,
       bmodNId,
       amodPId,
@@ -30,8 +31,11 @@ identityProps =
       bnonNegativeId
     ]
 
-fractionId :: TestTree
-fractionId = amonoidIdentity Gens.fraction MkEqExact "Fraction" "fractionId"
+afractionId :: TestTree
+afractionId = amonoidIdentity Gens.afraction MkEqExact "Fraction.Algebra" "afractionId"
+
+bfractionId :: TestTree
+bfractionId = amonoidIdentity Gens.bfraction MkEqExact "Fraction.Base" "bfractionId"
 
 amodNId :: TestTree
 amodNId = amonoidIdentity Gens.amodN MkEqExact "ModN.Algebra" "amodNId"
@@ -66,11 +70,15 @@ absProps :: TestTree
 absProps =
   testGroup
     "Absolute Value"
-    [ fractionAbs
+    [ afractionAbs,
+      bfractionAbs
     ]
 
-fractionAbs :: TestTree
-fractionAbs = amonoidAbs Gens.fraction MkEqExact "Fraction" "fractionAbs"
+afractionAbs :: TestTree
+afractionAbs = amonoidAbs Gens.afraction MkEqExact "Fraction.Algebra" "afractionAbs"
+
+bfractionAbs :: TestTree
+bfractionAbs = amonoidAbs Gens.bfraction MkEqExact "Fraction.Base" "bfractionAbs"
 
 amonoidAbs ::
   ( AMonoid a,

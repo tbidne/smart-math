@@ -35,7 +35,7 @@ import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod))
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Algebra.Normed (Normed (norm))
+import Numeric.Algebra.Normed (Normed (norm, sgn))
 import Numeric.Class.Division (Division (divide))
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
@@ -150,9 +150,12 @@ instance (Real a) => MetricSpace (Positive a) where
   {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
-instance Normed (Positive a) where
+instance (Normed a) => Normed (Positive a) where
   norm = id
   {-# INLINEABLE norm #-}
+
+  sgn (UnsafePositive x) = UnsafePositive $ sgn x
+  {-# INLINEABLE sgn #-}
 
 -- | __WARNING: Partial__
 --

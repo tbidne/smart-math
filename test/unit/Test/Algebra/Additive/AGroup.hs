@@ -19,25 +19,33 @@ subProps :: TestTree
 subProps =
   testGroup
     "(.-.) === (-)"
-    [ fractionSub
+    [ afractionSub,
+      bfractionSub
     ]
 
-fractionSub :: TestTree
-fractionSub = agroupSubEq Gens.fraction MkEqExact "Fraction" "fractionSub"
+afractionSub :: TestTree
+afractionSub = agroupSubEq Gens.afraction MkEqExact "Fraction.Algebra" "afractionSub"
+
+bfractionSub :: TestTree
+bfractionSub = agroupSubEq Gens.bfraction MkEqExact "Fraction.Base" "bfractionSub"
 
 subIdentProps :: TestTree
 subIdentProps =
   testGroup
     "Subtraction is the inverse: zero == x .-. x"
-    [ fractionSubIdent,
+    [ afractionSubIdent,
+      bfractionSubIdent,
       amodNSubIdent,
       bmodNSubIdent,
       amodPSubIdent,
       bmodPSubIdent
     ]
 
-fractionSubIdent :: TestTree
-fractionSubIdent = agroupSubIdent Gens.fraction "Fraction" "fractionSubIdent"
+afractionSubIdent :: TestTree
+afractionSubIdent = agroupSubIdent Gens.afraction "Fraction.Algebra" "afractionSubIdent"
+
+bfractionSubIdent :: TestTree
+bfractionSubIdent = agroupSubIdent Gens.bfraction "Fraction.Base" "bfractionSubIdent"
 
 amodNSubIdent :: TestTree
 amodNSubIdent = agroupSubIdent Gens.amodN "ModN.Algebra" "amodNSubIdent"

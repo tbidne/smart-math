@@ -81,8 +81,10 @@ library
   import:          common-lang
   exposed-modules:
     Numeric.Class.Division
-    Numeric.Data.Fraction
-    Numeric.Data.Fraction.Internal
+    Numeric.Data.Fraction.Algebra
+    Numeric.Data.Fraction.Algebra.Internal
+    Numeric.Data.Fraction.Base
+    Numeric.Data.Fraction.Base.Internal
     Numeric.Data.Internal.Utils
     Numeric.Data.Interval.Algebra
     Numeric.Data.Interval.Algebra.Internal

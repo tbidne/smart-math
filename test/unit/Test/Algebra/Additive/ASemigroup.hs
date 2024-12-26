@@ -18,11 +18,15 @@ addNumProps :: TestTree
 addNumProps =
   testGroup
     "(.+.) === (+)"
-    [ fractionAddNum
+    [ afractionAddNum,
+      bfractionAddNum
     ]
 
-fractionAddNum :: TestTree
-fractionAddNum = asemigroupAddNum Gens.fraction MkEqExact "Fraction" "fractionAddNum"
+afractionAddNum :: TestTree
+afractionAddNum = asemigroupAddNum Gens.afraction MkEqExact "Fraction.Algebra" "afractionAddNum"
+
+bfractionAddNum :: TestTree
+bfractionAddNum = asemigroupAddNum Gens.bfraction MkEqExact "Fraction.Base" "bfractionAddNum"
 
 asemigroupAddNum ::
   ( ASemigroup a,
@@ -40,7 +44,8 @@ assocProps :: TestTree
 assocProps =
   testGroup
     "Associativity: (x .+. y) .+. z === x .+. (y .+. z)"
-    [ fractionAssoc,
+    [ afractionAssoc,
+      bfractionAssoc,
       amodNAssoc,
       bmodNAssoc,
       amodPAssoc,
@@ -51,8 +56,11 @@ assocProps =
       bpositiveAssoc
     ]
 
-fractionAssoc :: TestTree
-fractionAssoc = asemigroupAssoc Gens.fraction "Fraction" "fractionAssoc"
+afractionAssoc :: TestTree
+afractionAssoc = asemigroupAssoc Gens.afraction "Fraction.Algebra" "afractionAssoc"
+
+bfractionAssoc :: TestTree
+bfractionAssoc = asemigroupAssoc Gens.bfraction "Fraction.Base" "bfractionAssoc"
 
 amodNAssoc :: TestTree
 amodNAssoc = asemigroupAssoc Gens.amodN "ModN.Algebra" "amodNAssoc"

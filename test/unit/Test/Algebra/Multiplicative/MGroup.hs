@@ -18,17 +18,22 @@ divProps :: TestTree
 divProps =
   testGroup
     "(.%.) === div / (/)"
-    [ fractionDiv
+    [ afractionDiv,
+      bfractionDiv
     ]
 
-fractionDiv :: TestTree
-fractionDiv = mgroupDivEq (/) Gens.fraction Gens.fractionNonZero MkEqExact "Fraction" "fractionDiv"
+afractionDiv :: TestTree
+afractionDiv = mgroupDivEq (/) Gens.afraction Gens.afractionNonZero MkEqExact "Fraction.Algebra" "afractionDiv"
+
+bfractionDiv :: TestTree
+bfractionDiv = mgroupDivEq (/) Gens.bfraction Gens.bfractionNonZero MkEqExact "Fraction.Base" "bfractionDiv"
 
 divIdentProps :: TestTree
 divIdentProps =
   testGroup
     "Division is the inverse: one == x .%. x"
-    [ fractionDivIdent,
+    [ afractionDivIdent,
+      bfractionDivIdent,
       amodPDivIdent,
       bmodPDivIdent,
       anonNegativeDivIdent,
@@ -39,8 +44,11 @@ divIdentProps =
       bpositiveDivIdent
     ]
 
-fractionDivIdent :: TestTree
-fractionDivIdent = agroupDivIdent Gens.fractionNonZero MkEqExact "Fraction" "fractionDivIdent"
+afractionDivIdent :: TestTree
+afractionDivIdent = agroupDivIdent Gens.afractionNonZero MkEqExact "Fraction.Algebra" "afractionDivIdent"
+
+bfractionDivIdent :: TestTree
+bfractionDivIdent = agroupDivIdent Gens.bfractionNonZero MkEqExact "Fraction.Base" "bfractionDivIdent"
 
 amodPDivIdent :: TestTree
 amodPDivIdent =

@@ -30,7 +30,7 @@ import Numeric.Algebra.Multiplicative
     MMonoid (one),
     MSemigroup ((.*.)),
   )
-import Numeric.Algebra.Normed (Normed (norm))
+import Numeric.Algebra.Normed (Normed (norm, sgn))
 import Numeric.Class.Division (Division (divide))
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
@@ -110,9 +110,12 @@ instance (Real a) => MetricSpace (NonZero a) where
   {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
-instance (Num a) => Normed (NonZero a) where
-  norm (UnsafeNonZero x) = UnsafeNonZero $ abs x
+instance (Normed a) => Normed (NonZero a) where
+  norm (UnsafeNonZero x) = UnsafeNonZero $ norm x
   {-# INLINEABLE norm #-}
+
+  sgn (UnsafeNonZero x) = UnsafeNonZero $ sgn x
+  {-# INLINEABLE sgn #-}
 
 -- | __WARNING: Partial__
 --

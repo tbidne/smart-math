@@ -7,7 +7,8 @@ module Gens
     -- ** Integral
     integer,
     natural,
-    fraction,
+    afraction,
+    bfraction,
     amodN,
     bmodN,
     amodP,
@@ -23,7 +24,8 @@ module Gens
 
     -- ** Specializations
     integerNZ,
-    fractionNonZero,
+    afractionNonZero,
+    bfractionNonZero,
     amodPNonZero,
     bmodPNonZero,
     anonNegativeNonZero,
@@ -38,7 +40,8 @@ import Hedgehog (Gen)
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range (Range)
 import Hedgehog.Range qualified as HR
-import Numeric.Data.Fraction (Fraction, unsafeFraction)
+import Numeric.Data.Fraction.Algebra qualified as AFrac
+import Numeric.Data.Fraction.Base qualified as BFrac
 import Numeric.Data.ModN.Algebra qualified as AModN
 import Numeric.Data.ModN.Base qualified as BModN
 import Numeric.Data.ModP.Algebra qualified as AModP
@@ -57,8 +60,11 @@ integer = HG.integral $ HR.exponentialFrom minVal 0 maxVal
 natural :: Gen Natural
 natural = HG.integral $ HR.exponential minVal maxVal
 
-fraction :: Gen (Fraction Integer)
-fraction = unsafeFraction <$> integer <*> integerNZ
+afraction :: Gen (AFrac.Fraction Integer)
+afraction = AFrac.unsafeFraction <$> integer <*> integerNZ
+
+bfraction :: Gen (BFrac.Fraction Integer)
+bfraction = BFrac.unsafeFraction <$> integer <*> integerNZ
 
 amodN :: Gen (AModN.ModN 10 Natural)
 amodN = AModN.unsafeModN <$> natural
@@ -100,8 +106,11 @@ integerNZ = nzBounds HG.integral minVal maxVal
 naturalNZ :: Gen Natural
 naturalNZ = HG.integral $ HR.exponential 1 maxVal
 
-fractionNonZero :: Gen (Fraction Integer)
-fractionNonZero = unsafeFraction <$> integerNZ <*> integerNZ
+afractionNonZero :: Gen (AFrac.Fraction Integer)
+afractionNonZero = AFrac.unsafeFraction <$> integerNZ <*> integerNZ
+
+bfractionNonZero :: Gen (BFrac.Fraction Integer)
+bfractionNonZero = BFrac.unsafeFraction <$> integerNZ <*> integerNZ
 
 amodPNonZero :: Gen (AModP.ModP 17 Natural)
 amodPNonZero = AModP.reallyUnsafeModP <$> pos

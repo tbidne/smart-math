@@ -16,8 +16,10 @@ main =
 files :: [String]
 files =
   [ "-isrc",
-    "src/Numeric/Data/Fraction.hs",
-    "src/Numeric/Data/Fraction/Internal.hs",
+    "src/Numeric/Data/Fraction/Algebra.hs",
+    "src/Numeric/Data/Fraction/Algebra/Internal.hs",
+    "src/Numeric/Data/Fraction/Base.hs",
+    "src/Numeric/Data/Fraction/Base/Internal.hs",
     "src/Numeric/Data/Interval/Algebra.hs",
     "src/Numeric/Data/Interval/Algebra/Internal.hs",
     "src/Numeric/Data/Interval/Base.hs",
