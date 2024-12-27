@@ -40,7 +40,11 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)), anegate)
-import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.AMonoid
+  ( AMonoid (zero),
+    pattern NonZero,
+    pattern Zero,
+  )
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
@@ -234,7 +238,7 @@ instance
   ) =>
   Eq (Fraction a)
   where
-  UnsafeFraction n1 _ == UnsafeFraction n2 _ | n1 == zero && n2 == zero = True
+  UnsafeFraction Zero _ == UnsafeFraction Zero _ = True
   x == y = n1 == n2 && d1 == d2
     where
       UnsafeFraction n1 d1 = reduce x
@@ -589,10 +593,8 @@ unsafeFraction ::
   a ->
   a ->
   Fraction a
-unsafeFraction n d =
-  if d == zero
-    then error $ errMsg "unsafeFraction"
-    else reduce $ UnsafeFraction n d
+unsafeFraction _ Zero = error $ errMsg "unsafeFraction"
+unsafeFraction n (NonZero d) = reduce $ UnsafeFraction n d
 {-# INLINEABLE unsafeFraction #-}
 
 -- | Infix version of 'unsafeFraction'.
@@ -647,10 +649,8 @@ reduce ::
   ) =>
   Fraction a ->
   Fraction a
-reduce (UnsafeFraction n d) =
-  if n == zero
-    then UnsafeFraction zero one
-    else UnsafeFraction (n' .*. sgn d) (norm d')
+reduce (UnsafeFraction Zero _) = UnsafeFraction zero one
+reduce (UnsafeFraction (NonZero n) d) = UnsafeFraction (n' .*. sgn d) (norm d')
   where
     n' = n `mdiv` g
     d' = d `mdiv` g
@@ -667,10 +667,10 @@ reciprocal ::
   ) =>
   Fraction a ->
   Fraction a
-reciprocal (UnsafeFraction n d) =
-  if n == zero
-    then error "Numeric.Data.Fraction.Algebra.reciprocal: Fraction has zero numerator"
-    else unsafeFraction d n
+reciprocal (UnsafeFraction Zero _) =
+  -- NOTE: Not using errMsg because numerator vs. denominator
+  error "Numeric.Data.Fraction.Algebra.reciprocal: Fraction has zero numerator"
+reciprocal (UnsafeFraction (NonZero n) d) = unsafeFraction d n
 
 xor :: Bool -> Bool -> Bool
 xor True False = True

@@ -33,7 +33,7 @@ import Data.Bounds
   )
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.AMonoid (pattern NonZero, pattern Zero)
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean)
 import Numeric.Algebra.Normed (Normed)
 import Numeric.Algebra.Semiring (Semiring)
@@ -100,10 +100,8 @@ mkFraction ::
   a ->
   a ->
   Maybe (Fraction a)
-mkFraction n d =
-  if d == zero
-    then Nothing
-    else Just $ Internal.reduce (UnsafeFraction n d)
+mkFraction _ Zero = Nothing
+mkFraction n (NonZero d) = Just $ Internal.reduce (UnsafeFraction n d)
 {-# INLINEABLE mkFraction #-}
 
 -- | Infix version of 'mkFractionTH'.

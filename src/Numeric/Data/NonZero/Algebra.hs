@@ -23,7 +23,7 @@ where
 
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Algebra (AMonoid (zero))
+import Numeric.Algebra (AMonoid, pattern NonZero, pattern Zero)
 import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.NonZero.Algebra.Internal (NonZero (MkNonZero, UnsafeNonZero))
 import Numeric.Data.NonZero.Algebra.Internal qualified as Internal
@@ -47,9 +47,8 @@ unNonZero (UnsafeNonZero x) = x
 --
 -- @since 0.1
 mkNonZero :: (AMonoid a, Eq a) => a -> Maybe (NonZero a)
-mkNonZero x
-  | x == zero = Nothing
-  | otherwise = Just (UnsafeNonZero x)
+mkNonZero Zero = Nothing
+mkNonZero (NonZero x) = Just (UnsafeNonZero x)
 {-# INLINEABLE mkNonZero #-}
 
 -- | Template-haskell version of 'mkNonZero' for creating 'NonZero'
@@ -61,9 +60,8 @@ mkNonZero x
 --
 -- @since 0.1
 mkNonZeroTH :: (AMonoid a, Eq a, Lift a) => a -> Code Q (NonZero a)
-mkNonZeroTH x
-  | x == zero = error $ Internal.errMsg "mkNonZeroTH"
-  | otherwise = liftTyped (UnsafeNonZero x)
+mkNonZeroTH Zero = error $ Internal.errMsg "mkNonZeroTH"
+mkNonZeroTH (NonZero x) = liftTyped (UnsafeNonZero x)
 {-# INLINEABLE mkNonZeroTH #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeNonZero@
