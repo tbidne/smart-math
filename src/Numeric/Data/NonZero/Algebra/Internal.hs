@@ -24,7 +24,7 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra (AMonoid)
-import Numeric.Algebra.Additive (AMonoid (zero))
+import Numeric.Algebra.Additive (pattern NonZero, pattern Zero)
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative
   ( MEuclidean (mdivMod),
@@ -172,9 +172,8 @@ pattern MkNonZero x <- UnsafeNonZero x
 --
 -- @since 0.1
 unsafeNonZero :: (AMonoid a, Eq a, HasCallStack) => a -> NonZero a
-unsafeNonZero x
-  | x == zero = error $ errMsg "unsafeNonZero"
-  | otherwise = UnsafeNonZero x
+unsafeNonZero Zero = error $ errMsg "unsafeNonZero"
+unsafeNonZero (NonZero x) = UnsafeNonZero x
 {-# INLINEABLE unsafeNonZero #-}
 
 -- | @since 0.1
