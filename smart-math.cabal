@@ -4,7 +4,12 @@ version:            0.1
 license:            MIT
 license-file:       LICENSE
 tested-with:
-  GHC ==9.2.8 || ==9.4.8 || ==9.6.5 || ==9.8.2 || ==9.10.1
+  GHC ==9.2.8
+   || ==9.4.8
+   || ==9.6.5
+   || ==9.8.2
+   || ==9.10.1
+   || ==9.12.1
 
 copyright:          2022-2025 Thomas Bidne
 author:             Thomas Bidne
@@ -113,12 +118,12 @@ library
 
   build-depends:
     , algebra-simple    ^>=0.1
-    , base              >=4.16.0.0 && <4.21
+    , base              >=4.16.0.0 && <4.22
     , bounds            ^>=0.1
     , deepseq           >=1.4.4.0  && <1.6
     , optics-core       ^>=0.4
     , random            ^>=1.2.0
-    , template-haskell  >=2.17.0.0 && <2.23
+    , template-haskell  >=2.17.0.0 && <2.24
     , text              >=1.2.4.0  && <2.2
     , text-display      >=0.0.3.0  && <0.6
 
@@ -146,7 +151,7 @@ test-suite doctest
   main-is:        Main.hs
   build-depends:
     , base
-    , doctest    >=0.16.3 && <0.23
+    , doctest    >=0.16.3 && <0.24
     , env-guard  ^>=0.2
 
   hs-source-dirs: test/doctest
@@ -182,7 +187,7 @@ test-suite unit
     , base
     , bounds
     , deepseq
-    , hedgehog        >=1.0.2   && <1.5
+    , hedgehog        >=1.0.2   && <1.6
     , optics-core
     , smart-math
     , tasty           >=1.1.0.3 && <1.6
@@ -200,7 +205,7 @@ benchmark benchmarks
   build-depends:
     , base
     , smart-math
-    , tasty-bench  ^>=0.3
+    , tasty-bench  >=0.3 && <0.5
 
   hs-source-dirs: benchmarks
   ghc-options:    -Wmissing-import-lists
