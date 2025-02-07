@@ -31,6 +31,7 @@ module Numeric.Data.Interval.Base
   )
 where
 
+import Data.Singletons (SingI)
 import GHC.TypeNats (Nat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
@@ -38,7 +39,6 @@ import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.Interval.Base.Internal
   ( Interval (MkInterval, UnsafeInterval),
     IntervalBound (Closed, None, Open),
-    SingIntervalBound,
   )
 import Numeric.Data.Interval.Base.Internal qualified as Internal
 import Optics.Core (Prism', ReversedPrism', ReversibleOptic (re), prism)
@@ -62,8 +62,8 @@ mkIntervalTH ::
   ( Lift a,
     Num a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r,
+    SingI l,
+    SingI r,
     Show a
   ) =>
   a ->
@@ -137,8 +137,8 @@ _MkInterval ::
   forall l r a.
   ( Num a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r
+    SingI l,
+    SingI r
   ) =>
   ReversedPrism' (Interval l r a) a
 _MkInterval = re (prism unInterval g)

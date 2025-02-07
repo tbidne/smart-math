@@ -23,8 +23,6 @@ module Numeric.Data.Interval.Base.Internal
 
     -- * Singletons
     SIntervalBound (..),
-    SingIntervalBound (..),
-    withSingIntervalBound,
 
     -- * Misc
     errMsg,
@@ -32,9 +30,15 @@ module Numeric.Data.Interval.Base.Internal
 where
 
 import Control.DeepSeq (NFData)
-import Data.Kind (Constraint, Type)
+import Data.Kind (Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (Proxy))
+import Data.Singletons as X
+  ( Sing,
+    SingI (sing),
+    SingKind (Demote, fromSing, toSing),
+    SomeSing (SomeSing),
+  )
 import Data.Text qualified as T
 import Data.Text.Display (Display (displayBuilder))
 import Data.Text.Lazy qualified as TL
@@ -44,7 +48,7 @@ import GHC.Generics (Generic)
 import GHC.Records (HasField (getField))
 import GHC.Show (showSpace)
 import GHC.Stack (HasCallStack)
-import GHC.TypeNats (KnownNat, Nat, natVal)
+import GHC.TypeNats (KnownNat, Nat, SomeNat (SomeNat), natVal, someNatVal)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
@@ -121,42 +125,33 @@ data SIntervalBound (i :: IntervalBound) where
   SClosed :: forall (n :: Nat). (KnownNat n) => SIntervalBound (Closed n)
   SNone :: SIntervalBound None
 
--- | Singleton \"with\"-style convenience function. Allows us to run a
--- computation @SingIntervalBound i => r@ without explicitly pattern-matching
--- every time.
---
--- @since 0.1
-withSingIntervalBound :: SIntervalBound i -> ((SingIntervalBound i) => r) -> r
-withSingIntervalBound i x = case i of
-  SOpen -> x
-  SClosed -> x
-  SNone -> x
-{-# INLINEABLE withSingIntervalBound #-}
+deriving stock instance Show (SIntervalBound d)
 
-type SingIntervalBound :: IntervalBound -> Constraint
+type instance Sing = SIntervalBound
 
--- | Class for retrieving the singleton witness from the 'IntervalBound'.
---
--- @since 0.1
-class SingIntervalBound (s :: IntervalBound) where
-  -- | Retrieves the singleton witness.
-  --
-  -- @since 0.1
-  singIntervalBound :: SIntervalBound s
+instance (KnownNat k) => SingI (Open k) where
+  sing = SOpen @k
 
--- | @since 0.1
-instance (KnownNat k) => SingIntervalBound (Open k) where
-  singIntervalBound = SOpen @k
+instance (KnownNat k) => SingI (Closed k) where
+  sing = SClosed @k
 
--- | @since 0.1
-instance (KnownNat k) => SingIntervalBound (Closed k) where
-  singIntervalBound = SClosed @k
+instance SingI None where
+  sing = SNone
 
--- | @since 0.1
-instance SingIntervalBound None where
-  singIntervalBound = SNone
+instance SingKind IntervalBound where
+  type Demote IntervalBound = IntervalBound
 
-type Interval :: IntervalBound -> IntervalBound -> Type -> Type
+  fromSing (SOpen @k) = Open (natVal @k Proxy)
+  fromSing (SClosed @k) = Closed (natVal @k Proxy)
+  fromSing SNone = None
+
+  toSing (Open k) =
+    case someNatVal k of
+      SomeNat @n _ -> SomeSing (SOpen @n)
+  toSing (Closed k) =
+    case someNatVal k of
+      SomeNat @n _ -> SomeSing (SClosed @n)
+  toSing None = SomeSing SNone
 
 -- | Represents an interval. Can be (open|closed) bounded (left|right).
 --
@@ -208,8 +203,8 @@ instance
 -- | @since 0.1
 instance
   ( Show a,
-    SingIntervalBound l,
-    SingIntervalBound r
+    SingI l,
+    SingI r
   ) =>
   Show (Interval l r a)
   where
@@ -229,8 +224,8 @@ instance
 -- | @since 0.1
 instance
   ( Show a,
-    SingIntervalBound l,
-    SingIntervalBound r
+    SingI l,
+    SingI r
   ) =>
   Display (Interval l r a)
   where
@@ -254,8 +249,8 @@ instance (Real a) => MetricSpace (Interval l r a) where
 instance
   ( Num a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r,
+    SingI l,
+    SingI r,
     Show a
   ) =>
   FromInteger (Interval l r a)
@@ -274,8 +269,8 @@ instance (Integral a) => ToInteger (Interval l r a) where
 instance
   ( Fractional a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r,
+    SingI l,
+    SingI r,
     Show a
   ) =>
   FromRational (Interval l r a)
@@ -294,8 +289,8 @@ instance (Real a) => ToRational (Interval l r a) where
 instance
   ( Fractional a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r,
+    SingI l,
+    SingI r,
     Show a
   ) =>
   FromReal (Interval l r a)
@@ -332,11 +327,11 @@ pattern MkInterval x <- UnsafeInterval x
 --
 -- @since 0.1
 mkInterval ::
-  forall l r a.
+  forall (l :: IntervalBound) (r :: IntervalBound) a.
   ( Num a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r
+    SingI l,
+    SingI r
   ) =>
   a ->
   Maybe (Interval l r a)
@@ -345,7 +340,7 @@ mkInterval x
   | otherwise = Nothing
   where
     boundedLeft :: Bool
-    boundedLeft = case singIntervalBound @l of
+    boundedLeft = case sing @l of
       SNone -> True
       (SOpen @k) ->
         let l' = natVal @k Proxy
@@ -355,7 +350,7 @@ mkInterval x
          in x >= fromIntegral l'
 
     boundedRight :: Bool
-    boundedRight = case singIntervalBound @r of
+    boundedRight = case sing @r of
       SNone -> True
       (SOpen @k) ->
         let r' = natVal @k Proxy
@@ -379,8 +374,8 @@ unsafeInterval ::
   ( HasCallStack,
     Num a,
     Ord a,
-    SingIntervalBound l,
-    SingIntervalBound r,
+    SingI l,
+    SingI r,
     Show a
   ) =>
   a ->
@@ -392,10 +387,10 @@ unsafeInterval x = Maybe.fromMaybe (error msg) $ mkInterval x
 
 -- | @since 0.1
 errMsg ::
-  forall l r a.
+  forall (l :: IntervalBound) (r :: IntervalBound) a.
   ( Show a,
-    SingIntervalBound l,
-    SingIntervalBound r
+    SingI l,
+    SingI r
   ) =>
   a ->
   Builder ->
@@ -418,15 +413,15 @@ errMsg x fnName =
         ]
 
 getInterval ::
-  forall l r.
-  ( SingIntervalBound l,
-    SingIntervalBound r
+  forall (l :: IntervalBound) (r :: IntervalBound).
+  ( SingI l,
+    SingI r
   ) =>
   (IntervalBound, IntervalBound)
 getInterval = (fromSingleton left, fromSingleton right)
   where
-    left = singIntervalBound @l
-    right = singIntervalBound @r
+    left = sing @l
+    right = sing @r
 
 fromSingleton :: SIntervalBound i -> IntervalBound
 fromSingleton SNone = None
