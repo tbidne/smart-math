@@ -419,12 +419,7 @@ getInterval ::
     SingI r
   ) =>
   (IntervalBound, IntervalBound)
-getInterval = (fromSingleton left, fromSingleton right)
+getInterval = (fromSing left, fromSing right)
   where
     left = sing @l
     right = sing @r
-
-fromSingleton :: SIntervalBound i -> IntervalBound
-fromSingleton SNone = None
-fromSingleton (SOpen @n) = Open (natVal @n Proxy)
-fromSingleton (SClosed @n) = Closed (natVal @n Proxy)
