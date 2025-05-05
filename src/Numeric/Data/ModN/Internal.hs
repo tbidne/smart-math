@@ -3,7 +3,7 @@
 -- | Provides the 'ModN' type for modular arithmetic.
 --
 -- @since 0.1
-module Numeric.Data.ModN.Base.Internal
+module Numeric.Data.ModN.Internal
   ( -- * Type
     ModN (MkModN, UnsafeModN),
 
@@ -33,14 +33,18 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
 import Language.Haskell.TH.Syntax (Lift)
-import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
-import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
-import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
-import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Algebra.Ring (Ring)
-import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Algebra
+  ( AGroup ((.-.)),
+    AMonoid (zero),
+    ASemigroup ((.+.)),
+    MEuclidean,
+    MMonoid (one),
+    MSemigroup ((.*.)),
+    MetricSpace (diffR),
+    Ring,
+    Semiring,
+    mmod,
+  )
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (ToRational (toQ))
 import Numeric.Convert.Real (ToReal (toR))
@@ -138,9 +142,12 @@ pattern MkModN x <- UnsafeModN x
 --
 -- @since 0.1
 instance
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   Bounded (ModN n a)
@@ -152,33 +159,41 @@ instance
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   LowerBounded (ModN n a)
   where
-  lowerBound = unsafeModN 0
+  lowerBound = unsafeModN zero
   {-# INLINEABLE lowerBound #-}
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   UpperBounded (ModN n a)
   where
-  upperBound = unsafeModN $ fromIntegral (natVal @n Proxy - 1)
+  upperBound = unsafeModN $ fromZ $ toZ (natVal @n Proxy - 1)
   {-# INLINEABLE upperBound #-}
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   MaybeLowerBounded (ModN n a)
@@ -188,9 +203,11 @@ instance
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   MaybeUpperBounded (ModN n a)
@@ -212,14 +229,17 @@ instance (KnownNat n, Show a) => Display (ModN n a) where
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( ASemigroup a,
+    FromInteger a,
     KnownNat n,
+    MEuclidean a,
+    ToInteger a,
     MaybeUpperBounded a
   ) =>
   ASemigroup (ModN n a)
   where
   UnsafeModN x .+. UnsafeModN y =
-    UnsafeModN $ Utils.modSafeAdd x y (fromIntegral n')
+    UnsafeModN $ Utils.modSafeAddAlgebra x y (fromZ $ toZ n')
     where
       n' = natVal @n Proxy
   {-# INLINEABLE (.+.) #-}
@@ -228,42 +248,49 @@ instance
 --
 -- @since 0.1
 instance
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   AMonoid (ModN n a)
   where
-  zero = unsafeModN 0
+  zero = unsafeModN zero
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
     KnownNat n,
-    MaybeLowerBounded a,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   AGroup (ModN n a)
   where
   UnsafeModN x .-. UnsafeModN y =
-    UnsafeModN $ Utils.modSafeSub x y (fromIntegral n')
+    UnsafeModN $ Utils.modSafeSubAlgebra x y (fromZ $ toZ n')
     where
       n' = natVal @n Proxy
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( FromInteger a,
     KnownNat n,
-    MaybeUpperBounded a
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a
   ) =>
   MSemigroup (ModN n a)
   where
   UnsafeModN x .*. UnsafeModN y =
-    UnsafeModN $ Utils.modSafeMult x y (fromIntegral n')
+    UnsafeModN $ Utils.modSafeMultAlgebra x y (fromZ $ toZ n')
     where
       n' = natVal @n Proxy
   {-# INLINEABLE (.*.) #-}
@@ -272,46 +299,55 @@ instance
 --
 -- @since 0.1
 instance
-  ( Integral a,
+  ( FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   MMonoid (ModN n a)
   where
-  one = unsafeModN 1
+  one = unsafeModN one
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( AMonoid a,
+    FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   Semiring (ModN n a)
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( AGroup a,
+    FromInteger a,
     KnownNat n,
-    MaybeLowerBounded a,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   Ring (ModN n a)
 
 -- | @since 0.1
 instance
-  ( Integral a,
+  ( AGroup a,
+    FromInteger a,
     KnownNat n,
-    MaybeLowerBounded a,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   MetricSpace (ModN n a)
   where
-  diffR x y = realToFrac d
+  diffR x y = toR d
     where
       UnsafeModN d = y .-. x
   {-# INLINEABLE diffR #-}
@@ -320,29 +356,31 @@ instance
 --
 -- @since 0.1
 instance
-  ( Integral a,
+  ( FromInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   FromInteger (ModN n a)
   where
-  fromZ = unsafeModN . fromInteger
+  fromZ = unsafeModN . fromZ
   {-# INLINEABLE fromZ #-}
 
 -- | @since 0.1
-instance (Integral a) => ToInteger (ModN n a) where
-  toZ (UnsafeModN x) = toInteger x
+instance (ToInteger a) => ToInteger (ModN n a) where
+  toZ (UnsafeModN x) = toZ x
   {-# INLINEABLE toZ #-}
 
 -- | @since 0.1
-instance (Real a) => ToRational (ModN n a) where
-  toQ (UnsafeModN x) = toRational x
+instance (ToRational a) => ToRational (ModN n a) where
+  toQ (UnsafeModN x) = toQ x
   {-# INLINEABLE toQ #-}
 
 -- | @since 0.1
-instance (Real a) => ToReal (ModN n a) where
-  toR (UnsafeModN x) = realToFrac x
+instance (ToReal a) => ToReal (ModN n a) where
+  toR (UnsafeModN x) = toR x
   {-# INLINEABLE toR #-}
 
 -- | Constructor for 'ModN'.
@@ -360,18 +398,20 @@ instance (Real a) => ToReal (ModN n a) where
 -- @since 0.1
 mkModN ::
   forall n a.
-  ( Integral a,
+  ( FromInteger a,
+    ToInteger a,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
     Typeable a
   ) =>
   a ->
   Either String (ModN n a)
-mkModN x = maybe modN Left (Utils.checkModBound x n')
+mkModN x = maybe modN Left (Utils.checkModBoundAlgebra x n')
   where
     modN = Right x'
-    n' = toInteger $ natVal @n Proxy
-    x' = UnsafeModN $ x `mod` fromIntegral n'
+    n' = toZ $ natVal @n Proxy
+    x' = UnsafeModN $ x `mmod` fromZ n'
 {-# INLINEABLE mkModN #-}
 
 -- | Variant of 'mkModN' that throws an error when type @a@ is not
@@ -386,10 +426,12 @@ mkModN x = maybe modN Left (Utils.checkModBound x n')
 -- @since 0.1
 unsafeModN ::
   forall n a.
-  ( HasCallStack,
-    Integral a,
+  ( FromInteger a,
+    HasCallStack,
     KnownNat n,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   a ->
@@ -406,17 +448,24 @@ unsafeModN x = case mkModN x of
 -- caution.
 --
 -- @since 0.1
-reallyUnsafeModN :: forall n a. (Integral a, KnownNat n) => a -> ModN n a
-reallyUnsafeModN = UnsafeModN . (`mod` n')
+reallyUnsafeModN ::
+  forall n a.
+  ( FromInteger a,
+    KnownNat n,
+    MEuclidean a
+  ) =>
+  a ->
+  ModN n a
+reallyUnsafeModN = UnsafeModN . (`mmod` n')
   where
-    n' = fromIntegral $ natVal @n Proxy
+    n' = fromZ $ toZ $ natVal @n Proxy
 {-# INLINEABLE reallyUnsafeModN #-}
 
 -- | @since 0.1
 errMsg :: String -> String -> String
 errMsg fn msg =
   mconcat
-    [ "Numeric.Data.ModN.Base.",
+    [ "Numeric.Data.ModN.",
       fn,
       ": ",
       msg

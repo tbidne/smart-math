@@ -1,9 +1,7 @@
 -- | Provides the 'Positive' type for enforcing a positive invariant.
--- In contrast to "Numeric.Data.Positive.Base", typeclass instances are
--- provided in terms of algebra-simple classes, where possible.
 --
 -- @since 0.1
-module Numeric.Data.Positive.Algebra
+module Numeric.Data.Positive
   ( -- * Type
     Positive (MkPositive),
 
@@ -31,9 +29,9 @@ import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
-import Numeric.Data.NonZero.Algebra (NonZero, reallyUnsafeNonZero, rmatching)
-import Numeric.Data.Positive.Algebra.Internal (Positive (MkPositive, UnsafePositive))
-import Numeric.Data.Positive.Algebra.Internal qualified as Internal
+import Numeric.Data.NonZero (NonZero, reallyUnsafeNonZero, rmatching)
+import Numeric.Data.Positive.Internal (Positive (MkPositive, UnsafePositive))
+import Numeric.Data.Positive.Internal qualified as Internal
 import Optics.Core
   ( ReversedPrism',
     ReversibleOptic (re),
@@ -43,7 +41,7 @@ import Optics.Core
 -- $setup
 -- >>> :set -XTemplateHaskell
 -- >>> :set -XPostfixOperators
--- >>> import Numeric.Data.Positive.Algebra.Internal (unsafePositive)
+-- >>> import Numeric.Data.Positive.Internal (unsafePositive)
 
 -- | Template haskell for creating a 'Positive' at compile-time.
 --

@@ -3,7 +3,7 @@
 -- | Provides the 'ModN' type for modular arithmetic.
 --
 -- @since 0.1
-module Numeric.Data.ModN.Algebra
+module Numeric.Data.ModN
   ( -- * Type
     ModN (MkModN),
 
@@ -30,14 +30,14 @@ import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
 import Numeric.Algebra (MEuclidean)
 import Numeric.Convert.Integer (FromInteger, ToInteger)
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.ModN.Algebra.Internal (ModN (MkModN, UnsafeModN))
-import Numeric.Data.ModN.Algebra.Internal qualified as Internal
+import Numeric.Data.ModN.Internal (ModN (MkModN, UnsafeModN))
+import Numeric.Data.ModN.Internal qualified as Internal
 import Optics.Core (ReversedPrism', prism, re)
 
 -- $setup
 -- >>> :set -XTemplateHaskell
 -- >>> import Data.Int (Int8)
--- >>> import Numeric.Data.ModN.Algebra.Internal (mkModN)
+-- >>> import Numeric.Data.ModN.Internal (mkModN)
 
 -- | @since 0.1
 unModN :: ModN n a -> a

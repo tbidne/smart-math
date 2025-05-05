@@ -19,47 +19,32 @@ subProps :: TestTree
 subProps =
   testGroup
     "(.-.) === (-)"
-    [ afractionSub,
-      bfractionSub
+    [ fractionSub
     ]
 
-afractionSub :: TestTree
-afractionSub = agroupSubEq Gens.afraction MkEqExact "Fraction.Algebra" "afractionSub"
-
-bfractionSub :: TestTree
-bfractionSub = agroupSubEq Gens.bfraction MkEqExact "Fraction.Base" "bfractionSub"
+fractionSub :: TestTree
+fractionSub = groupSubEq Gens.fraction MkEqExact "Fraction" "fractionSub"
 
 subIdentProps :: TestTree
 subIdentProps =
   testGroup
     "Subtraction is the inverse: zero == x .-. x"
-    [ afractionSubIdent,
-      bfractionSubIdent,
-      amodNSubIdent,
-      bmodNSubIdent,
-      amodPSubIdent,
-      bmodPSubIdent
+    [ fractionSubIdent,
+      fractionSubIdent,
+      modNSubIdent,
+      modPSubIdent
     ]
 
-afractionSubIdent :: TestTree
-afractionSubIdent = agroupSubIdent Gens.afraction "Fraction.Algebra" "afractionSubIdent"
+fractionSubIdent :: TestTree
+fractionSubIdent = groupSubIdent Gens.fraction "Fraction" "fractionSubIdent"
 
-bfractionSubIdent :: TestTree
-bfractionSubIdent = agroupSubIdent Gens.bfraction "Fraction.Base" "bfractionSubIdent"
+modNSubIdent :: TestTree
+modNSubIdent = groupSubIdent Gens.modN "ModN" "modNSubIdent"
 
-amodNSubIdent :: TestTree
-amodNSubIdent = agroupSubIdent Gens.amodN "ModN.Algebra" "amodNSubIdent"
+modPSubIdent :: TestTree
+modPSubIdent = groupSubIdent Gens.modP "ModP" "modPSubIdent"
 
-bmodNSubIdent :: TestTree
-bmodNSubIdent = agroupSubIdent Gens.bmodN "ModN.Base" "bmodNSubIdent"
-
-amodPSubIdent :: TestTree
-amodPSubIdent = agroupSubIdent Gens.amodP "ModP.Algebra" "amodPSubIdent"
-
-bmodPSubIdent :: TestTree
-bmodPSubIdent = agroupSubIdent Gens.bmodP "ModP.Base" "bmodPSubIdent"
-
-agroupSubEq ::
+groupSubEq ::
   ( AGroup a,
     Num a,
     Show a
@@ -69,9 +54,9 @@ agroupSubEq ::
   TestName ->
   PropertyName ->
   TestTree
-agroupSubEq = Utils.binaryEq (-) (.-.)
+groupSubEq = Utils.binaryEq (-) (.-.)
 
-agroupSubIdent ::
+groupSubIdent ::
   ( AGroup a,
     Eq a,
     Show a
@@ -80,7 +65,7 @@ agroupSubIdent ::
   TestName ->
   PropertyName ->
   TestTree
-agroupSubIdent gen desc propName =
+groupSubIdent gen desc propName =
   testPropertyCompat desc propName $
     property $ do
       x <- forAll gen

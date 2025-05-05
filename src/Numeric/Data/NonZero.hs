@@ -1,7 +1,7 @@
 -- | Provides the 'NonZero' type for enforcing a non-zero invariant.
 --
 -- @since 0.1
-module Numeric.Data.NonZero.Algebra
+module Numeric.Data.NonZero
   ( -- * Type
     NonZero (MkNonZero),
 
@@ -25,8 +25,8 @@ import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
 import Numeric.Algebra (AMonoid, pattern NonZero, pattern Zero)
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.NonZero.Algebra.Internal (NonZero (MkNonZero, UnsafeNonZero))
-import Numeric.Data.NonZero.Algebra.Internal qualified as Internal
+import Numeric.Data.NonZero.Internal (NonZero (MkNonZero, UnsafeNonZero))
+import Numeric.Data.NonZero.Internal qualified as Internal
 import Optics.Core (ReversedPrism', prism, re)
 
 -- $setup

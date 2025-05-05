@@ -18,81 +18,48 @@ divProps :: TestTree
 divProps =
   testGroup
     "(.%.) === div / (/)"
-    [ afractionDiv,
-      bfractionDiv
+    [ fractionDiv
     ]
 
-afractionDiv :: TestTree
-afractionDiv = mgroupDivEq (/) Gens.afraction Gens.afractionNonZero MkEqExact "Fraction.Algebra" "afractionDiv"
-
-bfractionDiv :: TestTree
-bfractionDiv = mgroupDivEq (/) Gens.bfraction Gens.bfractionNonZero MkEqExact "Fraction.Base" "bfractionDiv"
+fractionDiv :: TestTree
+fractionDiv = groupDivEq (/) Gens.fraction Gens.fractionNonZero MkEqExact "Fraction" "fractionDiv"
 
 divIdentProps :: TestTree
 divIdentProps =
   testGroup
     "Division is the inverse: one == x .%. x"
-    [ afractionDivIdent,
-      bfractionDivIdent,
-      amodPDivIdent,
-      bmodPDivIdent,
-      anonNegativeDivIdent,
-      bnonNegativeDivIdent,
-      anonZeroDivIdent,
-      bnonZeroDivIdent,
-      apositiveDivIdent,
-      bpositiveDivIdent
+    [ fractionDivIdent,
+      modPDivIdent,
+      nonNegativeDivIdent,
+      nonZeroDivIdent,
+      positiveDivIdent
     ]
 
-afractionDivIdent :: TestTree
-afractionDivIdent = agroupDivIdent Gens.afractionNonZero MkEqExact "Fraction.Algebra" "afractionDivIdent"
+fractionDivIdent :: TestTree
+fractionDivIdent = groupDivIdent Gens.fractionNonZero MkEqExact "Fraction" "fractionDivIdent"
 
-bfractionDivIdent :: TestTree
-bfractionDivIdent = agroupDivIdent Gens.bfractionNonZero MkEqExact "Fraction.Base" "bfractionDivIdent"
-
-amodPDivIdent :: TestTree
-amodPDivIdent =
-  testPropertyCompat "ModP.Algebra" "amodPDivIdent" $
+modPDivIdent :: TestTree
+modPDivIdent =
+  testPropertyCompat "ModP" "modPDivIdent" $
     property $ do
-      x <- forAll Gens.amodPNonZero
+      x <- forAll Gens.modPNonZero
       one === x .%. x
 
-bmodPDivIdent :: TestTree
-bmodPDivIdent =
-  testPropertyCompat "ModP.Base" "bmodPDivIdent" $
-    property $ do
-      x <- forAll Gens.bmodPNonZero
-      one === x .%. x
+nonNegativeDivIdent :: TestTree
+nonNegativeDivIdent = groupDivIdent Gens.nonNegativeNonZero MkEqExact "NonNegative" "nonNegativeDivIdent"
 
-anonNegativeDivIdent :: TestTree
-anonNegativeDivIdent = agroupDivIdent Gens.anonNegativeNonZero MkEqExact "NonNegative.Algebra" "anonNegativeDivIdent"
+nonZeroDivIdent :: TestTree
+nonZeroDivIdent = groupDivIdent Gens.nonZero MkEqExact "NonZero" "nonZeroDivIdent"
 
-bnonNegativeDivIdent :: TestTree
-bnonNegativeDivIdent = agroupDivIdent Gens.bnonNegativeNonZero MkEqExact "NonNegative.Base" "bnonNegativeDivIdent"
-
-anonZeroDivIdent :: TestTree
-anonZeroDivIdent = agroupDivIdent Gens.anonZero MkEqExact "NonZero.Algebra" "anonZeroDivIdent"
-
-bnonZeroDivIdent :: TestTree
-bnonZeroDivIdent = agroupDivIdent Gens.bnonZero MkEqExact "NonZero.Base" "bnonZeroDivIdent"
-
-apositiveDivIdent :: TestTree
-apositiveDivIdent =
-  agroupDivIdent
-    Gens.apositiveNonZero
+positiveDivIdent :: TestTree
+positiveDivIdent =
+  groupDivIdent
+    Gens.positiveNonZero
     MkEqExact
-    "Positive.Algebra"
-    "apositiveDivIdent"
+    "Positive"
+    "positiveDivIdent"
 
-bpositiveDivIdent :: TestTree
-bpositiveDivIdent =
-  agroupDivIdent
-    Gens.bpositiveNonZero
-    MkEqExact
-    "Positive.Base"
-    "bpositiveDivIdent"
-
-mgroupDivEq ::
+groupDivEq ::
   (MGroup a, Show a) =>
   (a -> a -> a) ->
   Gen a ->
@@ -101,7 +68,7 @@ mgroupDivEq ::
   TestName ->
   PropertyName ->
   TestTree
-mgroupDivEq expectedFn gen genNZ eqCons desc propName =
+groupDivEq expectedFn gen genNZ eqCons desc propName =
   testPropertyCompat desc propName $
     property $ do
       x <- forAll gen
@@ -110,14 +77,14 @@ mgroupDivEq expectedFn gen genNZ eqCons desc propName =
           expected = expectedFn x d
       eqCons expected === eqCons actual
 
-agroupDivIdent ::
+groupDivIdent ::
   (MGroup a, Show a) =>
   Gen a ->
   (a -> Equality eq a) ->
   TestName ->
   PropertyName ->
   TestTree
-agroupDivIdent gen eqCons desc propName =
+groupDivIdent gen eqCons desc propName =
   testPropertyCompat desc propName $
     property $ do
       x <- forAll gen

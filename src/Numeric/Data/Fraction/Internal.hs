@@ -4,7 +4,7 @@
 -- | Provides the 'Fraction' type, a safer alternative to 'Ratio'.
 --
 -- @since 0.1
-module Numeric.Data.Fraction.Base.Internal
+module Numeric.Data.Fraction.Internal
   ( -- * Type
     Fraction ((:%:), (:%!), UnsafeFraction),
 
@@ -39,11 +39,16 @@ import GHC.Real qualified as R
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH.Syntax (Lift)
-import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
-import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)), anegate)
+import Numeric.Algebra.Additive.AMonoid
+  ( AMonoid (zero),
+    pattern NonZero,
+    pattern Zero,
+  )
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
 import Numeric.Algebra.Field (Field)
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
+import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod), mdiv, mgcd)
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
@@ -52,7 +57,7 @@ import Numeric.Algebra.Ring (Ring)
 import Numeric.Algebra.Semifield (Semifield)
 import Numeric.Algebra.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
-import Numeric.Convert.Integer (FromInteger (fromZ))
+import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
 import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
 import Optics.Core
@@ -178,7 +183,10 @@ infixr 5 :%:
 -- @since 0.1
 pattern (:%!) ::
   ( HasCallStack,
-    Integral a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
     UpperBoundless a
   ) =>
   a ->
@@ -196,13 +204,13 @@ infixr 5 :%!
 -- for Fraction to only be used with types w/o an upper bound.
 
 -- | @since 0.1
-instance (LowerBounded a, Num a) => LowerBounded (Fraction a) where
-  lowerBound = UnsafeFraction lowerBound 1
+instance (LowerBounded a, MMonoid a) => LowerBounded (Fraction a) where
+  lowerBound = UnsafeFraction lowerBound one
   {-# INLINEABLE lowerBound #-}
 
 -- | @since 0.1
-instance (MaybeLowerBounded a, Num a) => MaybeLowerBounded (Fraction a) where
-  maybeLowerBound = (\n -> UnsafeFraction n 1) <$> maybeLowerBound
+instance (MaybeLowerBounded a, MMonoid a) => MaybeLowerBounded (Fraction a) where
+  maybeLowerBound = (\n -> UnsafeFraction n one) <$> maybeLowerBound
   {-# INLINEABLE maybeLowerBound #-}
 
 -- | @since 0.1
@@ -221,8 +229,16 @@ instance (Show a) => Display (Fraction a) where
       ]
 
 -- | @since 0.1
-instance (Eq a, Integral a, UpperBoundless a) => Eq (Fraction a) where
-  UnsafeFraction 0 _ == UnsafeFraction 0 _ = True
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Eq (Fraction a)
+  where
+  UnsafeFraction Zero _ == UnsafeFraction Zero _ = True
   x == y = n1 == n2 && d1 == d2
     where
       UnsafeFraction n1 d1 = reduce x
@@ -230,12 +246,20 @@ instance (Eq a, Integral a, UpperBoundless a) => Eq (Fraction a) where
   {-# INLINEABLE (==) #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Ord (Fraction a) where
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Ord (Fraction a)
+  where
   x@(UnsafeFraction n1 d1) <= y@(UnsafeFraction n2 d2)
     | x == y = True
-    | otherwise = n1 * d2 `comp` n2 * d1
+    | otherwise = n1 .*. d2 `comp` n2 .*. d1
     where
-      isNeg = (< 0) . denominator
+      isNeg = (< zero) . denominator
       comp
         | isNeg x `xor` isNeg y = (>=)
         | otherwise = (<=)
@@ -243,144 +267,301 @@ instance (Integral a, UpperBoundless a) => Ord (Fraction a) where
   {-# INLINEABLE (<=) #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Enum (Fraction a) where
-  toEnum n = UnsafeFraction (fromIntegral n) 1
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    ToInteger a,
+    UpperBoundless a
+  ) =>
+  Enum (Fraction a)
+  where
+  toEnum = fromZ . toZ
   {-# INLINEABLE toEnum #-}
-  fromEnum = fromInteger . truncate
+  fromEnum x = m
+    where
+      (m, _) = properFraction x
   {-# INLINEABLE fromEnum #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Fractional (Fraction a) where
-  (UnsafeFraction n1 d1) / (UnsafeFraction n2 d2) =
-    unsafeFraction (n1 * d2) (n2 * d1)
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    ToInteger a,
+    UpperBoundless a
+  ) =>
+  Fractional (Fraction a)
+  where
+  (/) = divide
   {-# INLINEABLE (/) #-}
-  recip (UnsafeFraction 0 _) =
-    error "Numeric.Data.Fraction.Base.recip: Fraction has zero numerator"
-  recip (UnsafeFraction n d) = unsafeFraction d n
+
+  recip = reciprocal
   {-# INLINEABLE recip #-}
-  fromRational (n :% d) = unsafeFraction (fromInteger n) (fromInteger d)
+  fromRational (n :% d) = unsafeFraction (fromZ n) (fromZ d)
   {-# INLINEABLE fromRational #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Num (Fraction a) where
-  (UnsafeFraction n1 d1) + (UnsafeFraction n2 d2) =
-    unsafeFraction (n1 * d2 + n2 * d1) (d1 * d2)
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    UpperBoundless a
+  ) =>
+  Num (Fraction a)
+  where
+  (+) = (.+.)
   {-# INLINEABLE (+) #-}
-  (UnsafeFraction n1 d1) - (UnsafeFraction n2 d2) =
-    unsafeFraction (n1 * d2 - n2 * d1) (d1 * d2)
+  (-) = (.-.)
   {-# INLINEABLE (-) #-}
-  (UnsafeFraction n1 d1) * (UnsafeFraction n2 d2) =
-    unsafeFraction (n1 * n2) (d1 * d2)
+  (*) = (.*.)
   {-# INLINEABLE (*) #-}
-  negate (UnsafeFraction n d) = UnsafeFraction (-n) d
+  negate = anegate
   {-# INLINEABLE negate #-}
-  abs (UnsafeFraction n d) = UnsafeFraction (abs n) (abs d)
+  abs = norm
   {-# INLINEABLE abs #-}
-  signum (UnsafeFraction n d) = UnsafeFraction (signum n * signum d) 1
+  signum = sgn
   {-# INLINEABLE signum #-}
-  fromInteger n1 = UnsafeFraction (fromInteger n1) 1
+  fromInteger = fromZ
   {-# INLINEABLE fromInteger #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Real (Fraction a) where
-  toRational (UnsafeFraction n d) = R.reduce (fromIntegral n) (fromIntegral d)
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    ToInteger a,
+    UpperBoundless a
+  ) =>
+  Real (Fraction a)
+  where
+  toRational (UnsafeFraction n d) = R.reduce (toZ n) (toZ d)
   {-# INLINEABLE toRational #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => RealFrac (Fraction a) where
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    ToInteger a,
+    UpperBoundless a
+  ) =>
+  RealFrac (Fraction a)
+  where
   properFraction (UnsafeFraction n d) =
-    (fromInteger (toInteger q), UnsafeFraction r d)
+    (fromInteger (toZ q), UnsafeFraction r d)
     where
-      (q, r) = quotRem n d
+      (q, r) = n `mdivMod` d
   {-# INLINEABLE properFraction #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Division (Fraction a) where
-  divide = (/)
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    ToInteger a,
+    UpperBoundless a
+  ) =>
+  Division (Fraction a)
+  where
+  divide x y = x .*. reciprocal y
   {-# INLINEABLE divide #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => ASemigroup (Fraction a) where
-  (.+.) = (+)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  ASemigroup (Fraction a)
+  where
+  UnsafeFraction n1 d1 .+. UnsafeFraction n2 d2 =
+    unsafeFraction (n1 .*. d2 .+. n2 .*. d1) (d1 .*. d2)
   {-# INLINEABLE (.+.) #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => AMonoid (Fraction a) where
-  zero = UnsafeFraction 0 1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  AMonoid (Fraction a)
+  where
+  zero = UnsafeFraction zero one
   {-# INLINEABLE zero #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => AGroup (Fraction a) where
-  (.-.) = (-)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    UpperBoundless a
+  ) =>
+  AGroup (Fraction a)
+  where
+  (UnsafeFraction n1 d1) .-. (UnsafeFraction n2 d2) =
+    unsafeFraction (n1 .*. d2 .-. n2 .*. d1) (d1 .*. d2)
   {-# INLINEABLE (.-.) #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => MSemigroup (Fraction a) where
-  (.*.) = (*)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  MSemigroup (Fraction a)
+  where
+  (UnsafeFraction n1 d1) .*. (UnsafeFraction n2 d2) =
+    unsafeFraction (n1 .*. n2) (d1 .*. d2)
   {-# INLINEABLE (.*.) #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => MMonoid (Fraction a) where
-  one = UnsafeFraction 1 1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  MMonoid (Fraction a)
+  where
+  one = UnsafeFraction one one
   {-# INLINEABLE one #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => MGroup (Fraction a) where
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  MGroup (Fraction a)
+  where
   x .%. (UnsafeFraction n d) = x .*. UnsafeFraction d n
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => MetricSpace (Fraction a) where
-  diffR x y
-    | x <= y = realToFrac $ abs (y - x)
-    | otherwise = realToFrac $ abs (x - y)
+instance (ToInteger a, UpperBoundless a) => MetricSpace (Fraction a) where
+  x `diffR` y = toR x `diffR` toR y
   {-# INLINEABLE diffR #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Normed (Fraction a) where
-  norm = abs
+instance (MMonoid a, Normed a, UpperBoundless a) => Normed (Fraction a) where
+  norm (UnsafeFraction n d) = UnsafeFraction (norm n) (norm d)
   {-# INLINEABLE norm #-}
 
-  sgn = signum
+  sgn (UnsafeFraction n _) = UnsafeFraction (sgn n) one
   {-# INLINEABLE sgn #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Semiring (Fraction a)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Semiring (Fraction a)
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Ring (Fraction a)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    UpperBoundless a
+  ) =>
+  Ring (Fraction a)
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Semifield (Fraction a)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Semifield (Fraction a)
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => Field (Fraction a)
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    UpperBoundless a
+  ) =>
+  Field (Fraction a)
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => FromInteger (Fraction a) where
-  fromZ = fromInteger
+instance
+  ( FromInteger a,
+    MMonoid a,
+    UpperBoundless a
+  ) =>
+  FromInteger (Fraction a)
+  where
+  fromZ n = UnsafeFraction (fromZ n) one
   {-# INLINEABLE fromZ #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => FromRational (Fraction a) where
-  fromQ = fromRational
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  FromRational (Fraction a)
+  where
+  fromQ (n :% d) = reduce $ UnsafeFraction (fromZ n) (fromZ d)
   {-# INLINEABLE fromQ #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => ToRational (Fraction a) where
-  toQ (UnsafeFraction n d) = toRational (n :% d)
+instance (ToInteger a, UpperBoundless a) => ToRational (Fraction a) where
+  toQ (UnsafeFraction n d) = toZ n :% toZ d
   {-# INLINEABLE toQ #-}
 
--- | __WARNING: Partial__
---
--- @since 0.1
-instance (Integral a, UpperBoundless a) => FromReal (Fraction a) where
-  fromR = fromRational . realToFrac
+-- | @since 0.1
+instance
+  ( FromInteger a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  FromReal (Fraction a)
+  where
+  fromR x = reduce $ UnsafeFraction (fromZ n) (fromZ d)
+    where
+      n :% d = fromR x
   {-# INLINEABLE fromR #-}
 
 -- | @since 0.1
-instance (Integral a, UpperBoundless a) => ToReal (Fraction a) where
-  toR (UnsafeFraction n d) = realToFrac (n :% d)
+instance (ToInteger a, UpperBoundless a) => ToReal (Fraction a) where
+  toR (UnsafeFraction n d) = toR (toZ n :% toZ d)
   {-# INLINEABLE toR #-}
 
 -- | @since 0.1
@@ -403,14 +584,17 @@ denominator (UnsafeFraction _ d) = d
 -- @since 0.1
 unsafeFraction ::
   ( HasCallStack,
-    Integral a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
     UpperBoundless a
   ) =>
   a ->
   a ->
   Fraction a
-unsafeFraction _ 0 = error $ errMsg "unsafeFraction"
-unsafeFraction n d = reduce $ UnsafeFraction n d
+unsafeFraction _ Zero = error $ errMsg "unsafeFraction"
+unsafeFraction n (NonZero d) = reduce $ UnsafeFraction n d
 {-# INLINEABLE unsafeFraction #-}
 
 -- | Infix version of 'unsafeFraction'.
@@ -425,7 +609,10 @@ unsafeFraction n d = reduce $ UnsafeFraction n d
 -- @since 0.1
 (%!) ::
   ( HasCallStack,
-    Integral a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
     UpperBoundless a
   ) =>
   a ->
@@ -453,14 +640,37 @@ infixl 7 %!
 -- UnsafeFraction 1 1
 --
 -- @since 0.1
-reduce :: (Integral a, UpperBoundless a) => Fraction a -> Fraction a
-reduce (UnsafeFraction 0 _) = UnsafeFraction 0 1
-reduce (UnsafeFraction n d) = UnsafeFraction (n' * signum d) (abs d')
+reduce ::
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Fraction a ->
+  Fraction a
+reduce (UnsafeFraction Zero _) = UnsafeFraction zero one
+reduce (UnsafeFraction (NonZero n) d) = UnsafeFraction (n' .*. sgn d) (norm d')
   where
-    n' = n `quot` g
-    d' = d `quot` g
-    g = gcd n d
+    n' = n `mdiv` g
+    d' = d `mdiv` g
+    g = mgcd n d
 {-# INLINEABLE reduce #-}
+
+reciprocal ::
+  ( HasCallStack,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Fraction a ->
+  Fraction a
+reciprocal (UnsafeFraction Zero _) =
+  -- NOTE: Not using errMsg because numerator vs. denominator
+  error "Numeric.Data.Fraction.reciprocal: Fraction has zero numerator"
+reciprocal (UnsafeFraction (NonZero n) d) = unsafeFraction d n
 
 xor :: Bool -> Bool -> Bool
 xor True False = True
@@ -474,7 +684,7 @@ infixr 2 `xor`
 errMsg :: String -> String
 errMsg fn =
   mconcat
-    [ "Numeric.Data.Fraction.Base.",
+    [ "Numeric.Data.Fraction.",
       fn,
       ": Fraction has zero denominator"
     ]

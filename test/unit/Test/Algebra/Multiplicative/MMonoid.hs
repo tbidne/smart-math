@@ -18,47 +18,27 @@ identityProps :: TestTree
 identityProps =
   testGroup
     "Identity: one .*. x == x == x .*. one"
-    [ afractionId,
-      bfractionId,
-      amodNId,
-      bmodNId,
-      amodPId,
-      bmodPId,
-      anonNegativeId,
-      bnonNegativeId,
-      apositiveId,
-      bpositiveId
+    [ fractionId,
+      modNId,
+      modPId,
+      nonNegativeId,
+      positiveId
     ]
 
-afractionId :: TestTree
-afractionId = mmonoidIdentity Gens.afraction MkEqExact "Fraction.Algebra" "afractionId"
+fractionId :: TestTree
+fractionId = mmonoidIdentity Gens.fraction MkEqExact "Fraction" "fractionId"
 
-bfractionId :: TestTree
-bfractionId = mmonoidIdentity Gens.bfraction MkEqExact "Fraction.Base" "bfractionId"
+modNId :: TestTree
+modNId = mmonoidIdentity Gens.modN MkEqExact "ModN" "modNId"
 
-amodNId :: TestTree
-amodNId = mmonoidIdentity Gens.amodN MkEqExact "ModN.Algebra" "amodNId"
+modPId :: TestTree
+modPId = mmonoidIdentity Gens.modP MkEqExact "ModP" "modPId"
 
-bmodNId :: TestTree
-bmodNId = mmonoidIdentity Gens.bmodN MkEqExact "ModN.Base" "bmodNId"
+nonNegativeId :: TestTree
+nonNegativeId = mmonoidIdentity Gens.nonNegative MkEqExact "NonNegative" "nonNegativeId"
 
-amodPId :: TestTree
-amodPId = mmonoidIdentity Gens.amodP MkEqExact "ModP.Algebra" "amodPId"
-
-bmodPId :: TestTree
-bmodPId = mmonoidIdentity Gens.bmodP MkEqExact "ModP.Base" "bmodPId"
-
-anonNegativeId :: TestTree
-anonNegativeId = mmonoidIdentity Gens.anonNegative MkEqExact "NonNegative.Algebra" "anonNegativeId"
-
-bnonNegativeId :: TestTree
-bnonNegativeId = mmonoidIdentity Gens.bnonNegative MkEqExact "NonNegative.Base" "bnonNegativeId"
-
-apositiveId :: TestTree
-apositiveId = mmonoidIdentity Gens.apositive MkEqExact "Positive.Algebra" "apositiveId"
-
-bpositiveId :: TestTree
-bpositiveId = mmonoidIdentity Gens.bpositive MkEqExact "Positive.Base" "bpositiveId"
+positiveId :: TestTree
+positiveId = mmonoidIdentity Gens.positive MkEqExact "Positive" "positiveId"
 
 mmonoidIdentity ::
   ( MMonoid a,

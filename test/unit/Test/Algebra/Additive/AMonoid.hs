@@ -21,41 +21,25 @@ identityProps :: TestTree
 identityProps =
   testGroup
     "Identity: zero .+. x == x == x .+. zero"
-    [ afractionId,
-      bfractionId,
-      amodNId,
-      bmodNId,
-      amodPId,
-      bmodPId,
-      anonNegativeId,
-      bnonNegativeId
+    [ fractionId,
+      modNId,
+      modPId,
+      nonNegativeId
     ]
 
-afractionId :: TestTree
-afractionId = amonoidIdentity Gens.afraction MkEqExact "Fraction.Algebra" "afractionId"
+fractionId :: TestTree
+fractionId = monoidIdentity Gens.fraction MkEqExact "Fraction" "fractionId"
 
-bfractionId :: TestTree
-bfractionId = amonoidIdentity Gens.bfraction MkEqExact "Fraction.Base" "bfractionId"
+modNId :: TestTree
+modNId = monoidIdentity Gens.modN MkEqExact "ModN" "modNId"
 
-amodNId :: TestTree
-amodNId = amonoidIdentity Gens.amodN MkEqExact "ModN.Algebra" "amodNId"
+modPId :: TestTree
+modPId = monoidIdentity Gens.modP MkEqExact "ModP" "modPId"
 
-bmodNId :: TestTree
-bmodNId = amonoidIdentity Gens.bmodN MkEqExact "ModN.Base" "bmodNId"
+nonNegativeId :: TestTree
+nonNegativeId = monoidIdentity Gens.nonNegative MkEqExact "NonNegative" "nonNegativeId"
 
-amodPId :: TestTree
-amodPId = amonoidIdentity Gens.amodP MkEqExact "ModP.Algebra" "amodPId"
-
-bmodPId :: TestTree
-bmodPId = amonoidIdentity Gens.bmodP MkEqExact "ModP.Base" "bmodPId"
-
-anonNegativeId :: TestTree
-anonNegativeId = amonoidIdentity Gens.anonNegative MkEqExact "NonNegative.Algebra" "anonNegativeId"
-
-bnonNegativeId :: TestTree
-bnonNegativeId = amonoidIdentity Gens.bnonNegative MkEqExact "NonNegative.Base" "bnonNegativeId"
-
-amonoidIdentity ::
+monoidIdentity ::
   ( AMonoid a,
     Show a
   ) =>
@@ -64,23 +48,19 @@ amonoidIdentity ::
   TestName ->
   PropertyName ->
   TestTree
-amonoidIdentity = Utils.identity (.+.) zero
+monoidIdentity = Utils.identity (.+.) zero
 
 absProps :: TestTree
 absProps =
   testGroup
     "Absolute Value"
-    [ afractionAbs,
-      bfractionAbs
+    [ fractionAbs
     ]
 
-afractionAbs :: TestTree
-afractionAbs = amonoidAbs Gens.afraction MkEqExact "Fraction.Algebra" "afractionAbs"
+fractionAbs :: TestTree
+fractionAbs = monoidAbs Gens.fraction MkEqExact "Fraction" "fractionAbs"
 
-bfractionAbs :: TestTree
-bfractionAbs = amonoidAbs Gens.bfraction MkEqExact "Fraction.Base" "bfractionAbs"
-
-amonoidAbs ::
+monoidAbs ::
   ( AMonoid a,
     Normed a,
     Ord a,
@@ -91,7 +71,7 @@ amonoidAbs ::
   TestName ->
   PropertyName ->
   TestTree
-amonoidAbs gen eqCons desc propName =
+monoidAbs gen eqCons desc propName =
   testPropertyCompat desc propName $
     property $ do
       x <- forAll gen

@@ -12,7 +12,7 @@
 -- | Provides types for enforcing minimum and maximum bounds.
 --
 -- @since 0.1
-module Numeric.Data.Interval.Base.Internal
+module Numeric.Data.Interval.Internal
   ( -- * Types
     IntervalBound (..),
     Interval (MkInterval, UnsafeInterval),
@@ -54,7 +54,6 @@ import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
 import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
-import Numeric.Data.Internal.Utils qualified as Utils
 import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 
 -- $setup
@@ -153,6 +152,8 @@ instance SingKind IntervalBound where
       SomeNat @n _ -> SomeSing (SClosed @n)
   toSing None = SomeSing SNone
 
+type Interval :: IntervalBound -> IntervalBound -> Type -> Type
+
 -- | Represents an interval. Can be (open|closed) bounded (left|right).
 --
 -- ==== __Examples__
@@ -239,15 +240,15 @@ instance
       (left, right) = getInterval @l @r
 
 -- | @since 0.1
-instance (Real a) => MetricSpace (Interval l r a) where
-  diffR (UnsafeInterval x) (UnsafeInterval y) = Utils.safeDiff x y
+instance (MetricSpace a) => MetricSpace (Interval l r a) where
+  diffR (UnsafeInterval x) (UnsafeInterval y) = diffR x y
   {-# INLINEABLE diffR #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance
-  ( Num a,
+  ( FromInteger a,
     Ord a,
     SingI l,
     SingI r,
@@ -255,19 +256,19 @@ instance
   ) =>
   FromInteger (Interval l r a)
   where
-  fromZ = unsafeInterval . fromInteger
+  fromZ = unsafeInterval . fromZ
   {-# INLINEABLE fromZ #-}
 
 -- | @since 0.1
-instance (Integral a) => ToInteger (Interval l r a) where
-  toZ (UnsafeInterval x) = toInteger x
+instance (ToInteger a) => ToInteger (Interval l r a) where
+  toZ (UnsafeInterval x) = toZ x
   {-# INLINEABLE toZ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance
-  ( Fractional a,
+  ( FromRational a,
     Ord a,
     SingI l,
     SingI r,
@@ -275,19 +276,19 @@ instance
   ) =>
   FromRational (Interval l r a)
   where
-  fromQ = unsafeInterval . fromRational
+  fromQ = unsafeInterval . fromQ
   {-# INLINEABLE fromQ #-}
 
 -- | @since 0.1
-instance (Real a) => ToRational (Interval l r a) where
-  toQ (UnsafeInterval x) = toRational x
+instance (ToRational a) => ToRational (Interval l r a) where
+  toQ (UnsafeInterval x) = toQ x
   {-# INLINEABLE toQ #-}
 
 -- | __WARNING: Partial__
 --
 -- @since 0.1
 instance
-  ( Fractional a,
+  ( FromReal a,
     Ord a,
     SingI l,
     SingI r,
@@ -295,12 +296,12 @@ instance
   ) =>
   FromReal (Interval l r a)
   where
-  fromR = unsafeInterval . realToFrac
+  fromR = unsafeInterval . fromR
   {-# INLINEABLE fromR #-}
 
 -- | @since 0.1
-instance (Real a) => ToReal (Interval l r a) where
-  toR (UnsafeInterval x) = realToFrac x
+instance (ToReal a) => ToReal (Interval l r a) where
+  toR (UnsafeInterval x) = toR x
   {-# INLINEABLE toR #-}
 
 pattern MkInterval :: a -> Interval l r a
@@ -328,7 +329,7 @@ pattern MkInterval x <- UnsafeInterval x
 -- @since 0.1
 mkInterval ::
   forall (l :: IntervalBound) (r :: IntervalBound) a.
-  ( Num a,
+  ( FromInteger a,
     Ord a,
     SingI l,
     SingI r
@@ -344,20 +345,20 @@ mkInterval x
       SNone -> True
       (SOpen @k) ->
         let l' = natVal @k Proxy
-         in x > fromIntegral l'
+         in x > fromZ (fromIntegral l')
       (SClosed @k) ->
         let l' = natVal @k Proxy
-         in x >= fromIntegral l'
+         in x >= fromZ (fromIntegral l')
 
     boundedRight :: Bool
     boundedRight = case sing @r of
       SNone -> True
       (SOpen @k) ->
         let r' = natVal @k Proxy
-         in x < fromIntegral r'
+         in x < fromZ (fromIntegral r')
       (SClosed @k) ->
         let r' = natVal @k Proxy
-         in x <= fromIntegral r'
+         in x <= fromZ (fromIntegral r')
 {-# INLINEABLE mkInterval #-}
 
 -- | Variant of 'mkInterval' that throws an error when given a value out of bounds.
@@ -370,9 +371,9 @@ mkInterval x
 --
 -- @since 0.1
 unsafeInterval ::
-  forall l r a.
-  ( HasCallStack,
-    Num a,
+  forall (l :: IntervalBound) (r :: IntervalBound) a.
+  ( FromInteger a,
+    HasCallStack,
     Ord a,
     SingI l,
     SingI r,
@@ -404,7 +405,7 @@ errMsg x fnName =
     (left, right) = getInterval @l @r
     msg =
       mconcat
-        [ "Numeric.Data.Interval.Base.",
+        [ "Numeric.Data.Interval.",
           fnName,
           ": Wanted value in ",
           intervalStr,

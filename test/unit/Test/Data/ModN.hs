@@ -2,7 +2,7 @@
 
 module Test.Data.ModN (props) where
 
-import Data.Bounds (MaybeLowerBounded, MaybeUpperBounded)
+import Data.Bounds (MaybeUpperBounded)
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
@@ -14,8 +14,8 @@ import Numeric.Algebra.Additive
   )
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Convert.Integer (FromInteger, ToInteger)
-import Numeric.Data.ModN.Algebra qualified as AModN
-import Numeric.Data.ModN.Base qualified as BModN
+import Numeric.Data.ModN (ModN (MkModN))
+import Numeric.Data.ModN qualified as ModN
 import Test.Prelude
 import Test.TestBounds (TestBounds (maxVal))
 
@@ -487,14 +487,11 @@ mkModN' ::
   Property
 mkModN' = property $ do
   x <- forAll (nonneg @a)
-  let amx@(AModN.MkModN ax') = AModN.unsafeModN @n x
-      bmx@(BModN.MkModN bx') = BModN.unsafeModN @n x
+  let mx@(MkModN x') = ModN.unsafeModN @n x
 
-  annotateShow amx
-  annotateShow bmx
+  annotateShow mx
 
-  x `mod` n' === ax'
-  x `mod` n' === bx'
+  x `mod` n' === x'
   where
     n' = fromIntegral $ natVal @n Proxy
 
@@ -516,13 +513,7 @@ mkModNFailure ::
   Property
 mkModNFailure tyStr maxStr modStr = property $ do
   x <- forAll (nonneg @a)
-  case AModN.mkModN @n x of
-    Left s -> msg === s
-    Right y -> do
-      annotate ("Expected failure, received: " ++ show y)
-      failure
-
-  case BModN.mkModN @n x of
+  case ModN.mkModN @n x of
     Left s -> msg === s
     Right y -> do
       annotate ("Expected failure, received: " ++ show y)
@@ -553,11 +544,8 @@ boundedVals ::
   ) =>
   TestTree
 boundedVals = testCase "Min/max bounds" $ do
-  0 @=? AModN.unModN (minBound @(AModN.ModN n a))
-  nTerm - 1 @=? AModN.unModN (maxBound @(AModN.ModN n a))
-
-  0 @=? BModN.unModN (minBound @(BModN.ModN n a))
-  nTerm - 1 @=? BModN.unModN (maxBound @(BModN.ModN n a))
+  0 @=? ModN.unModN (minBound @(ModN.ModN n a))
+  nTerm - 1 @=? ModN.unModN (maxBound @(ModN.ModN n a))
   where
     nTerm = fromIntegral $ natVal @n Proxy
 
@@ -576,29 +564,17 @@ addTotal' ::
   ) =>
   Property
 addTotal' = property $ do
-  amx@(AModN.MkModN ax) <- forAll (aanyNat @n @a)
-  amy@(AModN.MkModN ay) <- forAll aanyNat
+  mx@(MkModN x) <- forAll (anyNat @n @a)
+  my@(MkModN y) <- forAll anyNat
 
-  let amz@(AModN.MkModN az) = amx .+. amy
-      az' = (toInteger ax + toInteger ay) `mod` n'
+  let mz@(MkModN z) = mx .+. my
+      z' = (toInteger x + toInteger y) `mod` n'
 
-  annotateShow amx
-  annotateShow amy
-  annotateShow amz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
-  az' === toInteger az
-
-  bmx@(BModN.MkModN bx) <- forAll (banyNat @n @a)
-  bmy@(BModN.MkModN by) <- forAll banyNat
-
-  let bmz@(BModN.MkModN bz) = bmx .+. bmy
-      bz' = (toInteger bx + toInteger by) `mod` n'
-
-  annotateShow bmx
-  annotateShow bmy
-  annotateShow bmz
-
-  bz' === toInteger bz
+  z' === toInteger z
   where
     n' = toInteger $ natVal @n Proxy
 
@@ -608,7 +584,6 @@ subTotal' ::
     FromInteger a,
     Integral a,
     KnownNat n,
-    MaybeLowerBounded a,
     MaybeUpperBounded a,
     MEuclidean a,
     Show a,
@@ -618,27 +593,16 @@ subTotal' ::
   ) =>
   Property
 subTotal' = property $ do
-  amx@(AModN.MkModN ax) <- forAll (aanyNat @n @a)
-  amy@(AModN.MkModN ay) <- forAll aanyNat
-  let amz@(AModN.MkModN az) = amx .-. amy
-      az' = (toInteger ax - toInteger ay) `mod` n'
+  mx@(MkModN x) <- forAll (anyNat @n @a)
+  my@(MkModN y) <- forAll anyNat
+  let mz@(MkModN z) = mx .-. my
+      z' = (toInteger x - toInteger y) `mod` n'
 
-  annotateShow amx
-  annotateShow amy
-  annotateShow amz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
-  az' === toInteger az
-
-  bmx@(BModN.MkModN bx) <- forAll (banyNat @n @a)
-  bmy@(BModN.MkModN by) <- forAll banyNat
-  let bmz@(BModN.MkModN bz) = bmx .-. bmy
-      bz' = (toInteger bx - toInteger by) `mod` n'
-
-  annotateShow bmx
-  annotateShow bmy
-  annotateShow bmz
-
-  bz' === toInteger bz
+  z' === toInteger z
   where
     n' = fromIntegral $ natVal @n Proxy
 
@@ -656,34 +620,23 @@ multTotal' ::
   ) =>
   Property
 multTotal' = property $ do
-  amx@(AModN.MkModN ax) <- forAll (aanyNat @n @a)
-  amy@(AModN.MkModN ay) <- forAll aanyNat
-  let amz@(AModN.MkModN az) = amx .*. amy
-      az' = (toInteger ax * toInteger ay) `mod` n'
+  mx@(MkModN x) <- forAll (anyNat @n @a)
+  my@(MkModN y) <- forAll anyNat
+  let mz@(MkModN z) = mx .*. my
+      z' = (toInteger x * toInteger y) `mod` n'
 
-  annotateShow amx
-  annotateShow amy
-  annotateShow amz
+  annotateShow mx
+  annotateShow my
+  annotateShow mz
 
-  az' === toInteger az
-
-  bmx@(BModN.MkModN bx) <- forAll (banyNat @n @a)
-  bmy@(BModN.MkModN by) <- forAll banyNat
-  let bmz@(BModN.MkModN bz) = bmx .*. bmy
-      bz' = (toInteger bx * toInteger by) `mod` n'
-
-  annotateShow bmx
-  annotateShow bmy
-  annotateShow bmz
-
-  bz' === toInteger bz
+  z' === toInteger z
   where
     n' = fromIntegral $ natVal @n Proxy
 
 nonneg :: forall a. (Integral a, TestBounds a) => Gen a
 nonneg = HG.integral $ HR.exponentialFrom 20 20 maxVal
 
-aanyNat ::
+anyNat ::
   forall n a.
   ( FromInteger a,
     Integral a,
@@ -694,46 +647,28 @@ aanyNat ::
     ToInteger a,
     Typeable a
   ) =>
-  Gen (AModN.ModN n a)
-aanyNat = AModN.unsafeModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
-
-banyNat ::
-  forall n a.
-  ( Integral a,
-    KnownNat n,
-    MaybeUpperBounded a,
-    TestBounds a,
-    Typeable a
-  ) =>
-  Gen (BModN.ModN n a)
-banyNat = BModN.unsafeModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
+  Gen (ModN.ModN n a)
+anyNat = ModN.unsafeModN <$> HG.integral (HR.exponentialFrom 0 0 maxVal)
 
 elimProps :: TestTree
 elimProps =
   testPropertyCompat desc "elimProps" $
     property $ do
-      amn@(AModN.MkModN an) <- forAll (aanyNat @350 @Int)
+      amn@(MkModN an) <- forAll (anyNat @350 @Int)
 
-      an === AModN.unModN amn
+      an === ModN.unModN amn
       an === amn.unModN
       an === view #unModN amn
-      an === view AModN._MkModN amn
-
-      bmn@(BModN.MkModN bn) <- forAll (banyNat @350 @Int)
-
-      bn === BModN.unModN bmn
-      bn === bmn.unModN
-      bn === view #unModN bmn
-      bn === view BModN._MkModN bmn
+      an === view ModN._MkModN amn
   where
     desc = "elim (MkModN x) === x"
 
 showSpecs :: TestTree
 showSpecs = testCase "Shows ModN" $ do
-  "MkModN 2 (mod 8)" @=? show (AModN.unsafeModN @8 @Integer 2)
-  "MkModN 10 (mod 12)" @=? show (AModN.unsafeModN @12 @Integer 22)
+  "MkModN 2 (mod 8)" @=? show (ModN.unsafeModN @8 @Integer 2)
+  "MkModN 10 (mod 12)" @=? show (ModN.unsafeModN @12 @Integer 22)
 
 displaySpecs :: TestTree
 displaySpecs = testCase "Displays ModN" $ do
-  "2 (mod 8)" @=? D.display (AModN.unsafeModN @8 @Integer 2)
-  "10 (mod 12)" @=? D.display (AModN.unsafeModN @12 @Integer 22)
+  "2 (mod 8)" @=? D.display (ModN.unsafeModN @8 @Integer 2)
+  "10 (mod 12)" @=? D.display (ModN.unsafeModN @12 @Integer 22)

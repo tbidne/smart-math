@@ -3,7 +3,7 @@
 -- | Provides the 'Fraction' type, a safer alternative to 'GHC.Real.Ratio'.
 --
 -- @since 0.1
-module Numeric.Data.Fraction.Base
+module Numeric.Data.Fraction
   ( -- * Type
     Fraction ((:%:), (:%!)),
 
@@ -33,14 +33,18 @@ import Data.Bounds
   )
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
-import Numeric.Data.Fraction.Base.Internal
+import Numeric.Algebra.Additive.AMonoid (pattern NonZero, pattern Zero)
+import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean)
+import Numeric.Algebra.Normed (Normed)
+import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Data.Fraction.Internal
   ( Fraction
       ( UnsafeFraction,
         (:%!),
         (:%:)
       ),
   )
-import Numeric.Data.Fraction.Base.Internal qualified as Internal
+import Numeric.Data.Fraction.Internal qualified as Internal
 import Numeric.Data.Internal.Utils (rmatching)
 import Optics.Core
   ( ReversedPrism',
@@ -50,7 +54,7 @@ import Optics.Core
 
 -- $setup
 -- >>> :set -XTemplateHaskell
--- >>> import Numeric.Data.Fraction.Base.Internal ((%!))
+-- >>> import Numeric.Data.Fraction.Internal ((%!))
 
 -- | Template haskell for creating a 'Fraction' at compile-time.
 --
@@ -60,8 +64,11 @@ import Optics.Core
 --
 -- @since 0.1
 mkFractionTH ::
-  ( Integral a,
-    Lift a,
+  ( Lift a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
     UpperBoundless a
   ) =>
   a ->
@@ -83,9 +90,18 @@ mkFractionTH n = maybe (error err) liftTyped . mkFraction n
 -- Nothing
 --
 -- @since 0.1
-mkFraction :: (Integral a, UpperBoundless a) => a -> a -> Maybe (Fraction a)
-mkFraction _ 0 = Nothing
-mkFraction n d = Just $ Internal.reduce (UnsafeFraction n d)
+mkFraction ::
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  a ->
+  a ->
+  Maybe (Fraction a)
+mkFraction _ Zero = Nothing
+mkFraction n (NonZero d) = Just $ Internal.reduce (UnsafeFraction n d)
 {-# INLINEABLE mkFraction #-}
 
 -- | Infix version of 'mkFractionTH'.
@@ -96,7 +112,17 @@ mkFraction n d = Just $ Internal.reduce (UnsafeFraction n d)
 -- UnsafeFraction 7 2
 --
 -- @since 0.1
-(%%) :: (Integral a, Lift a, UpperBoundless a) => a -> a -> Code Q (Fraction a)
+(%%) ::
+  ( Lift a,
+    MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  a ->
+  a ->
+  Code Q (Fraction a)
 n %% d = mkFractionTH n d
 {-# INLINE (%%) #-}
 
@@ -137,8 +163,10 @@ infixl 7 %%
 --
 -- @since 0.1
 _MkFraction ::
-  ( Integral a,
+  ( MEuclidean a,
+    Normed a,
     Ord a,
+    Semiring a,
     UpperBoundless a
   ) =>
   ReversedPrism' (Fraction a) (a, a)

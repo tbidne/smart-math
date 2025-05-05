@@ -3,7 +3,7 @@
 -- | Provides the 'Positive' type for enforcing a positive invariant.
 --
 -- @since 0.1
-module Numeric.Data.Positive.Algebra.Internal
+module Numeric.Data.Positive.Internal
   ( -- * Type
     Positive (MkPositive, UnsafePositive),
 
@@ -214,7 +214,7 @@ unsafePositive x
 errMsg :: (Show a) => String -> a -> String
 errMsg fn x =
   mconcat
-    [ "Numeric.Data.Positive.Algebra.",
+    [ "Numeric.Data.Positive.",
       fn,
       ": Received value <= zero: ",
       show x

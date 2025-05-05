@@ -3,9 +3,9 @@ module Test.Data.NonZero (props) where
 import Data.Text.Display qualified as D
 import Hedgehog.Gen qualified as HG
 import Hedgehog.Range qualified as HR
-import Numeric.Data.NonZero.Base (NonZero (MkNonZero))
-import Numeric.Data.NonZero.Base qualified as NonZero
-import Numeric.Data.NonZero.Base.Internal (NonZero (UnsafeNonZero))
+import Numeric.Data.NonZero (NonZero (MkNonZero))
+import Numeric.Data.NonZero qualified as NonZero
+import Numeric.Data.NonZero.Internal (NonZero (UnsafeNonZero))
 import Test.Prelude
 import Test.TestBounds (TestBounds (maxVal, minVal))
 import Utils qualified
@@ -42,7 +42,7 @@ testUnsafe = testCase "Test unsafeNonZero" $ do
 
   Utils.assertPureErrorCall expectedEx (NonZero.unsafeNonZero @Integer 0)
   where
-    expectedEx = "Numeric.Data.NonZero.Base.unsafeNonZero: Received zero"
+    expectedEx = "Numeric.Data.NonZero.unsafeNonZero: Received zero"
 
 nonzero :: Gen Int
 nonzero =

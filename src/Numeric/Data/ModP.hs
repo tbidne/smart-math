@@ -1,7 +1,7 @@
 -- | Provides the 'ModP' type for modular arithmetic.
 --
 -- @since 0.1
-module Numeric.Data.ModP.Base
+module Numeric.Data.ModP
   ( -- * Type
     ModP (MkModP),
 
@@ -29,9 +29,11 @@ import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Algebra (MEuclidean)
+import Numeric.Convert.Integer (FromInteger, ToInteger)
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.ModP.Base.Internal (ModP (MkModP, UnsafeModP))
-import Numeric.Data.ModP.Base.Internal qualified as Internal
+import Numeric.Data.ModP.Internal (ModP (MkModP, UnsafeModP))
+import Numeric.Data.ModP.Internal qualified as Internal
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- | @since 0.1
@@ -48,10 +50,12 @@ unModP (UnsafeModP x) = x
 -- @since 0.1
 mkModPTH ::
   forall p a.
-  ( Integral a,
+  ( FromInteger a,
     KnownNat p,
     Lift a,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   a ->
@@ -91,9 +95,11 @@ mkModPTH x = case Internal.mkModP x of
 -- @since 0.1
 _MkModP ::
   forall p a.
-  ( Integral a,
+  ( FromInteger a,
     KnownNat p,
     MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
     Typeable a
   ) =>
   ReversedPrism' (ModP p a) a

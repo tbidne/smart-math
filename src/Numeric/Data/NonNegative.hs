@@ -1,8 +1,8 @@
 -- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.
--- Typeclass instances are provided in terms of base classes e.g. Num.
+--
 --
 -- @since 0.1
-module Numeric.Data.NonNegative.Base
+module Numeric.Data.NonNegative
   ( -- * Type
     NonNegative (MkNonNegative),
 
@@ -26,14 +26,15 @@ where
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Numeric.Algebra (AMonoid (zero))
 import Numeric.Data.Internal.Utils (rmatching)
-import Numeric.Data.NonNegative.Base.Internal
+import Numeric.Data.NonNegative.Internal
   ( NonNegative
       ( MkNonNegative,
         UnsafeNonNegative
       ),
   )
-import Numeric.Data.NonNegative.Base.Internal qualified as Internal
+import Numeric.Data.NonNegative.Internal qualified as Internal
 import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 
 -- $setup
@@ -47,7 +48,7 @@ import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 -- UnsafeNonNegative 1
 --
 -- @since 0.1
-mkNonNegativeTH :: (Integral a, Lift a, Show a) => a -> Code Q (NonNegative a)
+mkNonNegativeTH :: (AMonoid a, Lift a, Ord a, Show a) => a -> Code Q (NonNegative a)
 mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
   where
     err = Internal.errMsg "mkNonNegativeTH" x
@@ -64,9 +65,9 @@ mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
 -- Nothing
 --
 -- @since 0.1
-mkNonNegative :: (Num a, Ord a) => a -> Maybe (NonNegative a)
+mkNonNegative :: (AMonoid a, Ord a) => a -> Maybe (NonNegative a)
 mkNonNegative x
-  | x >= 0 = Just (UnsafeNonNegative x)
+  | x >= zero = Just (UnsafeNonNegative x)
   | otherwise = Nothing
 {-# INLINEABLE mkNonNegative #-}
 
@@ -80,7 +81,7 @@ mkNonNegative x
 -- UnsafeNonNegative 7
 --
 -- @since 0.1
-(*!) :: (HasCallStack, Num a, Ord a, Show a) => a -> NonNegative a
+(*!) :: (AMonoid a, HasCallStack, Ord a, Show a) => a -> NonNegative a
 (*!) = Internal.unsafeNonNegative
 {-# INLINE (*!) #-}
 
@@ -130,7 +131,7 @@ unNonNegative (UnsafeNonNegative x) = x
 -- Left (-2)
 --
 -- @since 0.1
-_MkNonNegative :: (Num a, Ord a) => ReversedPrism' (NonNegative a) a
+_MkNonNegative :: (AMonoid a, Ord a) => ReversedPrism' (NonNegative a) a
 _MkNonNegative = re (prism unNonNegative g)
   where
     g x = case mkNonNegative x of
