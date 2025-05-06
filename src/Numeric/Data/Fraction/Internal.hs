@@ -457,7 +457,7 @@ instance
   ) =>
   MGroup (Fraction a)
   where
-  x .%. (UnsafeFraction n d) = x .*. UnsafeFraction d n
+  x .%. y = x .*. reciprocal y
   {-# INLINEABLE (.%.) #-}
 
 -- | @since 0.1
