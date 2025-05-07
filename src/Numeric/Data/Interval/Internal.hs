@@ -40,10 +40,9 @@ import Data.Singletons as X
     SomeSing (SomeSing),
   )
 import Data.Text qualified as T
+import Data.Text.Builder.Linear (Builder)
+import Data.Text.Builder.Linear qualified as TBL
 import Data.Text.Display (Display (displayBuilder))
-import Data.Text.Lazy qualified as TL
-import Data.Text.Lazy.Builder (Builder)
-import Data.Text.Lazy.Builder qualified as TLB
 import GHC.Generics (Generic)
 import GHC.Records (HasField (getField))
 import GHC.Show (showSpace)
@@ -396,10 +395,7 @@ errMsg ::
   a ->
   Builder ->
   String
-errMsg x fnName =
-  T.unpack $
-    TL.toStrict $
-      TLB.toLazyText msg
+errMsg x fnName = T.unpack $ TBL.runBuilder msg
   where
     intervalStr = displayIntervalBounds left right
     (left, right) = getInterval @l @r
