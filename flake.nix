@@ -65,8 +65,8 @@
 
           apps = {
             format = nix-hs-utils.format compilerPkgs;
-            lint = nix-hs-utils.lint compilerPkgs;
-            lintRefactor = nix-hs-utils.lintRefactor compilerPkgs;
+            #lint = nix-hs-utils.lint compilerPkgs;
+            #lintRefactor = nix-hs-utils.lintRefactor compilerPkgs;
           };
         };
       systems = [

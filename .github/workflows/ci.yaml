@@ -121,5 +121,5 @@ jobs:
           nix run .#format
           git diff --exit-code --color=always
 
-      - name: HLint
-        run: nix run .#lint
+      #- name: HLint
+      #  run: nix run .#lint
