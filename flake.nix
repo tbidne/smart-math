@@ -31,7 +31,7 @@
       perSystem =
         { pkgs, ... }:
         let
-          ghc-version = "ghc982";
+          ghc-version = "ghc9101";
           hlib = pkgs.haskell.lib;
           compiler = pkgs.haskell.packages."${ghc-version}".override {
             overrides =
@@ -48,6 +48,12 @@
               inherit compiler pkgs returnShellEnv;
               name = "smart-math";
               root = ./.;
+
+              devTools = [
+                (hlib.dontCheck compiler.cabal-fmt)
+                (hlib.dontCheck compiler.haskell-language-server)
+                pkgs.nixfmt-rfc-style
+              ];
             };
           compilerPkgs = {
             inherit compiler pkgs;
