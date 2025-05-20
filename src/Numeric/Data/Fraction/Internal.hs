@@ -122,6 +122,8 @@ type Fraction :: Type -> Type
 data Fraction a = UnsafeFraction !a !a
   deriving stock
     ( -- | @since 0.1
+      Foldable,
+      -- | @since 0.1
       Generic,
       -- | @since 0.1
       Lift,

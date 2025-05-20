@@ -91,6 +91,8 @@ newtype ModN n a = UnsafeModN a
     ( -- | @since 0.1
       Eq,
       -- | @since 0.1
+      Foldable,
+      -- | @since 0.1
       Generic,
       -- | @since 0.1
       Lift,

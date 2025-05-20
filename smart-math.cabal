@@ -36,6 +36,7 @@ common common-lang
     BangPatterns
     DataKinds
     DeriveAnyClass
+    DeriveFoldable
     DeriveGeneric
     DeriveLift
     DerivingStrategies
