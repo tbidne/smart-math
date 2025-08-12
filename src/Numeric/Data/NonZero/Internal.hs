@@ -17,6 +17,7 @@ where
 
 import Control.DeepSeq (NFData)
 import Data.Bifunctor (Bifunctor (bimap))
+import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.Text.Display (Display, ShowInstance (ShowInstance))
 import GHC.Generics (Generic)
@@ -61,7 +62,9 @@ newtype NonZero a = UnsafeNonZero a
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1
+    ( -- | @since 0.1.0.0
+      Hashable,
+      -- | @since 0.1.0.0
       NFData
     )
   deriving

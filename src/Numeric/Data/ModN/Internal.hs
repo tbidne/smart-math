@@ -24,6 +24,7 @@ import Data.Bounds
     MaybeUpperBounded (maybeUpperBound),
     UpperBounded (upperBound),
   )
+import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text.Display (Display (displayBuilder))
@@ -100,7 +101,9 @@ newtype ModN n a = UnsafeModN a
       Ord
     )
   deriving anyclass
-    ( -- | @since 0.1
+    ( -- | @since 0.1.0.0
+      Hashable,
+      -- | @since 0.1.0.0
       NFData
     )
 

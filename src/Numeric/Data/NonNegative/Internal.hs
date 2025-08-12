@@ -24,6 +24,7 @@ import Data.Bounds
     UpperBounded (upperBound),
     UpperBoundless,
   )
+import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.Text.Display (Display, ShowInstance (ShowInstance))
 import GHC.Generics (Generic)
@@ -72,6 +73,8 @@ newtype NonNegative a = UnsafeNonNegative a
     )
   deriving anyclass
     ( -- | @since 0.1
+      Hashable,
+      -- | @since 0.1
       NFData,
       -- | @since 0.1
       UpperBoundless

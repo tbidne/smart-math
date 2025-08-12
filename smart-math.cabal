@@ -108,6 +108,7 @@ library
     , base                 >=4.16.0.0 && <4.22
     , bounds               ^>=0.1
     , deepseq              >=1.4.4.0  && <1.6
+    , hashable             >=1.3.0.0  && <1.6
     , optics-core          ^>=0.4
     , random               ^>=1.2.0
     , singletons           ^>=3.0

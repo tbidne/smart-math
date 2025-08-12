@@ -30,6 +30,7 @@ module Numeric.Data.Interval.Internal
 where
 
 import Control.DeepSeq (NFData)
+import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (Proxy))
@@ -83,7 +84,9 @@ data IntervalBound
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1
+    ( -- | @since 0.1.0.0
+      Hashable,
+      -- | @since 0.1.0.0
       NFData
     )
 
@@ -183,7 +186,9 @@ newtype Interval (l :: IntervalBound) (r :: IntervalBound) (a :: Type)
       Ord
     )
   deriving anyclass
-    ( -- | @since 0.1
+    ( -- | @since 0.1.0.0
+      Hashable,
+      -- | @since 0.1.0.0
       NFData
     )
 

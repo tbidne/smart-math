@@ -31,6 +31,7 @@ import Data.Bounds
     MaybeLowerBounded (maybeLowerBound),
     UpperBoundless,
   )
+import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.Text.Display (Display (displayBuilder))
 import GHC.Generics (Generic)
@@ -131,7 +132,9 @@ data Fraction a = UnsafeFraction !a !a
       Show
     )
   deriving anyclass
-    ( -- | @since 0.1
+    ( -- | @since 0.1.0.0
+      Hashable,
+      -- | @since 0.1.0.0
       NFData
     )
 
