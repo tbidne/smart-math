@@ -177,18 +177,13 @@ pattern MkNonZero x <- UnsafeNonZero x
 --
 -- @since 0.1
 unsafeNonZero :: (AMonoid a, Eq a, HasCallStack) => a -> NonZero a
-unsafeNonZero Zero = error $ errMsg "unsafeNonZero"
+unsafeNonZero Zero = error errMsg
 unsafeNonZero (NonZero x) = UnsafeNonZero x
 {-# INLINEABLE unsafeNonZero #-}
 
 -- | @since 0.1
-errMsg :: String -> String
-errMsg fn =
-  mconcat
-    [ "Numeric.Data.NonZero.",
-      fn,
-      ": Received zero"
-    ]
+errMsg :: String
+errMsg = "Numeric.Data.NonZero: Received zero"
 
 liftNonZero2 ::
   forall a.

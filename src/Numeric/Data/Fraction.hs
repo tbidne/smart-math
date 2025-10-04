@@ -28,11 +28,12 @@ module Numeric.Data.Fraction
   )
 where
 
+import Data.Bifunctor (Bifunctor (first))
 import Data.Bounds
   ( UpperBoundless,
   )
 import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AMonoid (pattern NonZero, pattern Zero)
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean)
 import Numeric.Algebra.Normed (Normed)
@@ -46,6 +47,7 @@ import Numeric.Data.Fraction.Internal
   )
 import Numeric.Data.Fraction.Internal qualified as Internal
 import Numeric.Data.Internal.Utils (rmatching)
+import Numeric.Data.Internal.Utils qualified as Utils
 import Optics.Core
   ( ReversedPrism',
     ReversibleOptic (re),
@@ -74,9 +76,7 @@ mkFractionTH ::
   a ->
   a ->
   Code Q (Fraction a)
-mkFractionTH n = maybe (error err) liftTyped . mkFraction n
-  where
-    err = Internal.errMsg "mkFractionTH"
+mkFractionTH n = Utils.liftErrorTH . mkFraction n
 {-# INLINEABLE mkFractionTH #-}
 
 -- | Smart constructor for 'Fraction'. Returns 'Nothing' if the second
@@ -84,10 +84,10 @@ mkFractionTH n = maybe (error err) liftTyped . mkFraction n
 --
 -- ==== __Examples__
 -- >>> mkFraction 10 4
--- Just (UnsafeFraction 5 2)
+-- Right (UnsafeFraction 5 2)
 --
 -- >>> mkFraction 10 0
--- Nothing
+-- Left "Numeric.Data.Fraction: Fraction has zero denominator"
 --
 -- @since 0.1
 mkFraction ::
@@ -99,9 +99,9 @@ mkFraction ::
   ) =>
   a ->
   a ->
-  Maybe (Fraction a)
-mkFraction _ Zero = Nothing
-mkFraction n (NonZero d) = Just $ Internal.reduce (UnsafeFraction n d)
+  Either String (Fraction a)
+mkFraction _ Zero = Left Internal.errMsg
+mkFraction n (NonZero d) = Right $ Internal.reduce (UnsafeFraction n d)
 {-# INLINEABLE mkFraction #-}
 
 -- | Infix version of 'mkFractionTH'.
@@ -172,7 +172,5 @@ _MkFraction ::
   ReversedPrism' (Fraction a) (a, a)
 _MkFraction = re (prism (\(UnsafeFraction n d) -> (n, d)) g)
   where
-    g x = case uncurry mkFraction x of
-      Nothing -> Left x
-      Just x' -> Right x'
+    g x = first (const x) . uncurry mkFraction $ x
 {-# INLINEABLE _MkFraction #-}

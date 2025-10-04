@@ -443,7 +443,7 @@ unsafeModN ::
   ModN n a
 unsafeModN x = case mkModN x of
   Right mp -> mp
-  Left err -> error $ errMsg "unsafeModN" err
+  Left err -> error $ errMsg err
 {-# INLINEABLE unsafeModN #-}
 
 -- | This function reduces the argument modulo @p@ but does __not__ check
@@ -467,11 +467,9 @@ reallyUnsafeModN = UnsafeModN . (`mmod` n')
 {-# INLINEABLE reallyUnsafeModN #-}
 
 -- | @since 0.1
-errMsg :: String -> String -> String
-errMsg fn msg =
+errMsg :: String -> String
+errMsg msg =
   mconcat
-    [ "Numeric.Data.ModN.",
-      fn,
-      ": ",
+    [ "Numeric.Data.ModN: ",
       msg
     ]

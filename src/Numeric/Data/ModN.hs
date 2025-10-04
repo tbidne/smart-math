@@ -26,10 +26,11 @@ where
 import Data.Bounds (MaybeUpperBounded)
 import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
-import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
+import Language.Haskell.TH.Syntax (Code, Lift, Q)
 import Numeric.Algebra (MEuclidean)
 import Numeric.Convert.Integer (FromInteger, ToInteger)
 import Numeric.Data.Internal.Utils (rmatching)
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Data.ModN.Internal (ModN (MkModN, UnsafeModN))
 import Numeric.Data.ModN.Internal qualified as Internal
 import Optics.Core (ReversedPrism', prism, re)
@@ -63,9 +64,7 @@ mkModNTH ::
   ) =>
   a ->
   Code Q (ModN n a)
-mkModNTH x = case Internal.mkModN x of
-  Right y -> liftTyped y
-  Left err -> error $ Internal.errMsg "mkModNTH" err
+mkModNTH = Utils.liftErrorTH . Internal.mkModN
 {-# INLINEABLE mkModNTH #-}
 
 -- $optics

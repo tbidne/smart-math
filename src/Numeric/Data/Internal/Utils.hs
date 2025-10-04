@@ -10,12 +10,16 @@ module Numeric.Data.Internal.Utils
 
     -- * Optics
     rmatching,
+
+    -- * Misc
+    liftErrorTH,
   )
 where
 
 import Data.Bounds (MaybeUpperBounded (maybeUpperBound))
 import Data.Typeable (Typeable)
 import Data.Typeable qualified as Typeable
+import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
 import Numeric.Algebra
   ( ASemigroup ((.+.)),
     MEuclidean,
@@ -203,3 +207,6 @@ rmatching ::
   Either t a
 rmatching = matching . re
 {-# INLINEABLE rmatching #-}
+
+liftErrorTH :: (Lift a) => Either String a -> Code Q a
+liftErrorTH = either error liftTyped

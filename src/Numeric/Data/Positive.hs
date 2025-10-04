@@ -25,10 +25,12 @@ module Numeric.Data.Positive
   )
 where
 
+import Data.Bifunctor (Bifunctor (first))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Data.NonZero (NonZero, reallyUnsafeNonZero, rmatching)
 import Numeric.Data.Positive.Internal (Positive (MkPositive, UnsafePositive))
 import Numeric.Data.Positive.Internal qualified as Internal
@@ -51,9 +53,7 @@ import Optics.Core
 --
 -- @since 0.1
 mkPositiveTH :: (AMonoid a, Lift a, Ord a, Show a) => a -> Code Q (Positive a)
-mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
-  where
-    err = Internal.errMsg "mkPositiveTH" x
+mkPositiveTH = Utils.liftErrorTH . mkPositive
 {-# INLINEABLE mkPositiveTH #-}
 
 -- | Smart constructor for 'Positive'. Returns 'Nothing' if the second
@@ -61,16 +61,16 @@ mkPositiveTH x = maybe (error err) liftTyped $ mkPositive x
 --
 -- ==== __Examples__
 -- >>> mkPositive 7
--- Just (UnsafePositive 7)
+-- Right (UnsafePositive 7)
 --
 -- >>> mkPositive 0
--- Nothing
+-- Left "Numeric.Data.Positive: Received value <= zero: 0"
 --
 -- @since 0.1
-mkPositive :: (AMonoid a, Ord a) => a -> Maybe (Positive a)
+mkPositive :: (AMonoid a, Ord a, Show a) => a -> Either String (Positive a)
 mkPositive x
-  | x > zero = Just (UnsafePositive x)
-  | otherwise = Nothing
+  | x > zero = Right (UnsafePositive x)
+  | otherwise = Left $ Internal.errMsg x
 {-# INLINEABLE mkPositive #-}
 
 -- | Postfix operator for 'Internal.unsafePositive'.
@@ -144,10 +144,8 @@ unPositive (UnsafePositive x) = x
 -- Left 0
 --
 -- @since 0.1
-_MkPositive :: (AMonoid a, Ord a) => ReversedPrism' (Positive a) a
+_MkPositive :: (AMonoid a, Ord a, Show a) => ReversedPrism' (Positive a) a
 _MkPositive = re (prism unPositive g)
   where
-    g x = case mkPositive x of
-      Nothing -> Left x
-      Just x' -> Right x'
+    g x = first (const x) . mkPositive $ x
 {-# INLINEABLE _MkPositive #-}

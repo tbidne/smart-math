@@ -31,12 +31,14 @@ module Numeric.Data.Interval
   )
 where
 
+import Data.Bifunctor (Bifunctor (first))
 import Data.Singletons (SingI)
 import GHC.TypeNats (Nat)
 import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Convert.Integer (FromInteger)
 import Numeric.Data.Internal.Utils (rmatching)
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Data.Interval.Internal
   ( Interval (MkInterval, UnsafeInterval),
     IntervalBound (Closed, None, Open),
@@ -69,9 +71,7 @@ mkIntervalTH ::
   ) =>
   a ->
   Code Q (Interval l r a)
-mkIntervalTH x = maybe (error msg) liftTyped $ Internal.mkInterval x
-  where
-    msg = Internal.errMsg @l @r x "mkIntervalTH"
+mkIntervalTH = Utils.liftErrorTH . Internal.mkInterval
 {-# INLINEABLE mkIntervalTH #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeInterval@
@@ -138,15 +138,14 @@ _MkInterval ::
   forall l r a.
   ( FromInteger a,
     Ord a,
+    Show a,
     SingI l,
     SingI r
   ) =>
   ReversedPrism' (Interval l r a) a
 _MkInterval = re (prism unInterval g)
   where
-    g x = case Internal.mkInterval x of
-      Nothing -> Left x
-      Just x' -> Right x'
+    g x = first (const x) . Internal.mkInterval $ x
 {-# INLINEABLE _MkInterval #-}
 
 -- | @since 0.1

@@ -234,16 +234,14 @@ instance (Semifield a) => Semifield (NonNegative a)
 unsafeNonNegative :: (AMonoid a, HasCallStack, Ord a, Show a) => a -> NonNegative a
 unsafeNonNegative x
   | x >= zero = UnsafeNonNegative x
-  | otherwise = error $ errMsg "unsafeNonNegative" x
+  | otherwise = error $ errMsg x
 {-# INLINEABLE unsafeNonNegative #-}
 
 -- | @since 0.1
-errMsg :: (Show a) => String -> a -> String
-errMsg fn x =
+errMsg :: (Show a) => a -> String
+errMsg x =
   mconcat
-    [ "Numeric.Data.NonNegative.",
-      fn,
-      ": Received value < zero: ",
+    [ "Numeric.Data.NonNegative: Received value < zero: ",
       show x
     ]
 

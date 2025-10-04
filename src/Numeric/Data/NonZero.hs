@@ -21,10 +21,12 @@ module Numeric.Data.NonZero
   )
 where
 
+import Data.Bifunctor (Bifunctor (first))
 import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra (AMonoid, pattern NonZero, pattern Zero)
 import Numeric.Data.Internal.Utils (rmatching)
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Data.NonZero.Internal (NonZero (MkNonZero, UnsafeNonZero))
 import Numeric.Data.NonZero.Internal qualified as Internal
 import Optics.Core (ReversedPrism', prism, re)
@@ -40,15 +42,15 @@ unNonZero (UnsafeNonZero x) = x
 --
 -- ==== __Examples__
 -- >>> mkNonZero 7
--- Just (UnsafeNonZero 7)
+-- Right (UnsafeNonZero 7)
 --
 -- >>> mkNonZero 0
--- Nothing
+-- Left "Numeric.Data.NonZero: Received zero"
 --
 -- @since 0.1
-mkNonZero :: (AMonoid a, Eq a) => a -> Maybe (NonZero a)
-mkNonZero Zero = Nothing
-mkNonZero (NonZero x) = Just (UnsafeNonZero x)
+mkNonZero :: (AMonoid a, Eq a) => a -> Either String (NonZero a)
+mkNonZero Zero = Left Internal.errMsg
+mkNonZero (NonZero x) = Right (UnsafeNonZero x)
 {-# INLINEABLE mkNonZero #-}
 
 -- | Template-haskell version of 'mkNonZero' for creating 'NonZero'
@@ -60,8 +62,7 @@ mkNonZero (NonZero x) = Just (UnsafeNonZero x)
 --
 -- @since 0.1
 mkNonZeroTH :: (AMonoid a, Eq a, Lift a) => a -> Code Q (NonZero a)
-mkNonZeroTH Zero = error $ Internal.errMsg "mkNonZeroTH"
-mkNonZeroTH (NonZero x) = liftTyped (UnsafeNonZero x)
+mkNonZeroTH = Utils.liftErrorTH . mkNonZero
 {-# INLINEABLE mkNonZeroTH #-}
 
 -- | This function is an alias for the unchecked constructor @UnsafeNonZero@
@@ -104,10 +105,7 @@ reallyUnsafeNonZero = UnsafeNonZero
 --
 -- @since 0.1
 _MkNonZero :: (AMonoid a, Eq a) => ReversedPrism' (NonZero a) a
-_MkNonZero = re (prism f g)
+_MkNonZero = re (prism unNonZero g)
   where
-    f = unNonZero
-    g x = case mkNonZero x of
-      Nothing -> Left x
-      Just x' -> Right x'
+    g x = first (const x) . mkNonZero $ x
 {-# INLINEABLE _MkNonZero #-}

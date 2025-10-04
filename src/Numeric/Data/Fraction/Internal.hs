@@ -598,7 +598,7 @@ unsafeFraction ::
   a ->
   a ->
   Fraction a
-unsafeFraction _ Zero = error $ errMsg "unsafeFraction"
+unsafeFraction _ Zero = error errMsg
 unsafeFraction n (NonZero d) = reduce $ UnsafeFraction n d
 {-# INLINEABLE unsafeFraction #-}
 
@@ -686,10 +686,5 @@ xor _ _ = False
 infixr 2 `xor`
 
 -- | @since 0.1
-errMsg :: String -> String
-errMsg fn =
-  mconcat
-    [ "Numeric.Data.Fraction.",
-      fn,
-      ": Fraction has zero denominator"
-    ]
+errMsg :: String
+errMsg = "Numeric.Data.Fraction: Fraction has zero denominator"

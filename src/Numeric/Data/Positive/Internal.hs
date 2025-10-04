@@ -210,18 +210,14 @@ instance (ToReal a) => ToReal (Positive a) where
 unsafePositive :: (AMonoid a, HasCallStack, Ord a, Show a) => a -> Positive a
 unsafePositive x
   | x > zero = UnsafePositive x
-  | otherwise =
-      error $
-        errMsg "unsafePositive" x
+  | otherwise = error $ errMsg x
 {-# INLINEABLE unsafePositive #-}
 
 -- | @since 0.1
-errMsg :: (Show a) => String -> a -> String
-errMsg fn x =
+errMsg :: (Show a) => a -> String
+errMsg x =
   mconcat
-    [ "Numeric.Data.Positive.",
-      fn,
-      ": Received value <= zero: ",
+    [ "Numeric.Data.Positive: Received value <= zero: ",
       show x
     ]
 

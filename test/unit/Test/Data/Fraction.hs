@@ -190,7 +190,7 @@ testUnsafe = testCase "Test unsafeFraction" $ do
   1 %! 2 @=? Frac.unsafeFraction @Integer 5 10
   Utils.assertPureErrorCall aexpectedEx (Frac.unsafeFraction @Integer 5 0)
   where
-    aexpectedEx = "Numeric.Data.Fraction.unsafeFraction: Fraction has zero denominator"
+    aexpectedEx = "Numeric.Data.Fraction: Fraction has zero denominator"
 
 testRecip :: TestTree
 testRecip = testCase "Test recip" $ do

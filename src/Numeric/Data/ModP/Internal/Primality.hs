@@ -143,7 +143,6 @@ isPrimeArithmoi n =
 isPrimeArithmoi =
   error
     $ errMsg
-    "Internal.Primality.isPrimeArithmoi"
     "arithmoi flag is disabled. Either turn the flag on or use one of isPrime, isPrimeDefault."
 #endif
 
@@ -360,7 +359,6 @@ invertArithmoi d =
     Nothing ->
       error
         $ errMsg
-            ".Internal.Primality.invert"
             ("Could not find inverse of " ++ (show d) ++ " (mod " ++ show p' ++ ")")
     Just n -> Mod.unMod n
   where
@@ -369,7 +367,6 @@ invertArithmoi d =
 invertArithmoi =
   error
     $ errMsg
-    "Internal.Primality.invertArithmoi"
     "arithmoi flag is disabled. Either turn the flag on or use one of invert, invertDefault."
 #endif
 
@@ -456,11 +453,9 @@ eec a b = go initOldR initR initOldS initS initOldT initT
 {-# INLINEABLE eec #-}
 
 -- | @since 0.1
-errMsg :: String -> String -> String
-errMsg fn msg =
+errMsg :: String -> String
+errMsg msg =
   mconcat
-    [ "Numeric.Data.ModP.",
-      fn,
-      ": ",
+    [ "Numeric.Data.ModP: ",
       msg
     ]

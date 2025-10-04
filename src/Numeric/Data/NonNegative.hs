@@ -23,11 +23,13 @@ module Numeric.Data.NonNegative
   )
 where
 
+import Data.Bifunctor (Bifunctor (first))
 import GHC.Stack (HasCallStack)
 import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift (liftTyped))
+import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra (AMonoid (zero))
 import Numeric.Data.Internal.Utils (rmatching)
+import Numeric.Data.Internal.Utils qualified as Utils
 import Numeric.Data.NonNegative.Internal
   ( NonNegative
       ( MkNonNegative,
@@ -49,9 +51,7 @@ import Optics.Core (ReversedPrism', ReversibleOptic (re), prism)
 --
 -- @since 0.1
 mkNonNegativeTH :: (AMonoid a, Lift a, Ord a, Show a) => a -> Code Q (NonNegative a)
-mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
-  where
-    err = Internal.errMsg "mkNonNegativeTH" x
+mkNonNegativeTH = Utils.liftErrorTH . mkNonNegative
 {-# INLINEABLE mkNonNegativeTH #-}
 
 -- | Smart constructor for 'NonNegative'. Returns 'Nothing' if the second
@@ -59,16 +59,16 @@ mkNonNegativeTH x = maybe (error err) liftTyped $ mkNonNegative x
 --
 -- ==== __Examples__
 -- >>> mkNonNegative 0
--- Just (UnsafeNonNegative 0)
+-- Right (UnsafeNonNegative 0)
 --
 -- >>> mkNonNegative (-2)
--- Nothing
+-- Left "Numeric.Data.NonNegative: Received value < zero: -2"
 --
 -- @since 0.1
-mkNonNegative :: (AMonoid a, Ord a) => a -> Maybe (NonNegative a)
+mkNonNegative :: (AMonoid a, Ord a, Show a) => a -> Either String (NonNegative a)
 mkNonNegative x
-  | x >= zero = Just (UnsafeNonNegative x)
-  | otherwise = Nothing
+  | x >= zero = Right (UnsafeNonNegative x)
+  | otherwise = Left $ Internal.errMsg x
 {-# INLINEABLE mkNonNegative #-}
 
 -- | Postfix operator for 'Internal.unsafeNonNegative'.
@@ -131,10 +131,8 @@ unNonNegative (UnsafeNonNegative x) = x
 -- Left (-2)
 --
 -- @since 0.1
-_MkNonNegative :: (AMonoid a, Ord a) => ReversedPrism' (NonNegative a) a
+_MkNonNegative :: forall a. (AMonoid a, Ord a, Show a) => ReversedPrism' (NonNegative a) a
 _MkNonNegative = re (prism unNonNegative g)
   where
-    g x = case mkNonNegative x of
-      Nothing -> Left x
-      Just x' -> Right x'
+    g x = first (const x) . mkNonNegative $ x
 {-# INLINEABLE _MkNonNegative #-}

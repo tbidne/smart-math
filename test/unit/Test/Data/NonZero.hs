@@ -27,14 +27,14 @@ mkNonZeroSucceeds =
   testPropertyCompat "x /= 0 succeeds" "mkNonZeroSucceeds" $
     property $ do
       x <- forAll nonzero
-      Just (NonZero.reallyUnsafeNonZero x) === NonZero.mkNonZero x
+      Right (NonZero.reallyUnsafeNonZero x) === NonZero.mkNonZero x
 
 mkNonZeroFails :: TestTree
 mkNonZeroFails =
   testPropertyCompat "x == 0 fails" "mkNonZeroFails" $
     property $ do
       x <- forAll zero
-      Nothing === NonZero.mkNonZero x
+      assertLeftHH "Numeric.Data.NonZero: Received zero" (NonZero.mkNonZero x)
 
 testUnsafe :: TestTree
 testUnsafe = testCase "Test unsafeNonZero" $ do
@@ -42,7 +42,7 @@ testUnsafe = testCase "Test unsafeNonZero" $ do
 
   Utils.assertPureErrorCall expectedEx (NonZero.unsafeNonZero @Integer 0)
   where
-    expectedEx = "Numeric.Data.NonZero.unsafeNonZero: Received zero"
+    expectedEx = "Numeric.Data.NonZero: Received zero"
 
 nonzero :: Gen Int
 nonzero =

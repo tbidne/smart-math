@@ -63,7 +63,7 @@ testUnsafe = testCase "Test unsafeModP" $ do
   ModPI.UnsafeModP 5 @=? ModP.unsafeModP @7 @Integer 5
   Utils.assertPureErrorCall expectedEx (ModP.unsafeModP @8 @Integer 5)
   where
-    expectedEx = "Numeric.Data.ModP.unsafeModP: Received non-prime: 8"
+    expectedEx = "Numeric.Data.ModP: Received non-prime: 8"
 
 int8Props :: TestTree
 int8Props =

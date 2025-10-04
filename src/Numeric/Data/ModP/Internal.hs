@@ -484,7 +484,7 @@ unsafeModP ::
   ModP p a
 unsafeModP x = case mkModP x of
   Right mp -> mp
-  Left err -> error $ Prime.errMsg "unsafeModP" err
+  Left err -> error $ Prime.errMsg err
 {-# INLINEABLE unsafeModP #-}
 
 -- | Given non-zero \(d\), returns the inverse i.e. finds \(e\) s.t.

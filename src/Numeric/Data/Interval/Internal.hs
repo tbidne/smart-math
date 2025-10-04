@@ -30,9 +30,9 @@ module Numeric.Data.Interval.Internal
 where
 
 import Control.DeepSeq (NFData)
+import Data.Either qualified as Either
 import Data.Hashable (Hashable)
 import Data.Kind (Type)
-import Data.Maybe qualified as Maybe
 import Data.Proxy (Proxy (Proxy))
 import Data.Singletons as X
   ( Sing,
@@ -321,30 +321,31 @@ pattern MkInterval x <- UnsafeInterval x
 --
 -- ==== __Examples__
 -- >>> mkInterval @(Open 10) @(Closed 100) 50
--- Just (UnsafeInterval (Open 10) (Closed 100) 50)
+-- Right (UnsafeInterval (Open 10) (Closed 100) 50)
 --
 -- >>> mkInterval @(Open 10) @(Closed 100) 100
--- Just (UnsafeInterval (Open 10) (Closed 100) 100)
+-- Right (UnsafeInterval (Open 10) (Closed 100) 100)
 --
 -- >>> mkInterval @(Open 10) @(Closed 100) 10
--- Nothing
+-- Left "Numeric.Data.Interval: Wanted value in (10, 100], received: 10"
 --
 -- >>> mkInterval @(Open 10) @(Closed 100) 101
--- Nothing
+-- Left "Numeric.Data.Interval: Wanted value in (10, 100], received: 101"
 --
 -- @since 0.1
 mkInterval ::
   forall (l :: IntervalBound) (r :: IntervalBound) a.
   ( FromInteger a,
     Ord a,
+    Show a,
     SingI l,
     SingI r
   ) =>
   a ->
-  Maybe (Interval l r a)
+  Either String (Interval l r a)
 mkInterval x
-  | boundedLeft && boundedRight = Just (UnsafeInterval x)
-  | otherwise = Nothing
+  | boundedLeft && boundedRight = Right (UnsafeInterval x)
+  | otherwise = Left $ errMsg @l @r x
   where
     boundedLeft :: Bool
     boundedLeft = case sing @l of
@@ -387,9 +388,9 @@ unsafeInterval ::
   ) =>
   a ->
   Interval l r a
-unsafeInterval x = Maybe.fromMaybe (error msg) $ mkInterval x
+unsafeInterval x = Either.fromRight (error msg) $ mkInterval x
   where
-    msg = errMsg @l @r x "unsafeInterval"
+    msg = errMsg @l @r x
 {-# INLINEABLE unsafeInterval #-}
 
 -- | @since 0.1
@@ -400,17 +401,14 @@ errMsg ::
     SingI r
   ) =>
   a ->
-  Builder ->
   String
-errMsg x fnName = T.unpack $ TBL.runBuilder msg
+errMsg x = T.unpack $ TBL.runBuilder msg
   where
     intervalStr = displayIntervalBounds left right
     (left, right) = getInterval @l @r
     msg =
       mconcat
-        [ "Numeric.Data.Interval.",
-          fnName,
-          ": Wanted value in ",
+        [ "Numeric.Data.Interval: Wanted value in ",
           intervalStr,
           ", received: ",
           displayBuilder $ show x

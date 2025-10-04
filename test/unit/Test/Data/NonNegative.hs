@@ -37,14 +37,14 @@ mkNonNegativeSucceeds =
   testPropertyCompat "x >= 0 succeeds" "mkNonNegativeSucceeds" $
     property $ do
       x <- forAll nonneg
-      Just (NonNeg.reallyUnsafeNonNegative x) === NonNeg.mkNonNegative x
+      Right (NonNeg.reallyUnsafeNonNegative x) === NonNeg.mkNonNegative x
 
 mkNonNegativeFails :: TestTree
 mkNonNegativeFails =
   testPropertyCompat "x < 0 fails" "mkNonNegativeFails" $
     property $ do
       x <- forAll neg
-      Nothing === NonNeg.mkNonNegative x
+      assertLeftHH "Numeric.Data.NonNegative: Received value < zero:" (NonNeg.mkNonNegative x)
 
 testUnsafe :: TestTree
 testUnsafe = testCase "Test unsafeNonNegative" $ do
@@ -52,7 +52,7 @@ testUnsafe = testCase "Test unsafeNonNegative" $ do
 
   Utils.assertPureErrorCall expectedEx (NonNeg.unsafeNonNegative @Integer (-1))
   where
-    expectedEx = "Numeric.Data.NonNegative.unsafeNonNegative: Received value < zero: -1"
+    expectedEx = "Numeric.Data.NonNegative: Received value < zero: -1"
 
 addTotal :: TestTree
 addTotal =

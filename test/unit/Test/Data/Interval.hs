@@ -50,7 +50,7 @@ mkIntervalSucceedsUnbounded =
       let i = Interval.mkInterval @None @None x
       annotateShow i
 
-      Just x === fmap Interval.unInterval i
+      Right x === fmap Interval.unInterval i
   where
     desc = "x in [0, \8734) succeeds Interval (-\8734, \8734)"
 
@@ -63,7 +63,7 @@ mkIntervalSucceedsOpenLowerBounded =
       let i = Interval.mkInterval @(Open 5) @None x
       annotateShow i
 
-      Just x === fmap Interval.unInterval i
+      Right x === fmap Interval.unInterval i
   where
     desc = "x in (5, \8734) succeeds Interval (5, \8734)"
 
@@ -76,7 +76,7 @@ mkIntervalFailsOpenLowerBounded =
       let i = Interval.mkInterval @(Open 20) @None x
       annotateShow i
 
-      Nothing === fmap Interval.unInterval i
+      assertLeftHH "Numeric.Data.Interval: Wanted value in (20, ∞), received:" (fmap Interval.unInterval i)
   where
     desc = "x in [0, 20) fails Interval (20, \8734)"
 
@@ -89,7 +89,7 @@ mkIntervalSucceedsClosedLowerBounded =
       let i = Interval.mkInterval @(Closed 5) @None x
       annotateShow i
 
-      Just x === fmap Interval.unInterval i
+      Right x === fmap Interval.unInterval i
   where
     desc = "x in [5, \8734) succeeds Interval [5, \8734)"
 
@@ -102,7 +102,7 @@ mkIntervalFailsClosedLowerBounded =
       let i = Interval.mkInterval @(Closed 20) @None x
       annotateShow i
 
-      Nothing === fmap Interval.unInterval i
+      assertLeftHH "Numeric.Data.Interval: Wanted value in [20, ∞), received:" (fmap Interval.unInterval i)
   where
     desc = "x in [0, 20) fails Interval [20, \8734)"
 
@@ -115,7 +115,7 @@ mkIntervalSucceedsOpenUpperBounded =
       let i = Interval.mkInterval @None @(Open 50) x
       annotateShow i
 
-      Just x === fmap Interval.unInterval i
+      Right x === fmap Interval.unInterval i
   where
     desc = "x in [0, 50) succeeds Interval (-\8734, 50)"
 
@@ -128,7 +128,7 @@ mkIntervalFailsOpenUpperBounded =
       let i = Interval.mkInterval @None @(Open 50) x
       annotateShow i
 
-      Nothing === fmap Interval.unInterval i
+      assertLeftHH "Numeric.Data.Interval: Wanted value in (-∞, 50), received:" (fmap Interval.unInterval i)
   where
     desc = "x in [50, \8734) fails Interval (-\8734, 50)"
 
@@ -141,7 +141,7 @@ mkIntervalSucceedsClosedUpperBounded =
       let i = Interval.mkInterval @None @(Closed 50) x
       annotateShow i
 
-      Just x === fmap Interval.unInterval i
+      Right x === fmap Interval.unInterval i
   where
     desc = "x in [0, 50] succeeds Interval (-\8734, 50]"
 
@@ -154,7 +154,7 @@ mkIntervalFailsClosedUpperBounded =
       let i = Interval.mkInterval @None @(Closed 50) x
       annotateShow i
 
-      Nothing === fmap Interval.unInterval i
+      assertLeftHH "Numeric.Data.Interval: Wanted value in (-∞, 50], received:" (fmap Interval.unInterval i)
   where
     desc = "x in (50, \8734) fails Interval (-\8734, 50]"
 
@@ -190,14 +190,14 @@ specs =
         [ testCase "6 passes (5, \8734)" $ do
             let expected :: Interval (Open 5) None Int
                 expected = $$(Interval.mkIntervalTH 6)
-            Just expected @=? mkLowerBoundedOpen 6,
+            Right expected @=? mkLowerBoundedOpen 6,
           testCase "5 fails (5, \8734)" $ do
-            Nothing @=? mkLowerBoundedOpen 5,
+            assertLeftHU "Numeric.Data.Interval: Wanted value in (5, ∞), received:" (mkLowerBoundedOpen 5),
           testCase "4 fails (5, \8734)" $ do
-            Nothing @=? mkLowerBoundedOpen 4
+            assertLeftHU "Numeric.Data.Interval: Wanted value in (5, ∞), received:" (mkLowerBoundedOpen 4)
         ]
 
-    mkLowerBoundedOpen :: Int -> Maybe (Interval (Open 5) None Int)
+    mkLowerBoundedOpen :: Int -> Either String (Interval (Open 5) None Int)
     mkLowerBoundedOpen = Interval.mkInterval
 
     lowerBoundedClosedTests =
@@ -206,16 +206,16 @@ specs =
         [ testCase "6 passes [5, \8734)" $ do
             let expected :: Interval (Closed 5) None Int
                 expected = $$(Interval.mkIntervalTH 6)
-            Just expected @=? mkLowerBoundedClosed 6,
+            Right expected @=? mkLowerBoundedClosed 6,
           testCase "5 passes [5, \8734)" $ do
             let expected :: Interval (Closed 5) None Int
                 expected = $$(Interval.mkIntervalTH 5)
-            Just expected @=? mkLowerBoundedClosed 5,
+            Right expected @=? mkLowerBoundedClosed 5,
           testCase "4 fails [5, \8734)" $ do
-            Nothing @=? mkLowerBoundedClosed 4
+            assertLeftHU "Numeric.Data.Interval: Wanted value in [5, ∞), received:" (mkLowerBoundedClosed 4)
         ]
 
-    mkLowerBoundedClosed :: Int -> Maybe (Interval (Closed 5) None Int)
+    mkLowerBoundedClosed :: Int -> Either String (Interval (Closed 5) None Int)
     mkLowerBoundedClosed = Interval.mkInterval
 
     upperBoundedOpenTests =
@@ -224,14 +224,14 @@ specs =
         [ testCase "6 passes (-\8734, 50)" $ do
             let expected :: Interval None (Open 50) Int
                 expected = $$(Interval.mkIntervalTH 6)
-            Just expected @=? mkUpperBoundedOpen 6,
+            Right expected @=? mkUpperBoundedOpen 6,
           testCase "50 fails (-\8734, 50)" $ do
-            Nothing @=? mkUpperBoundedOpen 50,
+            assertLeftHU "Numeric.Data.Interval: Wanted value in (-∞, 50), received:" (mkUpperBoundedOpen 50),
           testCase "55 fails (-\8734, 50)" $ do
-            Nothing @=? mkUpperBoundedOpen 55
+            assertLeftHU "Numeric.Data.Interval: Wanted value in (-∞, 50), received:" (mkUpperBoundedOpen 55)
         ]
 
-    mkUpperBoundedOpen :: Int -> Maybe (Interval None (Open 50) Int)
+    mkUpperBoundedOpen :: Int -> Either String (Interval None (Open 50) Int)
     mkUpperBoundedOpen = Interval.mkInterval
 
     upperBoundedClosedTests =
@@ -240,16 +240,16 @@ specs =
         [ testCase "6 passes (-\8734, 50]" $ do
             let expected :: Interval None (Closed 50) Int
                 expected = $$(Interval.mkIntervalTH 6)
-            Just expected @=? mkUpperBoundedClosed 6,
+            Right expected @=? mkUpperBoundedClosed 6,
           testCase "50 passes (-\8734, 50]" $ do
             let expected :: Interval None (Closed 50) Int
                 expected = $$(Interval.mkIntervalTH 50)
-            Just expected @=? mkUpperBoundedClosed 50,
+            Right expected @=? mkUpperBoundedClosed 50,
           testCase "55 fails (-\8734, 50]" $ do
-            Nothing @=? mkUpperBoundedClosed 55
+            assertLeftHU "Numeric.Data.Interval: Wanted value in (-∞, 50], received:" (mkUpperBoundedClosed 55)
         ]
 
-    mkUpperBoundedClosed :: Int -> Maybe (Interval None (Closed 50) Int)
+    mkUpperBoundedClosed :: Int -> Either String (Interval None (Closed 50) Int)
     mkUpperBoundedClosed = Interval.mkInterval
 
 genUnboundedInterval :: Gen (Interval None None Int)
@@ -276,7 +276,7 @@ testUnsafe = testCase "Test unsafeInterval" $ do
 
   Utils.assertPureErrorCall expectedEx (Interval.unsafeInterval @(Open 1) @None @Integer 1)
   where
-    expectedEx = "Numeric.Data.Interval.unsafeInterval: Wanted value in (1, ∞), received: 1"
+    expectedEx = "Numeric.Data.Interval: Wanted value in (1, ∞), received: 1"
 
 showSpecs :: TestTree
 showSpecs = testCase "Shows intervals" $ do
