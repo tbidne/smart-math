@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Provides the 'NonNegative' type for enforcing a nonnegative invariant.</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html"><span class="hs-identifier">Numeric.Data.NonNegative</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Type</span></span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier">NonNegative</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#MkNonNegative"><span class="hs-identifier">MkNonNegative</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Creation</span></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.html#mkNonNegativeTH"><span class="hs-identifier">mkNonNegativeTH</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.html#mkNonNegative"><span class="hs-identifier">mkNonNegative</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#unsafeNonNegative"><span class="hs-identifier">Internal.unsafeNonNegative</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.html#%2A%21"><span class="hs-operator">(*!)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.html#reallyUnsafeNonNegative"><span class="hs-identifier">reallyUnsafeNonNegative</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Elimination</span></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.html#unNonNegative"><span class="hs-identifier">unNonNegative</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Optics</span></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- $optics</span></span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Numeric.Data.NonNegative.html#_MkNonNegative"><span class="hs-identifier">_MkNonNegative</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html#rmatching"><span class="hs-identifier">rmatching</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">first</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Stack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">HasCallStack</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Code</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Q</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.html/Numeric.Algebra.html"><span class="hs-identifier">Numeric.Algebra</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#AMonoid"><span class="hs-identifier">AMonoid</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#zero"><span class="hs-identifier">zero</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html"><span class="hs-identifier">Numeric.Data.Internal.Utils</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Internal.Utils.html#rmatching"><span class="hs-identifier">rmatching</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html"><span class="hs-identifier">Numeric.Data.Internal.Utils</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Utils</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html"><span class="hs-identifier">Numeric.Data.NonNegative.Internal</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier">NonNegative</span></a></span><span>
+</span><span id="line-35"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#MkNonNegative"><span class="hs-identifier">MkNonNegative</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>        </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#UnsafeNonNegative"><span class="hs-identifier">UnsafeNonNegative</span></a></span><span>
+</span><span id="line-37"></span><span>      </span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html"><span class="hs-identifier">Numeric.Data.NonNegative.Internal</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Internal</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Core.html/Optics.Core.html"><span class="hs-identifier">Optics.Core</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.ReversedPrism.html/Optics.ReversedPrism.html#ReversedPrism%27"><span class="hs-identifier">ReversedPrism'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#ReversibleOptic"><span class="hs-identifier">ReversibleOptic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#re"><span class="hs-identifier">re</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier">prism</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XTemplateHaskell</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XPostfixOperators</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- | Template haskell for creating a 'NonNegative' at compile-time.</span><span>
+</span><span id="line-47"></span><span class="hs-comment">--</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; $$(mkNonNegativeTH 1)</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- UnsafeNonNegative 1</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-53"></span><span id="local-6989586621679114526"><span class="annot"><a href="Numeric.Data.NonNegative.html#mkNonNegativeTH"><span class="hs-identifier hs-type">mkNonNegativeTH</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#AMonoid"><span class="hs-identifier hs-type">AMonoid</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114526"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><a href="#local-6989586621679114526"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679114526"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679114526"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114526"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Code</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier hs-type">NonNegative</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114526"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-54"></span><span id="mkNonNegativeTH"><span class="annot"><span class="annottext">mkNonNegativeTH :: forall a.
+(AMonoid a, Lift a, Ord a, Show a) =&gt;
+a -&gt; Code Q (NonNegative a)
+</span><a href="Numeric.Data.NonNegative.html#mkNonNegativeTH"><span class="hs-identifier hs-var hs-var">mkNonNegativeTH</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either String (NonNegative a) -&gt; Code Q (NonNegative a)
+forall a. Lift a =&gt; Either String a -&gt; Code Q a
+</span><a href="Numeric.Data.Internal.Utils.html#liftErrorTH"><span class="hs-identifier hs-var">Utils.liftErrorTH</span></a></span><span> </span><span class="annot"><span class="annottext">(Either String (NonNegative a) -&gt; Code Q (NonNegative a))
+-&gt; (a -&gt; Either String (NonNegative a))
+-&gt; a
+-&gt; Code Q (NonNegative a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either String (NonNegative a)
+forall a.
+(AMonoid a, Ord a, Show a) =&gt;
+a -&gt; Either String (NonNegative a)
+</span><a href="Numeric.Data.NonNegative.html#mkNonNegative"><span class="hs-identifier hs-var">mkNonNegative</span></a></span><span>
+</span><span id="line-55"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html#mkNonNegativeTH"><span class="hs-pragma hs-type">mkNonNegativeTH</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- | Smart constructor for 'NonNegative'. Returns 'Nothing' if the second</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- parameter is @&lt; 0@.</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- &gt;&gt;&gt; mkNonNegative 0</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- Right (UnsafeNonNegative 0)</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- &gt;&gt;&gt; mkNonNegative (-2)</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- Left &quot;Numeric.Data.NonNegative: Received value &lt; zero: -2&quot;</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-68"></span><span id="local-6989586621679114535"><span class="annot"><a href="Numeric.Data.NonNegative.html#mkNonNegative"><span class="hs-identifier hs-type">mkNonNegative</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#AMonoid"><span class="hs-identifier hs-type">AMonoid</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114535"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679114535"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679114535"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114535"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier hs-type">NonNegative</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114535"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-69"></span><span id="mkNonNegative"><span class="annot"><span class="annottext">mkNonNegative :: forall a.
+(AMonoid a, Ord a, Show a) =&gt;
+a -&gt; Either String (NonNegative a)
+</span><a href="Numeric.Data.NonNegative.html#mkNonNegative"><span class="hs-identifier hs-var hs-var">mkNonNegative</span></a></span></span><span> </span><span id="local-6989586621679114616"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679114616"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679114616"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">a
+forall m. AMonoid m =&gt; m
+</span><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonNegative a -&gt; Either String (NonNegative a)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; NonNegative a
+forall a. a -&gt; NonNegative a
+</span><a href="Numeric.Data.NonNegative.Internal.html#UnsafeNonNegative"><span class="hs-identifier hs-var">UnsafeNonNegative</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679114616"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Either String (NonNegative a)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Either String (NonNegative a))
+-&gt; String -&gt; Either String (NonNegative a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><a href="Numeric.Data.NonNegative.Internal.html#errMsg"><span class="hs-identifier hs-var">Internal.errMsg</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679114616"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-72"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html#mkNonNegative"><span class="hs-pragma hs-type">mkNonNegative</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | Postfix operator for 'Internal.unsafeNonNegative'.</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- __WARNING: Partial__</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; (7 *!)</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- UnsafeNonNegative 7</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-84"></span><span id="local-6989586621679114547"><span class="annot"><a href="Numeric.Data.NonNegative.html#%2A%21"><span class="hs-operator hs-type">(*!)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#AMonoid"><span class="hs-identifier hs-type">AMonoid</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114547"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679114547"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679114547"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114547"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier hs-type">NonNegative</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114547"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-85"></span><span id="%2A%21"><span class="annot"><span class="annottext">*! :: forall a.
+(AMonoid a, HasCallStack, Ord a, Show a) =&gt;
+a -&gt; NonNegative a
+</span><a href="Numeric.Data.NonNegative.html#%2A%21"><span class="hs-operator hs-var hs-var">(*!)</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; NonNegative a
+forall a.
+(AMonoid a, HasCallStack, Ord a, Show a) =&gt;
+a -&gt; NonNegative a
+</span><a href="Numeric.Data.NonNegative.Internal.html#unsafeNonNegative"><span class="hs-identifier hs-var">Internal.unsafeNonNegative</span></a></span><span>
+</span><span id="line-86"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">*!</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html#%2A%21"><span class="hs-operator hs-type">*!</span></a></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- | This function is an alias for the unchecked constructor @UnsafeNonNegative@</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- i.e. it allows us to construct a 'NonNegative' __without__ checking the</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- invariant. This is intended only for when we absolutely know the invariant</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- holds and a branch (i.e. 'Internal.unsafeNonNegative') is undesirable for</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- performance reasons. Exercise extreme caution.</span><span>
+</span><span id="line-95"></span><span class="hs-comment">--</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-97"></span><span id="local-6989586621679114627"><span class="annot"><a href="Numeric.Data.NonNegative.html#reallyUnsafeNonNegative"><span class="hs-identifier hs-type">reallyUnsafeNonNegative</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679114627"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier hs-type">NonNegative</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114627"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-98"></span><span id="reallyUnsafeNonNegative"><span class="annot"><span class="annottext">reallyUnsafeNonNegative :: forall a. a -&gt; NonNegative a
+</span><a href="Numeric.Data.NonNegative.html#reallyUnsafeNonNegative"><span class="hs-identifier hs-var hs-var">reallyUnsafeNonNegative</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; NonNegative a
+forall a. a -&gt; NonNegative a
+</span><a href="Numeric.Data.NonNegative.Internal.html#UnsafeNonNegative"><span class="hs-identifier hs-var">UnsafeNonNegative</span></a></span><span>
+</span><span id="line-99"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html#reallyUnsafeNonNegative"><span class="hs-pragma hs-type">reallyUnsafeNonNegative</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-102"></span><span id="local-6989586621679114551"><span class="annot"><a href="Numeric.Data.NonNegative.html#unNonNegative"><span class="hs-identifier hs-type">unNonNegative</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier hs-type">NonNegative</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114551"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114551"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-103"></span><span id="unNonNegative"><span class="annot"><span class="annottext">unNonNegative :: forall a. NonNegative a -&gt; a
+</span><a href="Numeric.Data.NonNegative.html#unNonNegative"><span class="hs-identifier hs-var hs-var">unNonNegative</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#UnsafeNonNegative"><span class="hs-identifier hs-type">UnsafeNonNegative</span></a></span><span> </span><span id="local-6989586621679114628"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679114628"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679114628"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-104"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html#unNonNegative"><span class="hs-pragma hs-type">unNonNegative</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- $optics</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- We provide a 'ReversedPrism'' '_MkNonNegative' that allows for total</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- elimination and partial construction, along with a 'Optics.Core.LabelOptic' 'Optics.Core.Getter'</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- for @#unNonNegative@.</span><span>
+</span><span id="line-110"></span><span class="hs-comment">--</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XOverloadedLabels</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- &gt;&gt;&gt; import Optics.Core (view)</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- &gt;&gt;&gt; let n = $$(mkNonNegativeTH 2)</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- &gt;&gt;&gt; view #unNonNegative n</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- | 'ReversedPrism'' that enables total elimination and partial construction.</span><span>
+</span><span id="line-120"></span><span class="hs-comment">--</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- &gt;&gt;&gt; import Optics.Core (view)</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- &gt;&gt;&gt; nn = $$(mkNonNegativeTH 2)</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- &gt;&gt;&gt; view _MkNonNegative nn</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-126"></span><span class="hs-comment">--</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- &gt;&gt;&gt; rmatching _MkNonNegative 3</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- Right (UnsafeNonNegative 3)</span><span>
+</span><span id="line-129"></span><span class="hs-comment">--</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- &gt;&gt;&gt; rmatching _MkNonNegative (-2)</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- Left (-2)</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-134"></span><span class="annot"><a href="Numeric.Data.NonNegative.html#_MkNonNegative"><span class="hs-identifier hs-type">_MkNonNegative</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679114553"><span class="annot"><a href="#local-6989586621679114553"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Additive.AMonoid.html/Numeric.Algebra.Additive.AMonoid.html#AMonoid"><span class="hs-identifier hs-type">AMonoid</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114553"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679114553"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679114553"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.ReversedPrism.html/Optics.ReversedPrism.html#ReversedPrism%27"><span class="hs-identifier hs-type">ReversedPrism'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.NonNegative.Internal.html#NonNegative"><span class="hs-identifier hs-type">NonNegative</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114553"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679114553"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-135"></span><span id="_MkNonNegative"><span class="annot"><span class="annottext">_MkNonNegative :: forall a.
+(AMonoid a, Ord a, Show a) =&gt;
+ReversedPrism' (NonNegative a) a
+</span><a href="Numeric.Data.NonNegative.html#_MkNonNegative"><span class="hs-identifier hs-var hs-var">_MkNonNegative</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Optic A_Prism NoIx a a (NonNegative a) (NonNegative a)
+-&gt; Optic
+     (ReversedOptic A_Prism) NoIx (NonNegative a) (NonNegative a) a a
+forall (is :: IxList) s t a b.
+AcceptsEmptyIndices &quot;re&quot; is =&gt;
+Optic A_Prism is s t a b
+-&gt; Optic (ReversedOptic A_Prism) is b a t s
+forall k (is :: IxList) s t a b.
+(ReversibleOptic k, AcceptsEmptyIndices &quot;re&quot; is) =&gt;
+Optic k is s t a b -&gt; Optic (ReversedOptic k) is b a t s
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#re"><span class="hs-identifier hs-var">re</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(NonNegative a -&gt; a)
+-&gt; (a -&gt; Either a (NonNegative a))
+-&gt; Optic A_Prism NoIx a a (NonNegative a) (NonNegative a)
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier hs-var">prism</span></a></span><span> </span><span class="annot"><span class="annottext">NonNegative a -&gt; a
+forall a. NonNegative a -&gt; a
+</span><a href="Numeric.Data.NonNegative.html#unNonNegative"><span class="hs-identifier hs-var">unNonNegative</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either a (NonNegative a)
+forall {b}.
+(AMonoid b, Ord b, Show b) =&gt;
+b -&gt; Either b (NonNegative b)
+</span><a href="#local-6989586621679114639"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621679114639"><span class="annot"><span class="annottext">g :: b -&gt; Either b (NonNegative b)
+</span><a href="#local-6989586621679114639"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679114654"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679114654"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String -&gt; b)
+-&gt; Either String (NonNegative b) -&gt; Either b (NonNegative b)
+forall a b c. (a -&gt; b) -&gt; Either a c -&gt; Either b c
+forall (p :: Type -&gt; Type -&gt; Type) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; String -&gt; b
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679114654"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Either String (NonNegative b) -&gt; Either b (NonNegative b))
+-&gt; (b -&gt; Either String (NonNegative b))
+-&gt; b
+-&gt; Either b (NonNegative b)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; Either String (NonNegative b)
+forall a.
+(AMonoid a, Ord a, Show a) =&gt;
+a -&gt; Either String (NonNegative a)
+</span><a href="Numeric.Data.NonNegative.html#mkNonNegative"><span class="hs-identifier hs-var">mkNonNegative</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; Either b (NonNegative b)) -&gt; b -&gt; Either b (NonNegative b)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679114654"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-138"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.NonNegative.html#_MkNonNegative"><span class="hs-pragma hs-type">_MkNonNegative</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-139"></span></pre></body></html>

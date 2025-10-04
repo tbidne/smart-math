@@ -1,0 +1,296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Provides types for enforcing minimum and maximum bounds.</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html"><span class="hs-identifier">Numeric.Data.Interval</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Types</span></span><span>
+</span><span id="line-6"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier">IntervalBound</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Interval"><span class="hs-identifier">Interval</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#MkInterval"><span class="hs-identifier">MkInterval</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Creation</span></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#mkInterval"><span class="hs-identifier">Internal.mkInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#mkIntervalTH"><span class="hs-identifier">mkIntervalTH</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#unsafeInterval"><span class="hs-identifier">Internal.unsafeInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#reallyUnsafeInterval"><span class="hs-identifier">reallyUnsafeInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Elimination</span></span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#unInterval"><span class="hs-identifier">unInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Bound aliases</span></span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><span class="hs-comment">-- $bound-aliases</span></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#O"><span class="hs-identifier">O</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#C"><span class="hs-identifier">C</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#N"><span class="hs-identifier">N</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Optics</span></span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><span class="hs-comment">-- $optics</span></span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#_MkInterval"><span class="hs-identifier">_MkInterval</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html#rmatching"><span class="hs-identifier">rmatching</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#_Open"><span class="hs-identifier">_Open</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#_Closed"><span class="hs-identifier">_Closed</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.html#_None"><span class="hs-identifier">_None</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">first</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///nix/store/akygn4kw1kawipnbqkiy88gmr75f25zg-singletons-3.0.4-doc/share/doc/singletons-3.0.4/html/src/Data.Singletons.html/Data.Singletons.html"><span class="hs-identifier">Data.Singletons</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/akygn4kw1kawipnbqkiy88gmr75f25zg-singletons-3.0.4-doc/share/doc/singletons-3.0.4/html/src/Data.Singletons.html/Data.Singletons.html#SingI"><span class="hs-identifier">SingI</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeNats</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Nat</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Code</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Q</span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Integer.html/Numeric.Convert.Integer.html"><span class="hs-identifier">Numeric.Convert.Integer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#FromInteger"><span class="hs-identifier">FromInteger</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html"><span class="hs-identifier">Numeric.Data.Internal.Utils</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Internal.Utils.html#rmatching"><span class="hs-identifier">rmatching</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html"><span class="hs-identifier">Numeric.Data.Internal.Utils</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Utils</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html"><span class="hs-identifier">Numeric.Data.Interval.Internal</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Interval"><span class="hs-identifier">Interval</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#MkInterval"><span class="hs-identifier">MkInterval</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#UnsafeInterval"><span class="hs-identifier">UnsafeInterval</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier">IntervalBound</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Closed"><span class="hs-identifier">Closed</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#None"><span class="hs-identifier">None</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Open"><span class="hs-identifier">Open</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html"><span class="hs-identifier">Numeric.Data.Interval.Internal</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Internal</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Core.html/Optics.Core.html"><span class="hs-identifier">Optics.Core</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#Prism%27"><span class="hs-identifier">Prism'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.ReversedPrism.html/Optics.ReversedPrism.html#ReversedPrism%27"><span class="hs-identifier">ReversedPrism'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#ReversibleOptic"><span class="hs-identifier">ReversibleOptic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#re"><span class="hs-identifier">re</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier">prism</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XTemplateHaskell</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679109874"><span id="local-6989586621679109875"><span id="local-6989586621679109876"><span class="annot"><a href="Numeric.Data.Interval.html#unInterval"><span class="hs-identifier hs-type">unInterval</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Interval"><span class="hs-identifier hs-type">Interval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109874"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109875"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109876"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679109876"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-54"></span><span id="unInterval"><span class="annot"><span class="annottext">unInterval :: forall (l :: IntervalBound) (r :: IntervalBound) a.
+Interval l r a -&gt; a
+</span><a href="Numeric.Data.Interval.html#unInterval"><span class="hs-identifier hs-var hs-var">unInterval</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#UnsafeInterval"><span class="hs-identifier hs-type">UnsafeInterval</span></a></span><span> </span><span id="local-6989586621679109975"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679109975"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679109975"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- | Template haskell for creating an 'Interval' at compile-time.</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- &gt;&gt;&gt; $$(mkIntervalTH @None @(Closed 100) 7)</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- UnsafeInterval None (Closed 100) 7</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-63"></span><span class="annot"><a href="Numeric.Data.Interval.html#mkIntervalTH"><span class="hs-identifier hs-type">mkIntervalTH</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679109883"><span class="annot"><a href="#local-6989586621679109883"><span class="hs-identifier hs-type">l</span></a></span></span><span> </span><span id="local-6989586621679109885"><span class="annot"><a href="#local-6989586621679109885"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679109881"><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#FromInteger"><span class="hs-identifier hs-type">FromInteger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-67"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><a href="file:///nix/store/akygn4kw1kawipnbqkiy88gmr75f25zg-singletons-3.0.4-doc/share/doc/singletons-3.0.4/html/src/Data.Singletons.html/Data.Singletons.html#SingI"><span class="hs-identifier hs-type">SingI</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109883"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><a href="file:///nix/store/akygn4kw1kawipnbqkiy88gmr75f25zg-singletons-3.0.4-doc/share/doc/singletons-3.0.4/html/src/Data.Singletons.html/Data.Singletons.html#SingI"><span class="hs-identifier hs-type">SingI</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109885"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-72"></span><span>  </span><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-73"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Code</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Interval"><span class="hs-identifier hs-type">Interval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109883"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109885"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109881"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span id="mkIntervalTH"><span class="annot"><span class="annottext">mkIntervalTH :: forall (l :: IntervalBound) (r :: IntervalBound) a.
+(FromInteger a, Lift a, Ord a, SingI l, SingI r, Show a) =&gt;
+a -&gt; Code Q (Interval l r a)
+</span><a href="Numeric.Data.Interval.html#mkIntervalTH"><span class="hs-identifier hs-var hs-var">mkIntervalTH</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either String (Interval l r a) -&gt; Code Q (Interval l r a)
+forall a. Lift a =&gt; Either String a -&gt; Code Q a
+</span><a href="Numeric.Data.Internal.Utils.html#liftErrorTH"><span class="hs-identifier hs-var">Utils.liftErrorTH</span></a></span><span> </span><span class="annot"><span class="annottext">(Either String (Interval l r a) -&gt; Code Q (Interval l r a))
+-&gt; (a -&gt; Either String (Interval l r a))
+-&gt; a
+-&gt; Code Q (Interval l r a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either String (Interval l r a)
+forall (l :: IntervalBound) (r :: IntervalBound) a.
+(FromInteger a, Ord a, Show a, SingI l, SingI r) =&gt;
+a -&gt; Either String (Interval l r a)
+</span><a href="Numeric.Data.Interval.Internal.html#mkInterval"><span class="hs-identifier hs-var">Internal.mkInterval</span></a></span><span>
+</span><span id="line-75"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#mkIntervalTH"><span class="hs-pragma hs-type">mkIntervalTH</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- | This function is an alias for the unchecked constructor @UnsafeInterval@</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- i.e. it allows us to construct a 'Interval' __without__ checking</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- invariants. This is intended only for when we absolutely know the invariant</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- holds and a branch (i.e. 'Internal.unsafeInterval') is undesirable for</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- performance reasons. Exercise extreme caution.</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-84"></span><span id="local-6989586621679109899"><span id="local-6989586621679109900"><span id="local-6989586621679109901"><span class="annot"><a href="Numeric.Data.Interval.html#reallyUnsafeInterval"><span class="hs-identifier hs-type">reallyUnsafeInterval</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679109899"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Interval"><span class="hs-identifier hs-type">Interval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109900"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109901"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109899"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-85"></span><span id="reallyUnsafeInterval"><span class="annot"><span class="annottext">reallyUnsafeInterval :: forall a (l :: IntervalBound) (r :: IntervalBound).
+a -&gt; Interval l r a
+</span><a href="Numeric.Data.Interval.html#reallyUnsafeInterval"><span class="hs-identifier hs-var hs-var">reallyUnsafeInterval</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Interval l r a
+forall (l :: IntervalBound) (r :: IntervalBound) a.
+a -&gt; Interval l r a
+</span><a href="Numeric.Data.Interval.Internal.html#UnsafeInterval"><span class="hs-identifier hs-var">UnsafeInterval</span></a></span><span>
+</span><span id="line-86"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#reallyUnsafeInterval"><span class="hs-pragma hs-type">reallyUnsafeInterval</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- $bound-aliases</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- These aliases allow for writing interval types more concisely.</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- &gt;&gt;&gt; Internal.unsafeInterval @(O 10) @(C 100) 50</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- UnsafeInterval (Open 10) (Closed 100) 50</span><span>
+</span><span id="line-93"></span><span class="hs-comment">--</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- &gt;&gt;&gt; Internal.unsafeInterval @N @(C 100) 50</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- UnsafeInterval None (Closed 100) 50</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="annot"><span class="hs-comment">-- | Alias for 'Open', for writing bounds more concisely.</span></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#O"><span class="hs-identifier hs-type">O</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier hs-type">IntervalBound</span></a></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">type</span><span> </span><span id="O"><span class="annot"><a href="Numeric.Data.Interval.html#O"><span class="hs-identifier hs-var">O</span></a></span></span><span> </span><span id="local-6989586621679109991"><span class="annot"><a href="#local-6989586621679109991"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Open"><span class="hs-identifier hs-type">Open</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109991"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="annot"><span class="hs-comment">-- | Alias for 'Closed', for writing bounds more concisely.</span></span><span>
+</span><span id="line-102"></span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#C"><span class="hs-identifier hs-type">C</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier hs-type">IntervalBound</span></a></span><span>
+</span><span id="line-103"></span><span class="hs-keyword">type</span><span> </span><span id="C"><span class="annot"><a href="Numeric.Data.Interval.html#C"><span class="hs-identifier hs-var">C</span></a></span></span><span> </span><span id="local-6989586621679109992"><span class="annot"><a href="#local-6989586621679109992"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Closed"><span class="hs-identifier hs-type">Closed</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109992"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="annot"><span class="hs-comment">-- | Alias for 'None', for writing bounds more concisely.</span></span><span>
+</span><span id="line-106"></span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#N"><span class="hs-identifier hs-type">N</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier hs-type">IntervalBound</span></a></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">type</span><span> </span><span id="N"><span class="annot"><a href="Numeric.Data.Interval.html#N"><span class="hs-identifier hs-var">N</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#None"><span class="hs-identifier hs-type">None</span></a></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- $optics</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- We provide a 'ReversedPrism'' '_MkInterval' that allows for total</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- elimination and partial construction, along with a 'Optics.Core.LabelOptic'</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- 'Optics.Core.Getter' for @#unInterval@.</span><span>
+</span><span id="line-113"></span><span class="hs-comment">--</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-115"></span><span class="hs-comment">--</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XOverloadedLabels</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- &gt;&gt;&gt; import Optics.Core (view)</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- &gt;&gt;&gt; let x = $$(mkIntervalTH @(Open 1) @(Open 5) 2)</span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- &gt;&gt;&gt; view #unInterval x</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- | 'ReversedPrism'' that enables total elimination and partial construction.</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- &gt;&gt;&gt; import Optics.Core (view)</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- &gt;&gt;&gt; x = $$(mkIntervalTH @(Open 1) @(Open 5) 2)</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- &gt;&gt;&gt; view _MkInterval x</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-129"></span><span class="hs-comment">--</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- &gt;&gt;&gt; rmatching (_MkInterval @(Open 1) @(Open 5)) 3</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- Right (UnsafeInterval (Open 1) (Open 5) 3)</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- &gt;&gt;&gt; rmatching (_MkInterval @(Open 1) @(Open 5)) 7</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- Left 7</span><span>
+</span><span id="line-135"></span><span class="hs-comment">--</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-137"></span><span class="annot"><a href="Numeric.Data.Interval.html#_MkInterval"><span class="hs-identifier hs-type">_MkInterval</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679109909"><span class="annot"><a href="#local-6989586621679109909"><span class="hs-identifier hs-type">l</span></a></span></span><span> </span><span id="local-6989586621679109910"><span class="annot"><a href="#local-6989586621679109910"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679109908"><span class="annot"><a href="#local-6989586621679109908"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-139"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#FromInteger"><span class="hs-identifier hs-type">FromInteger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109908"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-140"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679109908"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-141"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679109908"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-142"></span><span>    </span><span class="annot"><a href="file:///nix/store/akygn4kw1kawipnbqkiy88gmr75f25zg-singletons-3.0.4-doc/share/doc/singletons-3.0.4/html/src/Data.Singletons.html/Data.Singletons.html#SingI"><span class="hs-identifier hs-type">SingI</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109909"><span class="hs-identifier hs-type">l</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-143"></span><span>    </span><span class="annot"><a href="file:///nix/store/akygn4kw1kawipnbqkiy88gmr75f25zg-singletons-3.0.4-doc/share/doc/singletons-3.0.4/html/src/Data.Singletons.html/Data.Singletons.html#SingI"><span class="hs-identifier hs-type">SingI</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-144"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-145"></span><span>  </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.ReversedPrism.html/Optics.ReversedPrism.html#ReversedPrism%27"><span class="hs-identifier hs-type">ReversedPrism'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Interval"><span class="hs-identifier hs-type">Interval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109909"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109908"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679109908"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-146"></span><span id="_MkInterval"><span class="annot"><span class="annottext">_MkInterval :: forall (l :: IntervalBound) (r :: IntervalBound) a.
+(FromInteger a, Ord a, Show a, SingI l, SingI r) =&gt;
+ReversedPrism' (Interval l r a) a
+</span><a href="Numeric.Data.Interval.html#_MkInterval"><span class="hs-identifier hs-var hs-var">_MkInterval</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Optic A_Prism NoIx a a (Interval l r a) (Interval l r a)
+-&gt; Optic
+     (ReversedOptic A_Prism) NoIx (Interval l r a) (Interval l r a) a a
+forall (is :: IxList) s t a b.
+AcceptsEmptyIndices &quot;re&quot; is =&gt;
+Optic A_Prism is s t a b
+-&gt; Optic (ReversedOptic A_Prism) is b a t s
+forall k (is :: IxList) s t a b.
+(ReversibleOptic k, AcceptsEmptyIndices &quot;re&quot; is) =&gt;
+Optic k is s t a b -&gt; Optic (ReversedOptic k) is b a t s
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#re"><span class="hs-identifier hs-var">re</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Interval l r a -&gt; a)
+-&gt; (a -&gt; Either a (Interval l r a))
+-&gt; Optic A_Prism NoIx a a (Interval l r a) (Interval l r a)
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier hs-var">prism</span></a></span><span> </span><span class="annot"><span class="annottext">Interval l r a -&gt; a
+forall (l :: IntervalBound) (r :: IntervalBound) a.
+Interval l r a -&gt; a
+</span><a href="Numeric.Data.Interval.html#unInterval"><span class="hs-identifier hs-var">unInterval</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either a (Interval l r a)
+forall {b} {l :: IntervalBound} {r :: IntervalBound}.
+(FromInteger b, Ord b, Show b, SingI l, SingI r) =&gt;
+b -&gt; Either b (Interval l r b)
+</span><a href="#local-6989586621679110007"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-148"></span><span>    </span><span id="local-6989586621679110007"><span class="annot"><span class="annottext">g :: b -&gt; Either b (Interval l r b)
+</span><a href="#local-6989586621679110007"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679110023"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679110023"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String -&gt; b)
+-&gt; Either String (Interval l r b) -&gt; Either b (Interval l r b)
+forall a b c. (a -&gt; b) -&gt; Either a c -&gt; Either b c
+forall (p :: Type -&gt; Type -&gt; Type) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; String -&gt; b
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679110023"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Either String (Interval l r b) -&gt; Either b (Interval l r b))
+-&gt; (b -&gt; Either String (Interval l r b))
+-&gt; b
+-&gt; Either b (Interval l r b)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; Either String (Interval l r b)
+forall (l :: IntervalBound) (r :: IntervalBound) a.
+(FromInteger a, Ord a, Show a, SingI l, SingI r) =&gt;
+a -&gt; Either String (Interval l r a)
+</span><a href="Numeric.Data.Interval.Internal.html#mkInterval"><span class="hs-identifier hs-var">Internal.mkInterval</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; Either b (Interval l r b)) -&gt; b -&gt; Either b (Interval l r b)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679110023"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-149"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#_MkInterval"><span class="hs-pragma hs-type">_MkInterval</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-152"></span><span class="annot"><a href="Numeric.Data.Interval.html#_Open"><span class="hs-identifier hs-type">_Open</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#Prism%27"><span class="hs-identifier hs-type">Prism'</span></a></span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier hs-type">IntervalBound</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span>
+</span><span id="line-153"></span><span id="_Open"><span class="annot"><span class="annottext">_Open :: Prism' IntervalBound Nat
+</span><a href="Numeric.Data.Interval.html#_Open"><span class="hs-identifier hs-var hs-var">_Open</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="annottext">(Nat -&gt; IntervalBound)
+-&gt; (IntervalBound -&gt; Either IntervalBound Nat)
+-&gt; Prism' IntervalBound Nat
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier hs-var">prism</span></a></span><span>
+</span><span id="line-155"></span><span>    </span><span class="annot"><span class="annottext">Nat -&gt; IntervalBound
+</span><a href="Numeric.Data.Interval.Internal.html#Open"><span class="hs-identifier hs-var">Open</span></a></span><span>
+</span><span id="line-156"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-157"></span><span>        </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Open"><span class="hs-identifier hs-type">Open</span></a></span><span> </span><span id="local-6989586621679110025"><span class="annot"><span class="annottext">Nat
+</span><a href="#local-6989586621679110025"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Nat -&gt; Either IntervalBound Nat
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">Nat
+</span><a href="#local-6989586621679110025"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-158"></span><span>        </span><span id="local-6989586621679110026"><span class="annot"><span class="annottext">IntervalBound
+</span><a href="#local-6989586621679110026"><span class="hs-identifier hs-var">other</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IntervalBound -&gt; Either IntervalBound Nat
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">IntervalBound
+</span><a href="#local-6989586621679110026"><span class="hs-identifier hs-var">other</span></a></span><span>
+</span><span id="line-159"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#_Open"><span class="hs-pragma hs-type">_Open</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-163"></span><span class="annot"><a href="Numeric.Data.Interval.html#_Closed"><span class="hs-identifier hs-type">_Closed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#Prism%27"><span class="hs-identifier hs-type">Prism'</span></a></span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier hs-type">IntervalBound</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span>
+</span><span id="line-164"></span><span id="_Closed"><span class="annot"><span class="annottext">_Closed :: Prism' IntervalBound Nat
+</span><a href="Numeric.Data.Interval.html#_Closed"><span class="hs-identifier hs-var hs-var">_Closed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-165"></span><span>  </span><span class="annot"><span class="annottext">(Nat -&gt; IntervalBound)
+-&gt; (IntervalBound -&gt; Either IntervalBound Nat)
+-&gt; Prism' IntervalBound Nat
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier hs-var">prism</span></a></span><span>
+</span><span id="line-166"></span><span>    </span><span class="annot"><span class="annottext">Nat -&gt; IntervalBound
+</span><a href="Numeric.Data.Interval.Internal.html#Closed"><span class="hs-identifier hs-var">Closed</span></a></span><span>
+</span><span id="line-167"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-168"></span><span>        </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#Closed"><span class="hs-identifier hs-type">Closed</span></a></span><span> </span><span id="local-6989586621679110027"><span class="annot"><span class="annottext">Nat
+</span><a href="#local-6989586621679110027"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Nat -&gt; Either IntervalBound Nat
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">Nat
+</span><a href="#local-6989586621679110027"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-169"></span><span>        </span><span id="local-6989586621679110028"><span class="annot"><span class="annottext">IntervalBound
+</span><a href="#local-6989586621679110028"><span class="hs-identifier hs-var">other</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IntervalBound -&gt; Either IntervalBound Nat
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">IntervalBound
+</span><a href="#local-6989586621679110028"><span class="hs-identifier hs-var">other</span></a></span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-171"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#_Closed"><span class="hs-pragma hs-type">_Closed</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-174"></span><span class="annot"><a href="Numeric.Data.Interval.html#_None"><span class="hs-identifier hs-type">_None</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#Prism%27"><span class="hs-identifier hs-type">Prism'</span></a></span><span> </span><span class="annot"><a href="Numeric.Data.Interval.Internal.html#IntervalBound"><span class="hs-identifier hs-type">IntervalBound</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span id="_None"><span class="annot"><span class="annottext">_None :: Prism' IntervalBound ()
+</span><a href="Numeric.Data.Interval.html#_None"><span class="hs-identifier hs-var hs-var">_None</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-176"></span><span>  </span><span class="annot"><span class="annottext">(() -&gt; IntervalBound)
+-&gt; (IntervalBound -&gt; Either IntervalBound ())
+-&gt; Prism' IntervalBound ()
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier hs-var">prism</span></a></span><span>
+</span><span id="line-177"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntervalBound -&gt; () -&gt; IntervalBound
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">IntervalBound
+</span><a href="Numeric.Data.Interval.Internal.html#None"><span class="hs-identifier hs-var">None</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-178"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-179"></span><span>        </span><span class="annot"><span class="annottext">IntervalBound
+</span><a href="Numeric.Data.Interval.Internal.html#None"><span class="hs-identifier hs-var">None</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; Either IntervalBound ()
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-180"></span><span>        </span><span id="local-6989586621679110029"><span class="annot"><span class="annottext">IntervalBound
+</span><a href="#local-6989586621679110029"><span class="hs-identifier hs-var">other</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IntervalBound -&gt; Either IntervalBound ()
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">IntervalBound
+</span><a href="#local-6989586621679110029"><span class="hs-identifier hs-var">other</span></a></span><span>
+</span><span id="line-181"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-182"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.Interval.html#_None"><span class="hs-pragma hs-type">_None</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-183"></span></pre></body></html>

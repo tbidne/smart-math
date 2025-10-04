@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -Wno-redundant-constraints #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- | Provides the 'ModN' type for modular arithmetic.</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.html"><span class="hs-identifier">Numeric.Data.ModN</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Type</span></span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#ModN"><span class="hs-identifier">ModN</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#MkModN"><span class="hs-identifier">MkModN</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Creation</span></span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#mkModN"><span class="hs-identifier">Internal.mkModN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.html#mkModNTH"><span class="hs-identifier">mkModNTH</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#unsafeModN"><span class="hs-identifier">Internal.unsafeModN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#reallyUnsafeModN"><span class="hs-identifier">Internal.reallyUnsafeModN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Elimination</span></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.html#unModN"><span class="hs-identifier">unModN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Optics</span></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- $optics</span></span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Numeric.Data.ModN.html#_MkModN"><span class="hs-identifier">_MkModN</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html#rmatching"><span class="hs-identifier">rmatching</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/bounds-0.1-39d4a6b089bda4aabbe79b166f6e14c8889dc9a7f2ff4187b6524df1e913bc6d/share/doc/html/src/Data.Bounds.html/Data.Bounds.html"><span class="hs-identifier">Data.Bounds</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/bounds-0.1-39d4a6b089bda4aabbe79b166f6e14c8889dc9a7f2ff4187b6524df1e913bc6d/share/doc/html/src/Data.Bounds.html/Data.Bounds.html#MaybeUpperBounded"><span class="hs-identifier">MaybeUpperBounded</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Typeable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeNats</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">KnownNat</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Code</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Lift</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Q</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.html/Numeric.Algebra.html"><span class="hs-identifier">Numeric.Algebra</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html/Numeric.Algebra.Multiplicative.MEuclidean.html#MEuclidean"><span class="hs-identifier">MEuclidean</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Integer.html/Numeric.Convert.Integer.html"><span class="hs-identifier">Numeric.Convert.Integer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#FromInteger"><span class="hs-identifier">FromInteger</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#ToInteger"><span class="hs-identifier">ToInteger</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html"><span class="hs-identifier">Numeric.Data.Internal.Utils</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.Internal.Utils.html#rmatching"><span class="hs-identifier">rmatching</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.Internal.Utils.html"><span class="hs-identifier">Numeric.Data.Internal.Utils</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Utils</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html"><span class="hs-identifier">Numeric.Data.ModN.Internal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#ModN"><span class="hs-identifier">ModN</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#MkModN"><span class="hs-identifier">MkModN</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#UnsafeModN"><span class="hs-identifier">UnsafeModN</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html"><span class="hs-identifier">Numeric.Data.ModN.Internal</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Internal</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Core.html/Optics.Core.html"><span class="hs-identifier">Optics.Core</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.ReversedPrism.html/Optics.ReversedPrism.html#ReversedPrism%27"><span class="hs-identifier">ReversedPrism'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier">prism</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#re"><span class="hs-identifier">re</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XTemplateHaskell</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Int (Int8)</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- &gt;&gt;&gt; import Numeric.Data.ModN.Internal (mkModN)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><span class="hs-comment">-- | @since 0.1</span></span><span>
+</span><span id="line-44"></span><span id="local-6989586621679110978"><span id="local-6989586621679110979"><span class="annot"><a href="Numeric.Data.ModN.html#unModN"><span class="hs-identifier hs-type">unModN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#ModN"><span class="hs-identifier hs-type">ModN</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110978"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110979"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679110979"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-45"></span><span id="unModN"><span class="annot"><span class="annottext">unModN :: forall (n :: Nat) a. ModN n a -&gt; a
+</span><a href="Numeric.Data.ModN.html#unModN"><span class="hs-identifier hs-var hs-var">unModN</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#UnsafeModN"><span class="hs-identifier hs-type">UnsafeModN</span></a></span><span> </span><span id="local-6989586621679111049"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679111049"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679111049"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.html#unModN"><span class="hs-pragma hs-type">unModN</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | Template haskell for creating a 'ModN' at compile-time.</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- &gt;&gt;&gt; $$(mkModNTH @11 7)</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- MkModN 7 (mod 11)</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-55"></span><span class="annot"><a href="Numeric.Data.ModN.html#mkModNTH"><span class="hs-identifier hs-type">mkModNTH</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679110986"><span class="annot"><a href="#local-6989586621679110986"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679110983"><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#FromInteger"><span class="hs-identifier hs-type">FromInteger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Lift</span></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#ToInteger"><span class="hs-identifier hs-type">ToInteger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679110986"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-61"></span><span>    </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/bounds-0.1-39d4a6b089bda4aabbe79b166f6e14c8889dc9a7f2ff4187b6524df1e913bc6d/share/doc/html/src/Data.Bounds.html/Data.Bounds.html#MaybeUpperBounded"><span class="hs-identifier hs-type">MaybeUpperBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-62"></span><span>    </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html/Numeric.Algebra.Multiplicative.MEuclidean.html#MEuclidean"><span class="hs-identifier hs-type">MEuclidean</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-63"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-65"></span><span>  </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Code</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Q</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#ModN"><span class="hs-identifier hs-type">ModN</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110986"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110983"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span id="mkModNTH"><span class="annot"><span class="annottext">mkModNTH :: forall (n :: Nat) a.
+(FromInteger a, Lift a, ToInteger a, KnownNat n,
+ MaybeUpperBounded a, MEuclidean a, Typeable a) =&gt;
+a -&gt; Code Q (ModN n a)
+</span><a href="Numeric.Data.ModN.html#mkModNTH"><span class="hs-identifier hs-var hs-var">mkModNTH</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either String (ModN n a) -&gt; Code Q (ModN n a)
+forall a. Lift a =&gt; Either String a -&gt; Code Q a
+</span><a href="Numeric.Data.Internal.Utils.html#liftErrorTH"><span class="hs-identifier hs-var">Utils.liftErrorTH</span></a></span><span> </span><span class="annot"><span class="annottext">(Either String (ModN n a) -&gt; Code Q (ModN n a))
+-&gt; (a -&gt; Either String (ModN n a)) -&gt; a -&gt; Code Q (ModN n a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either String (ModN n a)
+forall (n :: Nat) a.
+(FromInteger a, ToInteger a, KnownNat n, MaybeUpperBounded a,
+ MEuclidean a, Typeable a) =&gt;
+a -&gt; Either String (ModN n a)
+</span><a href="Numeric.Data.ModN.Internal.html#mkModN"><span class="hs-identifier hs-var">Internal.mkModN</span></a></span><span>
+</span><span id="line-68"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.html#mkModNTH"><span class="hs-pragma hs-type">mkModNTH</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- $optics</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- We provide a 'ReversedPrism'' '_MkModN' that allows for total</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- elimination and partial construction, along with a 'Optics.Core.LabelOptic' 'Optics.Core.Getter'</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- for @#unModN@.</span><span>
+</span><span id="line-74"></span><span class="hs-comment">--</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- &gt;&gt;&gt; :set -XOverloadedLabels</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- &gt;&gt;&gt; import Optics.Core (view)</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- &gt;&gt;&gt; let n = $$(mkModNTH @7 9)</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; view #unModN n</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- | 'ReversedPrism'' that enables total elimination and partial construction.</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- ==== __Examples__</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; import Optics.Core (view)</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- &gt;&gt;&gt; n = $$(mkModNTH @7 9)</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- &gt;&gt;&gt; view _MkModN n</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- 2</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- &gt;&gt;&gt; rmatching (_MkModN @7) 9</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- Right (MkModN 2 (mod 7))</span><span>
+</span><span id="line-93"></span><span class="hs-comment">--</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- &gt;&gt;&gt; rmatching (_MkModN @128) (9 :: Int8)</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- Left 9</span><span>
+</span><span id="line-96"></span><span class="hs-comment">--</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- @since 0.1</span><span>
+</span><span id="line-98"></span><span class="annot"><a href="Numeric.Data.ModN.html#_MkModN"><span class="hs-identifier hs-type">_MkModN</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679111000"><span class="annot"><a href="#local-6989586621679111000"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679110999"><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#FromInteger"><span class="hs-identifier hs-type">FromInteger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-101"></span><span>    </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Convert.Internal.html/Numeric.Convert.Internal.html#ToInteger"><span class="hs-identifier hs-type">ToInteger</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-102"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679111000"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-103"></span><span>    </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/bounds-0.1-39d4a6b089bda4aabbe79b166f6e14c8889dc9a7f2ff4187b6524df1e913bc6d/share/doc/html/src/Data.Bounds.html/Data.Bounds.html#MaybeUpperBounded"><span class="hs-identifier hs-type">MaybeUpperBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-104"></span><span>    </span><span class="annot"><a href="file:///home/tommy/.local/state/cabal/store/ghc-9.10.1-e92d/algebra-simple-0.1-fb17fbadbde981885de82c2f6253cfab2aed020bf727d0f89a6c4dc1e0e1e097/share/doc/html/src/Numeric.Algebra.Multiplicative.MEuclidean.html/Numeric.Algebra.Multiplicative.MEuclidean.html#MEuclidean"><span class="hs-identifier hs-type">MEuclidean</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-105"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-107"></span><span>  </span><span class="annot"><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.ReversedPrism.html/Optics.ReversedPrism.html#ReversedPrism%27"><span class="hs-identifier hs-type">ReversedPrism'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Data.ModN.Internal.html#ModN"><span class="hs-identifier hs-type">ModN</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111000"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679110999"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-108"></span><span id="_MkModN"><span class="annot"><span class="annottext">_MkModN :: forall (n :: Nat) a.
+(FromInteger a, ToInteger a, KnownNat n, MaybeUpperBounded a,
+ MEuclidean a, Typeable a) =&gt;
+ReversedPrism' (ModN n a) a
+</span><a href="Numeric.Data.ModN.html#_MkModN"><span class="hs-identifier hs-var hs-var">_MkModN</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Optic A_Prism NoIx a a (ModN n a) (ModN n a)
+-&gt; Optic (ReversedOptic A_Prism) NoIx (ModN n a) (ModN n a) a a
+forall (is :: IxList) s t a b.
+AcceptsEmptyIndices &quot;re&quot; is =&gt;
+Optic A_Prism is s t a b
+-&gt; Optic (ReversedOptic A_Prism) is b a t s
+forall k (is :: IxList) s t a b.
+(ReversibleOptic k, AcceptsEmptyIndices &quot;re&quot; is) =&gt;
+Optic k is s t a b -&gt; Optic (ReversedOptic k) is b a t s
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Re.html/Optics.Re.html#re"><span class="hs-identifier hs-var">re</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ModN n a -&gt; a)
+-&gt; (a -&gt; Either a (ModN n a))
+-&gt; Optic A_Prism NoIx a a (ModN n a) (ModN n a)
+forall b t s a. (b -&gt; t) -&gt; (s -&gt; Either t a) -&gt; Prism s t a b
+</span><a href="file:///nix/store/jg6gh80izd222d0xf0h9zsj2975hcxf8-optics-core-0.4.1.1-doc/share/doc/optics-core-0.4.1.1/html/src/Optics.Prism.html/Optics.Prism.html#prism"><span class="hs-identifier hs-var">prism</span></a></span><span> </span><span class="annot"><span class="annottext">ModN n a -&gt; a
+forall (n :: Nat) a. ModN n a -&gt; a
+</span><a href="Numeric.Data.ModN.html#unModN"><span class="hs-identifier hs-var">unModN</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Either a (ModN n a)
+forall {a} {n :: Nat}.
+(FromInteger a, ToInteger a, KnownNat n, MaybeUpperBounded a,
+ MEuclidean a, Typeable a) =&gt;
+a -&gt; Either a (ModN n a)
+</span><a href="#local-6989586621679111083"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679111083"><span class="annot"><span class="annottext">g :: a -&gt; Either a (ModN n a)
+</span><a href="#local-6989586621679111083"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679111111"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679111111"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either String (ModN n a)
+forall (n :: Nat) a.
+(FromInteger a, ToInteger a, KnownNat n, MaybeUpperBounded a,
+ MEuclidean a, Typeable a) =&gt;
+a -&gt; Either String (ModN n a)
+</span><a href="Numeric.Data.ModN.Internal.html#mkModN"><span class="hs-identifier hs-var">Internal.mkModN</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679111111"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-111"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either a (ModN n a)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679111111"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-112"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679111112"><span class="annot"><span class="annottext">ModN n a
+</span><a href="#local-6989586621679111112"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ModN n a -&gt; Either a (ModN n a)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">ModN n a
+</span><a href="#local-6989586621679111112"><span class="hs-identifier hs-var">x'</span></a></span><span>
+</span><span id="line-113"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Numeric.Data.ModN.html#_MkModN"><span class="hs-pragma hs-type">_MkModN</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-114"></span></pre></body></html>
