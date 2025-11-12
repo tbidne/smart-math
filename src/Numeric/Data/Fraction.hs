@@ -32,8 +32,7 @@ import Data.Bifunctor (Bifunctor (first))
 import Data.Bounds
   ( UpperBoundless,
   )
-import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift)
+import Language.Haskell.TH.Lift (Code, Lift, Q)
 import Numeric.Algebra.Additive.AMonoid (pattern NonZero, pattern Zero)
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean)
 import Numeric.Algebra.Normed (Normed)

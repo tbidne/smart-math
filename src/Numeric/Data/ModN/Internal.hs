@@ -33,7 +33,7 @@ import GHC.Generics (Generic)
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, Nat, natVal)
-import Language.Haskell.TH.Syntax (Lift)
+import Language.Haskell.TH.Lift (Lift)
 import Numeric.Algebra
   ( AGroup ((.-.)),
     AMonoid (zero),

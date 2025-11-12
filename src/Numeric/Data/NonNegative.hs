@@ -25,8 +25,7 @@ where
 
 import Data.Bifunctor (Bifunctor (first))
 import GHC.Stack (HasCallStack)
-import Language.Haskell.TH (Code, Q)
-import Language.Haskell.TH.Syntax (Lift)
+import Language.Haskell.TH.Lift (Code, Lift, Q)
 import Numeric.Algebra (AMonoid (zero))
 import Numeric.Data.Internal.Utils (rmatching)
 import Numeric.Data.Internal.Utils qualified as Utils

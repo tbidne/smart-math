@@ -19,10 +19,10 @@ jobs:
         ghc:
           - "9.2.8"
           - "9.4.8"
-          - "9.6.6"
+          - "9.6.7"
           - "9.8.4"
-          - "9.10.1"
-          - "9.12.1"
+          - "9.10.2"
+          - "9.12.2"
         platform:
           - os: "macos-latest"
             set-env: "export"
@@ -45,9 +45,9 @@ jobs:
         run: cabal build
 
       - name: Doctests
-        if: ${{ matrix.ghc == '9.8.4'
-             || matrix.ghc == '9.10.1'
-             || matrix.ghc == '9.12.1'
+        if: ${{ matrix.ghc != '9.2.8'
+             && matrix.ghc != '9.4.8'
+             && matrix.ghc != '9.6.7'
             }}
         run: |
           echo "*** Installing doctest ***"
@@ -121,5 +121,5 @@ jobs:
           nix run .#format
           git diff --exit-code --color=always
 
-      #- name: HLint
-      #  run: nix run .#lint
+      - name: HLint
+        run: nix run .#lint

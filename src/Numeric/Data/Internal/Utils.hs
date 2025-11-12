@@ -19,7 +19,7 @@ where
 import Data.Bounds (MaybeUpperBounded (maybeUpperBound))
 import Data.Typeable (Typeable)
 import Data.Typeable qualified as Typeable
-import Language.Haskell.TH.Syntax (Code, Lift (liftTyped), Q)
+import Language.Haskell.TH.Lift (Code, Lift (liftTyped), Q)
 import Numeric.Algebra
   ( ASemigroup ((.+.)),
     MEuclidean,

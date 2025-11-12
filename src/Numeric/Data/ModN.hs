@@ -26,7 +26,7 @@ where
 import Data.Bounds (MaybeUpperBounded)
 import Data.Typeable (Typeable)
 import GHC.TypeNats (KnownNat)
-import Language.Haskell.TH.Syntax (Code, Lift, Q)
+import Language.Haskell.TH.Lift (Code, Lift, Q)
 import Numeric.Algebra (MEuclidean)
 import Numeric.Convert.Integer (FromInteger, ToInteger)
 import Numeric.Data.Internal.Utils (rmatching)

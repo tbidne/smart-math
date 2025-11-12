@@ -31,12 +31,14 @@
       perSystem =
         { pkgs, ... }:
         let
-          ghc-version = "ghc9101";
+          ghc-version = "ghc9122";
           hlib = pkgs.haskell.lib;
           compiler = pkgs.haskell.packages."${ghc-version}".override {
             overrides =
               final: prev:
-              { }
+              {
+                Cabal-syntax_3_10_3_0 = hlib.doJailbreak prev.Cabal-syntax_3_10_3_0;
+              }
               // nix-hs-utils.mkLibs inputs final [
                 "algebra-simple"
                 "bounds"
@@ -65,8 +67,8 @@
 
           apps = {
             format = nix-hs-utils.format compilerPkgs;
-            #lint = nix-hs-utils.lint compilerPkgs;
-            #lintRefactor = nix-hs-utils.lintRefactor compilerPkgs;
+            lint = nix-hs-utils.lint compilerPkgs;
+            lint-refactor = nix-hs-utils.lint-refactor compilerPkgs;
           };
         };
       systems = [

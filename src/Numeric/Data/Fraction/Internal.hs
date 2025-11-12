@@ -39,7 +39,7 @@ import GHC.Real (Ratio ((:%)))
 import GHC.Real qualified as R
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
-import Language.Haskell.TH.Syntax (Lift)
+import Language.Haskell.TH.Lift (Lift)
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)), anegate)
 import Numeric.Algebra.Additive.AMonoid
   ( AMonoid (zero),
