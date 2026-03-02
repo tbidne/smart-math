@@ -47,16 +47,21 @@ import Numeric.Algebra.Additive.AMonoid
     pattern Zero,
   )
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Numeric.Algebra.Field (Field)
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean (mdivMod), mdiv, mgcd)
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Normed (Normed (norm, sgn))
-import Numeric.Algebra.Ring (Ring)
-import Numeric.Algebra.Semifield (Semifield)
-import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Algebra.Rings.Demiring (Demiring)
+import Numeric.Algebra.Rings.Field (Field)
+import Numeric.Algebra.Rings.Hemiring (Hemiring)
+import Numeric.Algebra.Rings.PseudoRing (PseudoRing)
+import Numeric.Algebra.Rings.PseudoSemifield (PseudoSemifield)
+import Numeric.Algebra.Rings.Quartaring (Quartaring)
+import Numeric.Algebra.Rings.Ring (Ring)
+import Numeric.Algebra.Rings.Semifield (Semifield)
+import Numeric.Algebra.Rings.Semiring (Semiring)
 import Numeric.Class.Division (Division (divide))
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
@@ -97,8 +102,8 @@ import Optics.Core
 -- 3. @'Show' x@ does __not__ reduce @x@ first. This is to make debugging
 -- easier.
 --
--- @'Fraction' 'Integer'@ is a 'Numeric.Algebra.Field.Field', and @'Fraction'
--- 'GHC.Natural.Natural'@ is a 'Numeric.Algebra.Semiring.Semiring'.
+-- @'Fraction' 'Integer'@ is a 'Numeric.Algebra.Rings.Field.Field', and @'Fraction'
+-- 'GHC.Natural.Natural'@ is a 'Numeric.Algebra.Rings.Semiring.Semiring'.
 --
 -- ==== __Examples__
 --
@@ -486,6 +491,36 @@ instance
     Semiring a,
     UpperBoundless a
   ) =>
+  Quartaring (Fraction a)
+
+-- | @since 0.1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Hemiring (Fraction a)
+
+-- | @since 0.1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  Demiring (Fraction a)
+
+-- | @since 0.1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
   Semiring (Fraction a)
 
 -- | @since 0.1
@@ -496,7 +531,27 @@ instance
     Ring a,
     UpperBoundless a
   ) =>
+  PseudoRing (Fraction a)
+
+-- | @since 0.1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Ring a,
+    UpperBoundless a
+  ) =>
   Ring (Fraction a)
+
+-- | @since 0.1
+instance
+  ( MEuclidean a,
+    Normed a,
+    Ord a,
+    Semiring a,
+    UpperBoundless a
+  ) =>
+  PseudoSemifield (Fraction a)
 
 -- | @since 0.1
 instance

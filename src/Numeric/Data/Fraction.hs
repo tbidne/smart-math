@@ -37,7 +37,7 @@ import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AMonoid (pattern NonZero, pattern Zero)
 import Numeric.Algebra.Multiplicative.MEuclidean (MEuclidean)
 import Numeric.Algebra.Normed (Normed)
-import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Algebra.Rings.Semiring (Semiring)
 import Numeric.Data.Fraction.Internal
   ( Fraction
       ( UnsafeFraction,

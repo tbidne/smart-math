@@ -42,15 +42,20 @@ import Numeric.Algebra (MEuclidean)
 import Numeric.Algebra.Additive.AGroup (AGroup ((.-.)))
 import Numeric.Algebra.Additive.AMonoid (AMonoid (zero))
 import Numeric.Algebra.Additive.ASemigroup (ASemigroup ((.+.)))
-import Numeric.Algebra.Field (Field)
 import Numeric.Algebra.MetricSpace (MetricSpace (diffR))
 import Numeric.Algebra.Multiplicative.MEuclidean (mmod)
 import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
-import Numeric.Algebra.Ring (Ring)
-import Numeric.Algebra.Semifield (Semifield)
-import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Algebra.Rings.Demiring (Demiring)
+import Numeric.Algebra.Rings.Field (Field)
+import Numeric.Algebra.Rings.Hemiring (Hemiring)
+import Numeric.Algebra.Rings.PseudoRing (PseudoRing)
+import Numeric.Algebra.Rings.PseudoSemifield (PseudoSemifield)
+import Numeric.Algebra.Rings.Quartaring (Quartaring)
+import Numeric.Algebra.Rings.Ring (Ring)
+import Numeric.Algebra.Rings.Semifield (Semifield)
+import Numeric.Algebra.Rings.Semiring (Semiring)
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (ToRational (toQ))
 import Numeric.Convert.Real (ToReal (toR))
@@ -70,7 +75,7 @@ import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 -- see NOTE: [Safe finite modular rounding]
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/p\mathbb{Z} \) for prime @p@.
--- 'ModP' is a 'Numeric.Algebra.Field.Field' i.e. supports addition,
+-- 'ModP' is a 'Numeric.Algebra.Rings.Field.Field' i.e. supports addition,
 -- subtraction, multiplication, and division.
 --
 -- When constructing a @'ModP' p a@ we must verify that @p@ is prime and the
@@ -334,6 +339,41 @@ instance
     KnownNat p,
     MaybeUpperBounded a,
     MEuclidean a,
+    ToInteger a
+  ) =>
+  Quartaring (ModP p a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  Hemiring (ModP p a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  Demiring (ModP p a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
     ToInteger a,
     Typeable a
   ) =>
@@ -349,7 +389,31 @@ instance
     ToInteger a,
     Typeable a
   ) =>
+  PseudoRing (ModP p a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
   Ring (ModP p a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat p,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  PseudoSemifield (ModP p a)
 
 -- | @since 0.1
 instance

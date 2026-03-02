@@ -39,8 +39,12 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Normed (Normed (norm, sgn))
-import Numeric.Algebra.Semifield (Semifield)
-import Numeric.Algebra.Semiring (Semiring)
+import Numeric.Algebra.Rings.Demiring (Demiring)
+import Numeric.Algebra.Rings.Hemiring (Hemiring)
+import Numeric.Algebra.Rings.PseudoSemifield (PseudoSemifield)
+import Numeric.Algebra.Rings.Quartaring (Quartaring)
+import Numeric.Algebra.Rings.Semifield (Semifield)
+import Numeric.Algebra.Rings.Semiring (Semiring)
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
 import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
@@ -51,7 +55,7 @@ import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 -- >>> :set -XPostfixOperators
 
 -- | Newtype wrapper that attaches a 'NonNegative' invariant to some @a@.
--- 'NonNegative' is a 'Numeric.Algebra.Semifield.Semifield' i.e. supports
+-- 'NonNegative' is a 'Numeric.Algebra.Rings.Semifield.Semifield' i.e. supports
 -- addition, multiplication, and division.
 --
 -- @since 0.1
@@ -168,6 +172,24 @@ instance (MEuclidean a) => MEuclidean (NonNegative a) where
   {-# INLINEABLE mdivMod #-}
 
 -- | @since 0.1
+instance (Quartaring a) => Quartaring (NonNegative a)
+
+-- | @since 0.1
+instance (Hemiring a) => Hemiring (NonNegative a)
+
+-- | @since 0.1
+instance (Demiring a) => Demiring (NonNegative a)
+
+-- | @since 0.1
+instance (Semiring a) => Semiring (NonNegative a)
+
+-- | @since 0.1
+instance (PseudoSemifield a) => PseudoSemifield (NonNegative a)
+
+-- | @since 0.1
+instance (Semifield a) => Semifield (NonNegative a)
+
+-- | @since 0.1
 instance (MetricSpace a) => MetricSpace (NonNegative a) where
   diffR = applyNonNegative2 diffR
   {-# INLINEABLE diffR #-}
@@ -215,12 +237,6 @@ instance (AMonoid a, FromReal a, Ord a, Show a) => FromReal (NonNegative a) wher
 instance (ToReal a) => ToReal (NonNegative a) where
   toR (UnsafeNonNegative x) = toR x
   {-# INLINEABLE toR #-}
-
--- | @since 0.1
-instance (Semiring a) => Semiring (NonNegative a)
-
--- | @since 0.1
-instance (Semifield a) => Semifield (NonNegative a)
 
 -- | Throws an error when given a value < 0.
 --

@@ -39,6 +39,9 @@ import Numeric.Algebra.Multiplicative.MGroup (MGroup ((.%.)))
 import Numeric.Algebra.Multiplicative.MMonoid (MMonoid (one))
 import Numeric.Algebra.Multiplicative.MSemigroup (MSemigroup ((.*.)))
 import Numeric.Algebra.Normed (Normed (norm, sgn))
+import Numeric.Algebra.Rings.Demiring (Demiring)
+import Numeric.Algebra.Rings.PseudoSemifield (PseudoSemifield)
+import Numeric.Algebra.Rings.Quartaring (Quartaring)
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (FromRational (fromQ), ToRational (toQ))
 import Numeric.Convert.Real (FromReal (fromR), ToReal (toR))
@@ -148,6 +151,18 @@ instance (MEuclidean a) => MEuclidean (Positive a) where
   UnsafePositive x `mdivMod` (UnsafePositive d) =
     bimap UnsafePositive UnsafePositive $ x `mdivMod` d
   {-# INLINEABLE mdivMod #-}
+
+-- | @since 0.1
+instance (Quartaring a) => Quartaring (Positive a)
+
+-- | @since 0.1
+instance (Demiring a) => Demiring (Positive a)
+
+-- | @since 0.1
+instance (PseudoSemifield a) => PseudoSemifield (Positive a)
+
+-- | @since 0.1
+-- instance (Semifield a) => Semifield (Positive a)
 
 -- | @since 0.1
 instance (MetricSpace a) => MetricSpace (Positive a) where

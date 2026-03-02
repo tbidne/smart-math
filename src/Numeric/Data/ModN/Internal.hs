@@ -46,6 +46,10 @@ import Numeric.Algebra
     Semiring,
     mmod,
   )
+import Numeric.Algebra.Rings.Demiring (Demiring)
+import Numeric.Algebra.Rings.Hemiring (Hemiring)
+import Numeric.Algebra.Rings.PseudoRing (PseudoRing)
+import Numeric.Algebra.Rings.Quartaring (Quartaring)
 import Numeric.Convert.Integer (FromInteger (fromZ), ToInteger (toZ))
 import Numeric.Convert.Rational (ToRational (toQ))
 import Numeric.Convert.Real (ToReal (toR))
@@ -73,7 +77,7 @@ import Optics.Core (A_Getter, LabelOptic (labelOptic), to)
 --    We can use Utils's modSafe(Add/Mult/Sub) for this.
 
 -- | Newtype wrapper that represents \( \mathbb{Z}/n\mathbb{Z} \).
--- 'ModN' is a 'Numeric.Algebra.Ring.Ring' i.e. supports addition, subtraction,
+-- 'ModN' is a 'Numeric.Algebra.Rings.Ring.Ring' i.e. supports addition, subtraction,
 -- and multiplication.
 --
 -- When constructing a @'ModN' n a@ we must verify that the type @a@ is large
@@ -323,10 +327,57 @@ instance
     KnownNat n,
     MaybeUpperBounded a,
     MEuclidean a,
+    ToInteger a
+  ) =>
+  Quartaring (ModN n a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  Hemiring (ModN n a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  Demiring (ModN n a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    MEuclidean a,
     ToInteger a,
     Typeable a
   ) =>
   Semiring (ModN n a)
+
+-- | @since 0.1
+instance
+  ( AMonoid a,
+    FromInteger a,
+    KnownNat n,
+    MaybeUpperBounded a,
+    MEuclidean a,
+    ToInteger a,
+    Typeable a
+  ) =>
+  PseudoRing (ModN n a)
 
 -- | @since 0.1
 instance
