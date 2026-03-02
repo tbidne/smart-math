@@ -558,7 +558,6 @@ unsafeModP x = case mkModP x of
 -- \]
 --
 -- ==== __Examples__
--- findInverse
 -- >>> invert $ unsafeModP @7 5
 -- MkModP 3 (mod 7)
 --
