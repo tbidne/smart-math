@@ -225,7 +225,7 @@ newtype Mult = MkMult Integer
 -- @since 0.1
 type Rand :: Type
 newtype Rand = MkRand Integer
-  deriving stock (Eq, Show, Ord)
+  deriving stock (Eq, Generic, Show, Ord)
   deriving (Enum, Integral, Num, Real) via Integer
 
 -- | @since 0.1

@@ -105,14 +105,14 @@ library
 
   build-depends:
     , algebra-simple       ^>=0.1
-    , base                 >=4.16.0.0 && <4.22
+    , base                 >=4.16.0.0 && <4.23
     , bounds               ^>=0.1
     , deepseq              >=1.4.4.0  && <1.6
     , hashable             >=1.3.0.0  && <1.6
     , optics-core          ^>=0.4
-    , random               ^>=1.2.0
+    , random               >=1.2.0    && <1.4
     , singletons           ^>=3.0
-    , template-haskell     >=2.17.0.0 && <2.24
+    , template-haskell     >=2.17.0.0 && <2.25
     , text                 >=1.2.4.0  && <2.2
     , text-builder-linear  ^>=0.1.3
     , text-display         ^>=1.0.0.0
@@ -165,7 +165,7 @@ test-suite unit
     , base
     , bounds
     , deepseq
-    , hedgehog        >=1.0.2   && <1.6
+    , hedgehog        >=1.0.2   && <1.8
     , optics-core
     , smart-math
     , tasty           >=1.1.0.3 && <1.6
@@ -184,7 +184,7 @@ benchmark benchmarks
   build-depends:
     , base
     , smart-math
-    , tasty-bench  >=0.3 && <0.5
+    , tasty-bench  >=0.3 && <0.6
 
   hs-source-dirs: benchmarks
   ghc-options:    -Wmissing-import-lists

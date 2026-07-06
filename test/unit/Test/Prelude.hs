@@ -47,7 +47,7 @@ assertLeftHH _ (Right x) = do
 assertLeftHH pfx (Left msg) = do
   annotate pfx
   annotate msg
-  assert $ (T.pack pfx) `T.isPrefixOf` (T.pack msg)
+  assert $ T.pack pfx `T.isPrefixOf` T.pack msg
 
 assertLeftHU :: (Show a) => String -> Either String a -> IO ()
 assertLeftHU _ (Right x) = assertFailure $ "Expected Left, received Right: " ++ show x
@@ -60,7 +60,7 @@ assertLeftHU pfx (Left msg) = do
             msg,
             "'"
           ]
-  assertBool err ((T.pack pfx) `T.isPrefixOf` (T.pack msg))
+  assertBool err (T.pack pfx `T.isPrefixOf` T.pack msg)
 
 testPropertyCompat :: TestName -> PropertyName -> Property -> TestTree
 #if MIN_VERSION_tasty_hedgehog(1, 2, 0)
