@@ -17,6 +17,9 @@ module Numeric.Data.Positive
 
     -- * Functions
     positiveToNonZero,
+    unsafeLiftPositive,
+    unsafeLiftPositive2,
+    unsafeLiftPositive3,
 
     -- * Optics
     -- $optics
@@ -149,3 +152,53 @@ _MkPositive = re (prism unPositive g)
   where
     g x = first (const x) . mkPositive $ x
 {-# INLINEABLE _MkPositive #-}
+
+-- | Lifts an unsafe unary function onto a 'Positive'.
+--
+-- @since 0.1
+unsafeLiftPositive ::
+  ( AMonoid b,
+    HasCallStack,
+    Ord b,
+    Show b
+  ) =>
+  (a -> b) ->
+  Positive a ->
+  Positive b
+unsafeLiftPositive f (UnsafePositive x) = Internal.unsafePositive (f x)
+{-# INLINEABLE unsafeLiftPositive #-}
+
+-- | Lifts an unsafe binary function onto a 'Positive'.
+--
+-- @since 0.1
+unsafeLiftPositive2 ::
+  ( AMonoid c,
+    HasCallStack,
+    Ord c,
+    Show c
+  ) =>
+  (a -> b -> c) ->
+  Positive a ->
+  Positive b ->
+  Positive c
+unsafeLiftPositive2 f (UnsafePositive x1) (UnsafePositive x2) =
+  Internal.unsafePositive (f x1 x2)
+{-# INLINEABLE unsafeLiftPositive2 #-}
+
+-- | Lifts an unsafe 3-ary function onto a 'Positive'.
+--
+-- @since 0.1
+unsafeLiftPositive3 ::
+  ( AMonoid d,
+    HasCallStack,
+    Ord d,
+    Show d
+  ) =>
+  (a -> b -> c -> d) ->
+  Positive a ->
+  Positive b ->
+  Positive c ->
+  Positive d
+unsafeLiftPositive3 f (UnsafePositive x1) (UnsafePositive x2) (UnsafePositive x3) =
+  Internal.unsafePositive (f x1 x2 x3)
+{-# INLINEABLE unsafeLiftPositive3 #-}

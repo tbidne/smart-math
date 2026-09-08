@@ -15,6 +15,11 @@ module Numeric.Data.Interval
     -- * Elimination
     unInterval,
 
+    -- * Functions
+    unsafeLiftInterval,
+    unsafeLiftInterval2,
+    unsafeLiftInterval3,
+
     -- * Bound aliases
     -- $bound-aliases
     O,
@@ -33,6 +38,7 @@ where
 
 import Data.Bifunctor (Bifunctor (first))
 import Data.Singletons (SingI)
+import GHC.Stack.Types (HasCallStack)
 import GHC.TypeNats (Nat)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift)
@@ -180,3 +186,62 @@ _None =
         other -> Left other
     )
 {-# INLINEABLE _None #-}
+
+-- | Lifts an unsafe unary function onto a 'Interval'.
+--
+-- @since 0.1
+unsafeLiftInterval ::
+  forall (l :: IntervalBound) (r :: IntervalBound) a b.
+  ( FromInteger b,
+    HasCallStack,
+    Ord b,
+    SingI l,
+    SingI r,
+    Show b
+  ) =>
+  (a -> b) ->
+  Interval l r a ->
+  Interval l r b
+unsafeLiftInterval f (UnsafeInterval x) = Internal.unsafeInterval (f x)
+{-# INLINEABLE unsafeLiftInterval #-}
+
+-- | Lifts an unsafe binary function onto a 'Interval'.
+--
+-- @since 0.1
+unsafeLiftInterval2 ::
+  forall (l :: IntervalBound) (r :: IntervalBound) a b c.
+  ( FromInteger c,
+    HasCallStack,
+    Ord c,
+    SingI l,
+    SingI r,
+    Show c
+  ) =>
+  (a -> b -> c) ->
+  Interval l r a ->
+  Interval l r b ->
+  Interval l r c
+unsafeLiftInterval2 f (UnsafeInterval x1) (UnsafeInterval x2) =
+  Internal.unsafeInterval (f x1 x2)
+{-# INLINEABLE unsafeLiftInterval2 #-}
+
+-- | Lifts an unsafe 3-ary function onto a 'Interval'.
+--
+-- @since 0.1
+unsafeLiftInterval3 ::
+  forall (l :: IntervalBound) (r :: IntervalBound) a b c d.
+  ( FromInteger d,
+    HasCallStack,
+    Ord d,
+    SingI l,
+    SingI r,
+    Show d
+  ) =>
+  (a -> b -> c -> d) ->
+  Interval l r a ->
+  Interval l r b ->
+  Interval l r c ->
+  Interval l r d
+unsafeLiftInterval3 f (UnsafeInterval x1) (UnsafeInterval x2) (UnsafeInterval x3) =
+  Internal.unsafeInterval (f x1 x2 x3)
+{-# INLINEABLE unsafeLiftInterval3 #-}

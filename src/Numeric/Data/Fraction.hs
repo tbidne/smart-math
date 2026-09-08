@@ -20,6 +20,9 @@ module Numeric.Data.Fraction
 
     -- * Functions
     Internal.reduce,
+    unsafeLiftFraction,
+    unsafeLiftFraction2,
+    unsafeLiftFraction3,
 
     -- * Optics
     -- $optics
@@ -32,6 +35,7 @@ import Data.Bifunctor (Bifunctor (first))
 import Data.Bounds
   ( UpperBoundless,
   )
+import GHC.Stack.Types (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra.Additive.AMonoid (pattern NonZero, pattern Zero)
@@ -174,3 +178,63 @@ _MkFraction = re (prism (\(UnsafeFraction n d) -> (n, d)) g)
   where
     g x = first (const x) . uncurry mkFraction $ x
 {-# INLINEABLE _MkFraction #-}
+
+-- | Lifts an unsafe unary function onto a 'Fraction'.
+--
+-- @since 0.1
+unsafeLiftFraction ::
+  ( HasCallStack,
+    MEuclidean b,
+    Normed b,
+    Ord b,
+    Semiring b,
+    UpperBoundless b
+  ) =>
+  ((a, a) -> (b, b)) ->
+  Fraction a ->
+  Fraction b
+unsafeLiftFraction f (UnsafeFraction n d) =
+  let (n2, d2) = f (n, d)
+   in Internal.unsafeFraction n2 d2
+{-# INLINEABLE unsafeLiftFraction #-}
+
+-- | Lifts an unsafe binary function onto a 'Fraction'.
+--
+-- @since 0.1
+unsafeLiftFraction2 ::
+  ( HasCallStack,
+    MEuclidean c,
+    Normed c,
+    Ord c,
+    Semiring c,
+    UpperBoundless c
+  ) =>
+  ((a, a) -> (b, b) -> (c, c)) ->
+  Fraction a ->
+  Fraction b ->
+  Fraction c
+unsafeLiftFraction2 f (UnsafeFraction n1 d1) (UnsafeFraction n2 d2) =
+  let (n3, d3) = f (n1, d1) (n2, d2)
+   in Internal.unsafeFraction n3 d3
+{-# INLINEABLE unsafeLiftFraction2 #-}
+
+-- | Lifts an unsafe 3-ary function onto a 'Fraction'.
+--
+-- @since 0.1
+unsafeLiftFraction3 ::
+  ( HasCallStack,
+    MEuclidean d,
+    Normed d,
+    Ord d,
+    Semiring d,
+    UpperBoundless d
+  ) =>
+  ((a, a) -> (b, b) -> (c, c) -> (d, d)) ->
+  Fraction a ->
+  Fraction b ->
+  Fraction c ->
+  Fraction d
+unsafeLiftFraction3 f (UnsafeFraction n1 d1) (UnsafeFraction n2 d2) (UnsafeFraction n3 d3) =
+  let (n4, d4) = f (n1, d1) (n2, d2) (n3, d3)
+   in Internal.unsafeFraction n4 d4
+{-# INLINEABLE unsafeLiftFraction3 #-}

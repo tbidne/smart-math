@@ -16,6 +16,11 @@ module Numeric.Data.ModN
     -- * Elimination
     unModN,
 
+    -- * Functions
+    unsafeLiftModN,
+    unsafeLiftModN2,
+    unsafeLiftModN3,
+
     -- * Optics
     -- $optics
     _MkModN,
@@ -111,3 +116,59 @@ _MkModN = re (prism unModN g)
       Left _ -> Left x
       Right x' -> Right x'
 {-# INLINEABLE _MkModN #-}
+
+-- | Lifts an unsafe unary function onto a 'ModN'.
+--
+-- @since 0.1
+unsafeLiftModN ::
+  ( FromInteger b,
+    KnownNat p,
+    MaybeUpperBounded b,
+    MEuclidean b,
+    ToInteger b,
+    Typeable b
+  ) =>
+  (a -> b) ->
+  ModN p a ->
+  ModN p b
+unsafeLiftModN f (UnsafeModN x) = Internal.unsafeModN (f x)
+{-# INLINEABLE unsafeLiftModN #-}
+
+-- | Lifts an unsafe binary function onto a 'ModN'.
+--
+-- @since 0.1
+unsafeLiftModN2 ::
+  ( FromInteger c,
+    KnownNat p,
+    MaybeUpperBounded c,
+    MEuclidean c,
+    ToInteger c,
+    Typeable c
+  ) =>
+  (a -> b -> c) ->
+  ModN p a ->
+  ModN p b ->
+  ModN p c
+unsafeLiftModN2 f (UnsafeModN x1) (UnsafeModN x2) =
+  Internal.unsafeModN (f x1 x2)
+{-# INLINEABLE unsafeLiftModN2 #-}
+
+-- | Lifts an unsafe 3-ary function onto a 'ModN'.
+--
+-- @since 0.1
+unsafeLiftModN3 ::
+  ( FromInteger d,
+    KnownNat p,
+    MaybeUpperBounded d,
+    MEuclidean d,
+    ToInteger d,
+    Typeable d
+  ) =>
+  (a -> b -> c -> d) ->
+  ModN p a ->
+  ModN p b ->
+  ModN p c ->
+  ModN p d
+unsafeLiftModN3 f (UnsafeModN x1) (UnsafeModN x2) (UnsafeModN x3) =
+  Internal.unsafeModN (f x1 x2 x3)
+{-# INLINEABLE unsafeLiftModN3 #-}

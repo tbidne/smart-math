@@ -14,6 +14,11 @@ module Numeric.Data.NonZero
     -- * Elimination
     unNonZero,
 
+    -- * Functions
+    unsafeLiftNonZero,
+    unsafeLiftNonZero2,
+    unsafeLiftNonZero3,
+
     -- * Optics
     -- $optics
     _MkNonZero,
@@ -22,6 +27,7 @@ module Numeric.Data.NonZero
 where
 
 import Data.Bifunctor (Bifunctor (first))
+import GHC.Stack.Types (HasCallStack)
 import Language.Haskell.TH (Code, Q)
 import Language.Haskell.TH.Syntax (Lift)
 import Numeric.Algebra (AMonoid, pattern NonZero, pattern Zero)
@@ -109,3 +115,50 @@ _MkNonZero = re (prism unNonZero g)
   where
     g x = first (const x) . mkNonZero $ x
 {-# INLINEABLE _MkNonZero #-}
+
+-- | Lifts an unsafe unary function onto a 'NonZero'.
+--
+-- @since 0.1
+unsafeLiftNonZero ::
+  ( AMonoid b,
+    Eq b,
+    HasCallStack
+  ) =>
+  (a -> b) ->
+  NonZero a ->
+  NonZero b
+unsafeLiftNonZero f (UnsafeNonZero x) = Internal.unsafeNonZero (f x)
+{-# INLINEABLE unsafeLiftNonZero #-}
+
+-- | Lifts an unsafe binary function onto a 'NonZero'.
+--
+-- @since 0.1
+unsafeLiftNonZero2 ::
+  ( AMonoid c,
+    Eq c,
+    HasCallStack
+  ) =>
+  (a -> b -> c) ->
+  NonZero a ->
+  NonZero b ->
+  NonZero c
+unsafeLiftNonZero2 f (UnsafeNonZero x1) (UnsafeNonZero x2) =
+  Internal.unsafeNonZero (f x1 x2)
+{-# INLINEABLE unsafeLiftNonZero2 #-}
+
+-- | Lifts an unsafe 3-ary function onto a 'NonZero'.
+--
+-- @since 0.1
+unsafeLiftNonZero3 ::
+  ( AMonoid d,
+    Eq d,
+    HasCallStack
+  ) =>
+  (a -> b -> c -> d) ->
+  NonZero a ->
+  NonZero b ->
+  NonZero c ->
+  NonZero d
+unsafeLiftNonZero3 f (UnsafeNonZero x1) (UnsafeNonZero x2) (UnsafeNonZero x3) =
+  Internal.unsafeNonZero (f x1 x2 x3)
+{-# INLINEABLE unsafeLiftNonZero3 #-}

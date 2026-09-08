@@ -16,6 +16,11 @@ module Numeric.Data.NonNegative
     -- * Elimination
     unNonNegative,
 
+    -- * Functions
+    unsafeLiftNonNegative,
+    unsafeLiftNonNegative2,
+    unsafeLiftNonNegative3,
+
     -- * Optics
     -- $optics
     _MkNonNegative,
@@ -136,3 +141,53 @@ _MkNonNegative = re (prism unNonNegative g)
   where
     g x = first (const x) . mkNonNegative $ x
 {-# INLINEABLE _MkNonNegative #-}
+
+-- | Lifts an unsafe unary function onto a 'NonNegative'.
+--
+-- @since 0.1
+unsafeLiftNonNegative ::
+  ( AMonoid b,
+    HasCallStack,
+    Ord b,
+    Show b
+  ) =>
+  (a -> b) ->
+  NonNegative a ->
+  NonNegative b
+unsafeLiftNonNegative f (UnsafeNonNegative x) = Internal.unsafeNonNegative (f x)
+{-# INLINEABLE unsafeLiftNonNegative #-}
+
+-- | Lifts an unsafe binary function onto a 'NonNegative'.
+--
+-- @since 0.1
+unsafeLiftNonNegative2 ::
+  ( AMonoid c,
+    HasCallStack,
+    Ord c,
+    Show c
+  ) =>
+  (a -> b -> c) ->
+  NonNegative a ->
+  NonNegative b ->
+  NonNegative c
+unsafeLiftNonNegative2 f (UnsafeNonNegative x1) (UnsafeNonNegative x2) =
+  Internal.unsafeNonNegative (f x1 x2)
+{-# INLINEABLE unsafeLiftNonNegative2 #-}
+
+-- | Lifts an unsafe 3-ary function onto a 'NonNegative'.
+--
+-- @since 0.1
+unsafeLiftNonNegative3 ::
+  ( AMonoid d,
+    HasCallStack,
+    Ord d,
+    Show d
+  ) =>
+  (a -> b -> c -> d) ->
+  NonNegative a ->
+  NonNegative b ->
+  NonNegative c ->
+  NonNegative d
+unsafeLiftNonNegative3 f (UnsafeNonNegative x1) (UnsafeNonNegative x2) (UnsafeNonNegative x3) =
+  Internal.unsafeNonNegative (f x1 x2 x3)
+{-# INLINEABLE unsafeLiftNonNegative3 #-}
